@@ -3,12 +3,12 @@ import { obtenerMisionesDisponibles } from '../../api/misiones.js'
 import { formatoDinero, formatoNumero } from '../../formato.js'
 
 const NOMBRE_RECURSO = {
-  MASA: 'Masa',
-  POTENCIA: 'Potencia',
-  PRESUPUESTO: 'Presupuesto',
-  DATOS: 'Datos',
-  COMUNICACIONES: 'Comunicaciones',
-  TIEMPO: 'Tiempo',
+  MASA: 'Mass',
+  POTENCIA: 'Power',
+  PRESUPUESTO: 'Budget',
+  DATOS: 'Data',
+  COMUNICACIONES: 'Communications',
+  TIEMPO: 'Time',
 }
 
 export default function CentroMisiones({ jugador, catalogo, misionActiva, onAceptar }) {
@@ -20,7 +20,7 @@ export default function CentroMisiones({ jugador, catalogo, misionActiva, onAcep
   }, [jugador])
 
   if (error) return <p className="p-8 text-center text-red-300">{error}</p>
-  if (!disponibles) return <p className="p-8 text-center text-slate-400">Consultando al Gobierno…</p>
+  if (!disponibles) return <p className="p-8 text-center text-slate-400">Contacting the Government…</p>
 
   const bloqueadasPorNivel = catalogo.misiones.filter(
     (mision) => mision.tipo === 'SOLO' && !disponibles.includes(mision.id) && mision.nivelMinimo > jugador.nivel,
@@ -29,9 +29,9 @@ export default function CentroMisiones({ jugador, catalogo, misionActiva, onAcep
   return (
     <main className="mx-auto max-w-4xl space-y-6 px-4 py-8">
       <header>
-        <h1 className="text-2xl font-bold">🏛️ Centro de Misiones</h1>
+        <h1 className="font-display text-2xl font-bold">Mission Center</h1>
         <p className="text-slate-400">
-          El Gobierno publica contratos. Tú pagas las piezas; si la misión sale bien, el Gobierno te paga según tu puntuación.
+          The Government posts contracts. You pay for the parts; if the mission succeeds, the Government pays you based on your score.
         </p>
       </header>
 
@@ -42,12 +42,12 @@ export default function CentroMisiones({ jugador, catalogo, misionActiva, onAcep
             <div className="flex flex-wrap gap-2">
               <button
                 onClick={() => onAceptar(mision)}
-                className="rounded-lg bg-cyan-500 px-4 py-2 font-semibold text-slate-950 hover:bg-cyan-400"
+                className="rounded-lg bg-cyan-400 px-4 py-2 font-semibold text-slate-950 hover:bg-cyan-300"
               >
-                {misionActiva?.id === mision.id ? 'Continuar diseño' : 'Aceptar en solitario'}
+                {misionActiva?.id === mision.id ? 'Continue design' : 'Accept solo'}
               </button>
-              <button disabled className="rounded-lg border border-slate-700 px-4 py-2 text-slate-500" title="Próximamente">
-                En grupo · próximamente
+              <button disabled className="rounded-lg border border-slate-400/30 px-4 py-2 text-slate-500" title="Coming soon">
+                As a team · coming soon
               </button>
             </div>
           </TarjetaMision>
@@ -55,7 +55,7 @@ export default function CentroMisiones({ jugador, catalogo, misionActiva, onAcep
 
       {bloqueadasPorNivel.map((mision) => (
         <TarjetaMision key={mision.id} mision={mision} catalogo={catalogo} bloqueada>
-          <p className="text-sm text-slate-400">🔒 Necesitas nivel {mision.nivelMinimo}</p>
+          <p className="text-sm text-slate-400">🔒 Requires level {mision.nivelMinimo}</p>
         </TarjetaMision>
       ))}
     </main>
@@ -64,30 +64,30 @@ export default function CentroMisiones({ jugador, catalogo, misionActiva, onAcep
 
 function TarjetaMision({ mision, catalogo, bloqueada = false, children }) {
   const { requisitos, recompensa } = mision
-  const orbitas = mision.orbitasPermitidas.map((id) => catalogo.orbitasPorId[id].nombre).join(' o ')
+  const orbitas = mision.orbitasPermitidas.map((id) => catalogo.orbitasPorId[id].nombre).join(' or ')
   const requisitosVisibles = [
-    requisitos.valorCientificoMin > 0 && `Valor científico ≥ ${requisitos.valorCientificoMin}`,
-    requisitos.datosMinMB > 0 && `Datos ≥ ${formatoNumero(requisitos.datosMinMB)} MB/día`,
-    requisitos.vidaUtilMinDias > 0 && `Vida útil ≥ ${formatoNumero(requisitos.vidaUtilMinDias)} días`,
-    `Plazo: ${requisitos.plazoMeses} meses`,
+    requisitos.valorCientificoMin > 0 && `Science value ≥ ${requisitos.valorCientificoMin}`,
+    requisitos.datosMinMB > 0 && `Data ≥ ${formatoNumero(requisitos.datosMinMB)} MB/day`,
+    requisitos.vidaUtilMinDias > 0 && `Lifetime ≥ ${formatoNumero(requisitos.vidaUtilMinDias)} days`,
+    `Deadline: ${requisitos.plazoMeses} months`,
   ].filter(Boolean)
 
   return (
-    <article className={`space-y-3 rounded-xl border border-slate-800 bg-slate-900/80 p-5 ${bloqueada ? 'opacity-50' : ''}`}>
+    <article className={`cristal space-y-3 p-5 ${bloqueada ? 'opacity-50' : ''}`}>
       <div className="flex flex-wrap items-start justify-between gap-2">
-        <h2 className="text-lg font-semibold">{mision.titulo}</h2>
+        <h2 className="font-display text-lg font-semibold">{mision.titulo}</h2>
         <p className="text-sm text-emerald-300">
-          {recompensa.dinero > 0 ? `hasta ${formatoDinero(recompensa.dinero)}` : 'sin pago'} · {recompensa.xp} XP
+          {recompensa.dinero > 0 ? `up to ${formatoDinero(recompensa.dinero)}` : 'unpaid'} · {recompensa.xp} XP
         </p>
       </div>
       <p className="text-slate-300">{mision.descripcion}</p>
-      <p className="text-sm text-slate-400">Órbita: {orbitas}</p>
+      <p className="text-sm text-slate-400">Orbit: {orbitas}</p>
       <ul className="flex flex-wrap gap-2 text-xs">
         {requisitosVisibles.map((texto) => (
-          <li key={texto} className="rounded bg-slate-800 px-2 py-1">{texto}</li>
+          <li key={texto} className="rounded bg-slate-800/80 px-2 py-1">{texto}</li>
         ))}
         {mision.recursosCriticos.map((recurso) => (
-          <li key={recurso} className="rounded bg-cyan-950 px-2 py-1 text-cyan-300">★ {NOMBRE_RECURSO[recurso]}</li>
+          <li key={recurso} className="rounded bg-cyan-950/80 px-2 py-1 text-cyan-300">★ {NOMBRE_RECURSO[recurso]}</li>
         ))}
       </ul>
       {children}

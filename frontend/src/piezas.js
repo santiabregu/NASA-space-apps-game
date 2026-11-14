@@ -1,14 +1,14 @@
 export const NOMBRE_TIPO = {
-  estructura: 'Estructuras',
-  panel: 'Paneles solares',
-  bateria: 'Baterías',
-  ordenador: 'Ordenadores',
-  antena: 'Antenas',
-  actitud: 'Control de orientación',
-  instrumento: 'Instrumentos científicos',
-  motor: 'Motores',
-  tanque: 'Tanques',
-  cofia: 'Cofias',
+  estructura: 'Structures',
+  panel: 'Solar panels',
+  bateria: 'Batteries',
+  ordenador: 'Computers',
+  antena: 'Antennas',
+  actitud: 'Attitude control',
+  instrumento: 'Science instruments',
+  motor: 'Engines',
+  tanque: 'Tanks',
+  cofia: 'Fairings',
 }
 
 export const estaBloqueada = (pieza, nivel) => pieza.nivelRequerido > nivel

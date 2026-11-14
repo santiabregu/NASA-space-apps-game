@@ -30,10 +30,10 @@ public class AuthService {
         String email = normalizarEmail(datos.email());
         String nombreUsuario = datos.nombreUsuario().trim();
         if (jugadores.existsByEmail(email)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Ya existe una cuenta con el correo " + email);
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "An account with the email " + email + " already exists");
         }
         if (jugadores.existsByNombreUsuario(nombreUsuario)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "El nombre de usuario " + nombreUsuario + " ya está en uso");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "The username " + nombreUsuario + " is already taken");
         }
         Empresa empresa = new Empresa(datos.nombreEmpresa().trim());
         Jugador jugador = jugadores.save(new Jugador(email, passwordEncoder.encode(datos.password()), nombreUsuario, empresa));
@@ -44,7 +44,7 @@ public class AuthService {
         return jugadores.findByEmail(normalizarEmail(credenciales.email()))
                 .filter(jugador -> passwordEncoder.matches(credenciales.password(), jugador.getPasswordHash()))
                 .map(tokenService::emitir)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Correo o contraseña incorrectos"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Incorrect email or password"));
     }
 
     private static String normalizarEmail(String email) {

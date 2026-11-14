@@ -19,7 +19,7 @@ class ManejadorErrores extends ResponseEntityExceptionHandler {
     protected ResponseEntity<Object> handleMethodArgumentNotValid(
             MethodArgumentNotValidException excepcion, HttpHeaders cabeceras, HttpStatusCode estado, WebRequest peticion) {
         String detalle = excepcion.getBindingResult().getFieldErrors().stream()
-                .map(error -> error.getField() + ": " + error.getDefaultMessage())
+                .map(error -> error.getDefaultMessage())
                 .collect(joining("; "));
         return ResponseEntity.badRequest().body(ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, detalle));
     }

@@ -15,8 +15,8 @@ export default function Laboratorio({ catalogo, analisis, diseno, onCambiarDisen
   return (
     <section className="space-y-6">
       <div className="space-y-2">
-        <h2 className="font-semibold">1 · Estructura</h2>
-        <p className="text-sm text-slate-400">El esqueleto del satélite: decide cuántos componentes caben y cuánto dura.</p>
+        <h2 className="font-display font-semibold">1 · Structure</h2>
+        <p className="text-sm text-slate-400">The satellite’s skeleton: it sets how many components fit and how long it lasts.</p>
         <div className="grid gap-3 sm:grid-cols-2">
           {catalogo.piezas
             .filter((pieza) => pieza.tipo === 'estructura')
@@ -29,7 +29,7 @@ export default function Laboratorio({ catalogo, analisis, diseno, onCambiarDisen
                     onClick={() => cambiarSatelite({ estructuraId: estructura.id })}
                     className="rounded-lg bg-slate-800 px-3 py-1 text-sm hover:bg-slate-700 disabled:opacity-40"
                   >
-                    {noCaben ? `No caben tus ${satelite.componentes.length} componentes` : 'Usar esta estructura'}
+                    {noCaben ? `Your ${satelite.componentes.length} components don’t fit` : 'Use this structure'}
                   </button>
                 </TarjetaPieza>
               )
@@ -38,15 +38,15 @@ export default function Laboratorio({ catalogo, analisis, diseno, onCambiarDisen
       </div>
 
       <div className="space-y-2">
-        <h2 className="font-semibold">2 · Componentes instalados ({huecosUsados} / {huecos} huecos)</h2>
+        <h2 className="font-display font-semibold">2 · Installed components ({huecosUsados} / {huecos} slots)</h2>
         {satelite.componentes.length === 0 ? (
-          <p className="text-sm text-slate-400">Todavía no hay nada. Un satélite necesita como mínimo energía, un ordenador y una antena.</p>
+          <p className="text-sm text-slate-400">Nothing yet. A satellite needs at least power, a computer and an antenna.</p>
         ) : (
           <ul className="flex flex-wrap gap-2">
             {analisis.resuelto.componentes.map((componente, indice) => (
-              <li key={indice} className="flex items-center gap-2 rounded-lg bg-slate-800 px-3 py-1 text-sm">
+              <li key={indice} className="flex items-center gap-2 rounded-lg bg-slate-800/80 px-3 py-1 text-sm">
                 {componente.nombre}
-                <button onClick={() => quitar(indice)} className="text-slate-400 hover:text-red-300" aria-label={`Quitar ${componente.nombre}`}>
+                <button onClick={() => quitar(indice)} className="text-slate-400 hover:text-red-300" aria-label={`Remove ${componente.nombre}`}>
                   ✕
                 </button>
               </li>
@@ -56,8 +56,8 @@ export default function Laboratorio({ catalogo, analisis, diseno, onCambiarDisen
       </div>
 
       <div className="space-y-4">
-        <h2 className="font-semibold">3 · Añadir componentes</h2>
-        {!satelite.estructuraId && <p className="text-sm text-amber-300">Elige primero una estructura.</p>}
+        <h2 className="font-display font-semibold">3 · Add components</h2>
+        {!satelite.estructuraId && <p className="text-sm text-amber-300">Choose a structure first.</p>}
         {TIPOS_COMPONENTE.map((tipo) => (
           <div key={tipo} className="space-y-2">
             <h3 className="text-sm text-slate-300">{NOMBRE_TIPO[tipo]}</h3>
@@ -71,7 +71,7 @@ export default function Laboratorio({ catalogo, analisis, diseno, onCambiarDisen
                       onClick={() => anadir(pieza.id)}
                       className="rounded-lg bg-slate-800 px-3 py-1 text-sm hover:bg-slate-700 disabled:opacity-40"
                     >
-                      {lleno ? 'Sin huecos libres' : '+ Añadir'}
+                      {lleno ? 'No free slots' : '+ Add'}
                     </button>
                   </TarjetaPieza>
                 ))}

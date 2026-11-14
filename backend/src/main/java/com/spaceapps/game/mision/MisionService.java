@@ -42,7 +42,7 @@ class MisionService {
         Jugador jugador = buscarJugador(jugadorId);
         MisionCatalogo mision = catalogo.mision(misionId)
                 .filter(candidata -> estaDisponible(candidata, jugador))
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.CONFLICT, "La misión " + misionId + " no está disponible para ti"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.CONFLICT, "Mission " + misionId + " is not available to you"));
 
         Empresa empresa = jugador.getEmpresa();
         long coste = costeDePiezas(lanzamiento.piezas(), jugador.getConocimiento().getNivel());
@@ -50,7 +50,7 @@ class MisionService {
         if (prestamo > 0) {
             if (!lanzamiento.aceptaPrestamo()) {
                 throw new ResponseStatusException(HttpStatus.CONFLICT,
-                        "El diseño cuesta " + coste + " $ y tu empresa tiene " + jugador.getDinero() + " $");
+                        "The design costs $" + coste + " and your company has $" + jugador.getDinero());
             }
             empresa.pedirPrestamo(prestamo);
             jugador.cobrar(prestamo);
@@ -78,10 +78,10 @@ class MisionService {
         long total = 0;
         for (String piezaId : piezaIds) {
             PiezaCatalogo pieza = catalogo.pieza(piezaId)
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "La pieza " + piezaId + " no existe"));
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Part " + piezaId + " does not exist"));
             if (pieza.nivelRequerido() > nivelJugador) {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                        pieza.nombre() + " requiere nivel " + pieza.nivelRequerido() + " y tienes nivel " + nivelJugador);
+                        pieza.nombre() + " requires level " + pieza.nivelRequerido() + " and you are level " + nivelJugador);
             }
             total += pieza.coste();
         }

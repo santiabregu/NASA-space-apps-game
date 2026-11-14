@@ -12,7 +12,7 @@ export const guardarToken = (token) => localStorage.setItem(CLAVE_TOKEN, token)
 export const borrarToken = () => localStorage.removeItem(CLAVE_TOKEN)
 
 export async function pedir(ruta, { metodo = 'GET', cuerpo } = {}) {
-  const cabeceras = { 'Accept-Language': 'es' }
+  const cabeceras = { 'Accept-Language': 'en' }
   const token = leerToken()
   if (token) cabeceras.Authorization = `Bearer ${token}`
   if (cuerpo) cabeceras['Content-Type'] = 'application/json'
@@ -24,7 +24,7 @@ export async function pedir(ruta, { metodo = 'GET', cuerpo } = {}) {
   })
   const datos = await respuesta.json().catch(() => null)
   if (!respuesta.ok) {
-    throw new ErrorApi(datos?.detail ?? `${metodo} ${ruta} respondió ${respuesta.status}`, respuesta.status)
+    throw new ErrorApi(datos?.detail ?? `${metodo} ${ruta} returned ${respuesta.status}`, respuesta.status)
   }
   return datos
 }

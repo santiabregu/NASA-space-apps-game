@@ -23,6 +23,6 @@ class JugadorController {
         long jugadorId = Long.parseLong(token.getSubject());
         return jugadores.findById(jugadorId)
                 .map(JugadorResponse::de)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "La cuenta " + jugadorId + " ya no existe"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Account " + jugadorId + " no longer exists"));
     }
 }

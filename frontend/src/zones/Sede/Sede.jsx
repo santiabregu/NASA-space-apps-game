@@ -1,59 +1,69 @@
 import BarraRecurso from '../../components/BarraRecurso.jsx'
 import { formatoDinero } from '../../formato.js'
+import { LOGOS } from '../../logos.js'
 
 const ZONAS = [
-  { id: 'misiones', icono: '🏛️', nombre: 'Centro de Misiones', descripcion: 'Contratos del Gobierno' },
-  { id: 'hangar', icono: '🛠️', nombre: 'Hangar', descripcion: 'Construye satélites y cohetes' },
-  { id: 'academia', icono: '📚', nombre: 'Academia', descripcion: 'Aprende los conceptos' },
-  { id: null, icono: '📡', nombre: 'Centro de Control', descripcion: 'Se abre al lanzar una misión' },
-  { id: null, icono: '👥', nombre: 'Social', descripcion: 'Amigos y misiones de grupo · Próximamente' },
+  { id: 'misiones', logo: LOGOS.centroMisiones, nombre: 'Mission Center', descripcion: 'Government contracts' },
+  { id: 'hangar', logo: LOGOS.hangar, nombre: 'Hangar', descripcion: 'Build satellites and rockets' },
+  { id: 'academia', logo: LOGOS.academia, nombre: 'Academy', descripcion: 'Learn the concepts' },
+  { id: null, logo: LOGOS.centroControl, nombre: 'Mission Control', descripcion: 'Opens when you launch' },
+  { id: null, logo: LOGOS.social, nombre: 'Social', descripcion: 'Friends and team missions · Coming soon' },
 ]
 
 const TEXTO_CONFIANZA = {
-  SOCIO: 'Socio de confianza: el Gobierno te ofrece sus mejores contratos.',
-  NORMAL: 'El Gobierno te paga al completar cada misión.',
-  EN_OBSERVACION: 'En observación: el Gobierno ha dejado de pagarte. Supera una prueba de confianza.',
+  SOCIO: 'Trusted partner: the Government offers you its best contracts.',
+  NORMAL: 'The Government pays you when you complete each mission.',
+  EN_OBSERVACION: 'On probation: the Government has stopped paying you. Pass a trust test.',
 }
 
 export default function Sede({ jugador, onIrA }) {
   const { empresa } = jugador
 
   return (
-    <main className="mx-auto max-w-4xl space-y-6 px-4 py-8">
+    <main className="mx-auto max-w-6xl space-y-6 px-4 py-8 md:px-8">
       <header>
-        <h1 className="text-3xl font-bold" style={{ color: empresa.colorPrimario }}>{empresa.nombre}</h1>
-        <p className="text-slate-400">Dirigida por {jugador.nombreUsuario}</p>
+        <h1
+          className="font-display text-4xl font-extrabold"
+          style={{ color: empresa.colorPrimario, textShadow: '0 0 24px rgba(34,211,238,.35)' }}
+        >
+          {empresa.nombre}
+        </h1>
+        <p className="text-slate-400">Run by {jugador.nombreUsuario}</p>
       </header>
 
-      <section className="grid gap-4 sm:grid-cols-3">
-        <Tarjeta titulo="Dinero">
+      <section className="grid max-w-4xl gap-4 sm:grid-cols-3">
+        <Tarjeta titulo="Money">
           <p className="text-2xl font-semibold">{formatoDinero(jugador.dinero)}</p>
-          {empresa.deuda > 0 && <p className="text-sm text-red-300">Deuda: {formatoDinero(empresa.deuda)}</p>}
+          {empresa.deuda > 0 && <p className="text-sm text-red-300">Debt: {formatoDinero(empresa.deuda)}</p>}
         </Tarjeta>
-        <Tarjeta titulo={`Conocimiento · Nivel ${jugador.nivel}`}>
+        <Tarjeta titulo={`Knowledge · Level ${jugador.nivel}`}>
           <BarraRecurso etiqueta="XP" valor={jugador.xp} maximo={jugador.xpSiguienteNivel} color="bg-violet-400" />
         </Tarjeta>
-        <Tarjeta titulo="Confianza del Gobierno">
-          <BarraRecurso etiqueta="Reputación" valor={empresa.reputacion} maximo={100} color="bg-emerald-400" />
+        <Tarjeta titulo="Government trust">
+          <BarraRecurso etiqueta="Reputation" valor={empresa.reputacion} maximo={100} color="bg-emerald-400" />
           <p className="text-xs text-slate-400">{TEXTO_CONFIANZA[empresa.confianza]}</p>
         </Tarjeta>
       </section>
 
       <p className="text-sm text-slate-400">
-        Misiones completadas: {jugador.misionesCompletadas} · Fallidas: {jugador.misionesFallidas}
+        Missions completed: {jugador.misionesCompletadas} · Failed: {jugador.misionesFallidas}
       </p>
 
-      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <section className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
         {ZONAS.map((zona) => (
           <button
             key={zona.nombre}
             disabled={!zona.id}
             onClick={() => onIrA(zona.id)}
-            className="rounded-xl border border-slate-800 bg-slate-900/50 p-4 text-left transition enabled:hover:border-cyan-700 disabled:opacity-50"
+            className="cristal p-4 text-center transition enabled:hover:-translate-y-1 enabled:hover:border-cyan-400/60 disabled:opacity-55"
           >
-            <p className="text-2xl">{zona.icono}</p>
-            <p className="font-semibold">{zona.nombre}</p>
-            <p className="text-sm text-slate-400">{zona.descripcion}</p>
+            <img
+              src={zona.logo}
+              alt=""
+              className="mx-auto h-28 object-contain drop-shadow-[0_6px_18px_rgba(34,211,238,.35)]"
+            />
+            <p className="mt-3 font-display font-semibold">{zona.nombre}</p>
+            <p className="mt-1 text-sm text-slate-400">{zona.descripcion}</p>
           </button>
         ))}
       </section>
@@ -63,7 +73,7 @@ export default function Sede({ jugador, onIrA }) {
 
 function Tarjeta({ titulo, children }) {
   return (
-    <div className="space-y-2 rounded-xl border border-slate-800 bg-slate-900/80 p-4">
+    <div className="cristal space-y-2 p-4">
       <p className="text-sm text-slate-400">{titulo}</p>
       {children}
     </div>

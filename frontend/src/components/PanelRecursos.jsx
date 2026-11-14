@@ -3,8 +3,8 @@ import BarraRecurso from './BarraRecurso.jsx'
 
 export default function PanelRecursos({ recursos, criticos }) {
   return (
-    <section className="space-y-3 rounded-xl border border-slate-800 bg-slate-900/80 p-4">
-      <h2 className="font-semibold">Recursos de la misión</h2>
+    <section className="cristal space-y-3 p-4">
+      <h2 className="font-display font-semibold">Mission resources</h2>
       {recursos.map((recurso) => {
         const critico = criticos.includes(recurso.id)
         return (
@@ -22,7 +22,7 @@ export default function PanelRecursos({ recursos, criticos }) {
           </details>
         )
       })}
-      <p className="text-xs text-slate-500">★ Crítico en esta misión · Toca un recurso para ver qué significa</p>
+      <p className="text-xs text-slate-500">★ Critical for this mission · Tap a resource to learn what it means</p>
     </section>
   )
 }

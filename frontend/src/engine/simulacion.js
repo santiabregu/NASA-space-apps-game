@@ -29,49 +29,49 @@ export function simular(analisis, mision) {
     const empujeKN = resuelto.etapas[0].motor.empujeKN
     const pesoKN = empujeKN / empujePeso
     return fallo(
-      'El cohete no se levanta de la plataforma',
-      `El motor de la primera etapa empuja ${formatoNumero(empujeKN)} kN, pero el cohete pesa ${formatoNumero(pesoKN)} kN. Necesitas un motor más potente o menos peso: la relación empuje/peso debe superar ${EMPUJE_PESO_MINIMO}.`,
+      'The rocket does not leave the launch pad',
+      `The first-stage engine pushes ${formatoNumero(empujeKN)} kN, but the rocket weighs ${formatoNumero(pesoKN)} kN. You need a more powerful engine or less weight: thrust-to-weight must be above ${EMPUJE_PESO_MINIMO}.`,
     )
   }
-  ocurre('🔥 Despegue')
+  ocurre('🔥 Liftoff')
 
   let deltaVConseguido = analisis.deltaV
   if (empujePeso < EMPUJE_PESO_MINIMO) {
     deltaVConseguido -= PERDIDA_DESPEGUE_LENTO
     explicaciones.push(
-      `El despegue fue lento (empuje/peso ${formatoNumero(empujePeso)}): el cohete gastó unos ${PERDIDA_DESPEGUE_LENTO} m/s de Δv luchando contra la gravedad.`,
+      `Liftoff was slow (thrust-to-weight ${formatoNumero(empujePeso)}): the rocket spent about ${PERDIDA_DESPEGUE_LENTO} m/s of Δv fighting gravity.`,
     )
   }
 
   if (satelite.masaKg > cofia.capacidadKg) {
     return fallo(
-      '💥 La cofia cede durante el ascenso',
-      `El satélite pesa ${formatoNumero(satelite.masaKg)} kg y la ${cofia.nombre} solo admite ${formatoNumero(cofia.capacidadKg)} kg. Usa una cofia más grande o aligera el satélite.`,
+      '💥 The fairing fails during ascent',
+      `The satellite weighs ${formatoNumero(satelite.masaKg)} kg and the ${cofia.nombre} only takes ${formatoNumero(cofia.capacidadKg)} kg. Use a bigger fairing or make the satellite lighter.`,
     )
   }
 
-  resuelto.etapas.slice(0, -1).forEach((_, indice) => ocurre(`Separación de la etapa ${indice + 1}`))
-  ocurre('Separación de la cofia')
+  resuelto.etapas.slice(0, -1).forEach((_, indice) => ocurre(`Stage ${indice + 1} separation`))
+  ocurre('Fairing separation')
 
   if (deltaVConseguido < orbita.deltaVRequerido) {
     const faltan = orbita.deltaVRequerido - deltaVConseguido
     return fallo(
-      'El cohete se queda sin combustible antes de llegar a la órbita',
-      `Faltaron ${formatoNumero(Math.round(faltan))} m/s de Δv: el cohete consiguió ${formatoNumero(Math.round(deltaVConseguido))} m/s y la ${orbita.nombre} necesita ${formatoNumero(orbita.deltaVRequerido)} m/s. Añade una etapa, usa motores con más Isp o aligera la carga (${formatoNumero(cargaUtilKg)} kg).`,
+      'The rocket runs out of propellant before reaching orbit',
+      `It was ${formatoNumero(Math.round(faltan))} m/s of Δv short: the rocket reached ${formatoNumero(Math.round(deltaVConseguido))} m/s and the ${orbita.nombre} needs ${formatoNumero(orbita.deltaVRequerido)} m/s. Add a stage, use higher-Isp engines or lighten the payload (${formatoNumero(cargaUtilKg)} kg).`,
     )
   }
-  ocurre(`🛰️ Satélite desplegado en ${orbita.nombre}`)
+  ocurre(`🛰️ Satellite deployed in ${orbita.nombre}`)
 
   if (!satelite.tieneOrdenador) {
-    return fallo('El satélite no responde', 'Sin ordenador de a bordo el satélite no puede encender sus equipos ni obedecer órdenes.')
+    return fallo('The satellite does not respond', 'Without an onboard computer the satellite cannot switch on its equipment or follow commands.')
   }
   if (!satelite.tieneAntena) {
-    return fallo('Silencio total: no llega ninguna señal', 'Sin antena no hay forma de hablar con el satélite. Aunque funcione, para nosotros está perdido.')
+    return fallo('Total silence: no signal arrives', 'Without an antenna there is no way to talk to the satellite. Even if it works, it is lost to us.')
   }
   if (satelite.potenciaGeneradaW === 0) {
-    return fallo('La batería se agota a las pocas horas', 'Sin paneles solares no hay forma de recargar la batería y el satélite se apaga para siempre.')
+    return fallo('The battery dies within hours', 'Without solar panels there is no way to recharge the battery, and the satellite shuts down for good.')
   }
-  ocurre('📡 Primer contacto con la estación de tierra')
+  ocurre('📡 First contact with the ground station')
 
   const avisos = avisosDeOperacion(satelite, orbita)
   explicaciones.push(...avisos)
@@ -79,18 +79,18 @@ export function simular(analisis, mision) {
   const fallosObjetivo = fallosDeObjetivo(satelite, requisitos)
   if (fallosObjetivo.length > 0) {
     explicaciones.push(...fallosObjetivo.slice(1))
-    return fallo('❌ La misión no cumple su objetivo', fallosObjetivo[0])
+    return fallo('❌ The mission does not meet its objective', fallosObjetivo[0])
   }
-  ocurre('✅ Objetivo cumplido')
+  ocurre('✅ Objective achieved')
 
   const retraso = meses > requisitos.plazoMeses
   if (retraso) {
     explicaciones.push(
-      `Entregaste con retraso: el desarrollo duró ${meses} meses y el plazo era de ${requisitos.plazoMeses}. Las piezas avanzadas tardan más en fabricarse.`,
+      `Delivered late: development took ${meses} months and the deadline was ${requisitos.plazoMeses}. Advanced parts take longer to build.`,
     )
   }
   if (avisos.length === 0 && !retraso) {
-    explicaciones.push('Diseño equilibrado: sobra energía, se descargan todos los datos y se cumplieron los plazos.')
+    explicaciones.push('Balanced design: power to spare, all the data gets downloaded and the deadline was met.')
   }
 
   const desglose = {
@@ -113,23 +113,23 @@ function avisosDeOperacion(satelite, orbita) {
   const avisos = []
   if (satelite.potenciaConsumidaW > satelite.potenciaGeneradaW) {
     avisos.push(
-      `Los paneles generan ${formatoNumero(satelite.potenciaGeneradaW)} W y los equipos consumen ${formatoNumero(satelite.potenciaConsumidaW)} W: parte del día hay que apagar instrumentos.`,
+      `The panels make ${formatoNumero(satelite.potenciaGeneradaW)} W and the equipment uses ${formatoNumero(satelite.potenciaConsumidaW)} W: instruments have to be switched off for part of the day.`,
     )
   }
   if (satelite.bateriaWh < satelite.bateriaNecesariaWh) {
     avisos.push(
-      `En la sombra de la Tierra la batería (${formatoNumero(satelite.bateriaWh)} Wh) no alcanza: hacen falta ${formatoNumero(satelite.bateriaNecesariaWh)} Wh. Los instrumentos se apagan en cada eclipse.`,
+      `In the Earth’s shadow the battery (${formatoNumero(satelite.bateriaWh)} Wh) is not enough: it needs ${formatoNumero(satelite.bateriaNecesariaWh)} Wh. The instruments shut down during every eclipse.`,
     )
   }
   if (satelite.datosGeneradosMB > satelite.descargaMB) {
     const perdido = Math.round((1 - satelite.descargaMB / satelite.datosGeneradosMB) * 100)
     avisos.push(
-      `Se pierde el ${perdido} % de los datos: los instrumentos generan ${formatoNumero(satelite.datosGeneradosMB)} MB al día y la antena solo descarga ${formatoNumero(satelite.descargaMB)} MB en ${orbita.minutosContactoDia} minutos de contacto. Prueba una antena más rápida o una órbita con más contacto.`,
+      `${perdido}% of the data is lost: the instruments make ${formatoNumero(satelite.datosGeneradosMB)} MB per day and the antenna only downloads ${formatoNumero(satelite.descargaMB)} MB in ${orbita.minutosContactoDia} minutes of contact. Try a faster antenna or an orbit with more contact time.`,
     )
   }
   if (satelite.instrumentosSinApuntado.length > 0) {
     const nombres = satelite.instrumentosSinApuntado.map((instrumento) => instrumento.nombre).join(', ')
-    avisos.push(`${nombres}: sin ruedas de reacción no pueden apuntar a su objetivo y solo aprovechas el 30 % de su ciencia.`)
+    avisos.push(`${nombres}: without reaction wheels they cannot point at their target, so you only get 30% of their science.`)
   }
   return avisos
 }
@@ -138,17 +138,17 @@ function fallosDeObjetivo(satelite, requisitos) {
   const fallos = []
   if (satelite.valorCientifico < requisitos.valorCientificoMin) {
     fallos.push(
-      `El valor científico fue ${satelite.valorCientifico} y la misión necesitaba ${requisitos.valorCientificoMin}. Añade instrumentos o asegúrate de que tienen energía, apuntado y una antena capaz de bajar sus datos.`,
+      `The science value was ${satelite.valorCientifico} and the mission needed ${requisitos.valorCientificoMin}. Add instruments, or make sure they have power, pointing and an antenna fast enough for their data.`,
     )
   }
   if (satelite.datosDescargadosMB < requisitos.datosMinMB) {
     fallos.push(
-      `Llegaron ${formatoNumero(satelite.datosDescargadosMB)} MB al día y el cliente necesitaba ${formatoNumero(requisitos.datosMinMB)} MB.`,
+      `${formatoNumero(satelite.datosDescargadosMB)} MB per day reached the ground and the client needed ${formatoNumero(requisitos.datosMinMB)} MB.`,
     )
   }
   if (satelite.vidaUtilDias < requisitos.vidaUtilMinDias) {
     fallos.push(
-      `El satélite funcionó ${formatoNumero(satelite.vidaUtilDias)} días y la misión necesitaba ${formatoNumero(requisitos.vidaUtilMinDias)}. Una estructura más robusta o una órbita más alta (menos rozamiento con el aire) lo hacen durar más.`,
+      `The satellite worked for ${formatoNumero(satelite.vidaUtilDias)} days and the mission needed ${formatoNumero(requisitos.vidaUtilMinDias)}. A sturdier structure or a higher orbit (less air drag) makes it last longer.`,
     )
   }
   return fallos

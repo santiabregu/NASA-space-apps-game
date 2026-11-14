@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { iniciarSesion, registrar } from '../../api/auth.js'
+import { LOGOS } from '../../logos.js'
 
 const CAMPOS_REGISTRO = { email: '', password: '', nombreUsuario: '', nombreEmpresa: '' }
 
@@ -28,22 +29,19 @@ export default function Login({ onEntrar, aviso }) {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center px-4">
-      <form
-        onSubmit={enviar}
-        className="w-full max-w-sm space-y-4 rounded-2xl border border-slate-800 bg-slate-900/80 p-6 shadow-xl"
-      >
+    <main className="flex min-h-screen items-center justify-center px-4 md:justify-start md:px-24">
+      <form onSubmit={enviar} className="cristal w-full max-w-sm space-y-4 p-7 shadow-2xl">
         <header className="text-center">
-          <p className="text-4xl">🚀</p>
-          <h1 className="mt-2 text-2xl font-bold">Misión Espacial</h1>
+          <img src={LOGOS.logoJuego} alt="" className="mx-auto w-36" />
+          <h1 className="mt-3 whitespace-nowrap font-display text-2xl font-extrabold tracking-wide">STELLAR STRATEGY</h1>
           <p className="text-sm text-slate-400">
-            {esRegistro ? 'Funda tu empresa espacial' : 'Vuelve a tu centro de control'}
+            {esRegistro ? 'Found your space company' : 'Welcome back to mission control'}
           </p>
         </header>
 
-        <Campo etiqueta="Correo" type="email" value={datos.email} onChange={cambiar('email')} autoComplete="email" />
+        <Campo etiqueta="Email" type="email" value={datos.email} onChange={cambiar('email')} autoComplete="email" />
         <Campo
-          etiqueta="Contraseña"
+          etiqueta="Password"
           type="password"
           value={datos.password}
           onChange={cambiar('password')}
@@ -52,25 +50,25 @@ export default function Login({ onEntrar, aviso }) {
         />
         {esRegistro && (
           <>
-            <Campo etiqueta="Nombre de usuario" value={datos.nombreUsuario} onChange={cambiar('nombreUsuario')} minLength={3} maxLength={20} />
-            <Campo etiqueta="Nombre de tu empresa" value={datos.nombreEmpresa} onChange={cambiar('nombreEmpresa')} minLength={2} maxLength={40} />
+            <Campo etiqueta="Username" value={datos.nombreUsuario} onChange={cambiar('nombreUsuario')} minLength={3} maxLength={20} />
+            <Campo etiqueta="Company name" value={datos.nombreEmpresa} onChange={cambiar('nombreEmpresa')} minLength={2} maxLength={40} />
           </>
         )}
 
-        {error && <p className="rounded-lg bg-red-950 p-3 text-sm text-red-300">{error}</p>}
+        {error && <p className="rounded-lg bg-red-950/80 p-3 text-sm text-red-300">{error}</p>}
 
         <button
           disabled={enviando}
-          className="w-full rounded-lg bg-cyan-500 py-2 font-semibold text-slate-950 transition hover:bg-cyan-400 disabled:opacity-50"
+          className="w-full rounded-lg bg-cyan-400 py-2.5 font-bold text-slate-950 shadow-[0_0_24px_rgba(34,211,238,.35)] transition hover:bg-cyan-300 disabled:opacity-50"
         >
-          {esRegistro ? 'Crear cuenta' : 'Entrar'}
+          {esRegistro ? 'Create account' : 'Log in'}
         </button>
         <button
           type="button"
           onClick={() => setModo(esRegistro ? 'login' : 'registro')}
           className="w-full text-sm text-slate-400 hover:text-slate-200"
         >
-          {esRegistro ? '¿Ya tienes cuenta? Inicia sesión' : '¿Nuevo? Crea tu cuenta'}
+          {esRegistro ? 'Already have an account? Log in' : 'New here? Create an account'}
         </button>
       </form>
     </main>
@@ -84,7 +82,7 @@ function Campo({ etiqueta, ...props }) {
       <input
         required
         {...props}
-        className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 outline-none focus:border-cyan-400"
+        className="mt-1 w-full rounded-lg border border-slate-400/20 bg-slate-950/70 px-3 py-2 outline-none focus:border-cyan-400"
       />
     </label>
   )

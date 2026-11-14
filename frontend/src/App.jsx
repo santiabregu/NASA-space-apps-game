@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react'
 import { obtenerCatalogo } from './api/catalogo.js'
 import { borrarToken, leerToken } from './api/client.js'
 import { obtenerJugador } from './api/jugador.js'
+import FondoZona from './components/FondoZona.jsx'
 import Navegacion from './components/Navegacion.jsx'
 import { disenoInicial } from './engine/diseno.js'
+import { FONDOS } from './fondos.js'
 import Academia from './zones/Academia/Academia.jsx'
 import CentroControl from './zones/CentroControl/CentroControl.jsx'
 import CentroMisiones from './zones/CentroMisiones/CentroMisiones.jsx'
@@ -69,11 +71,19 @@ export default function App() {
     setZona('sede')
   }
 
-  if (cargando) return <p className="p-8 text-center text-slate-400">Conectando con el centro de control…</p>
-  if (!jugador) return <Login onEntrar={cargarPartida} aviso={aviso} />
+  if (cargando) return <p className="p-8 text-center text-slate-400">Connecting to mission control…</p>
+  if (!jugador) {
+    return (
+      <>
+        <FondoZona {...FONDOS.login} />
+        <Login onEntrar={cargarPartida} aviso={aviso} />
+      </>
+    )
+  }
 
   return (
     <>
+      <FondoZona {...FONDOS[zona]} />
       {zona !== 'control' && <Navegacion jugador={jugador} zona={zona} onIrA={setZona} onSalir={salir} />}
       {zona === 'sede' && <Sede jugador={jugador} onIrA={setZona} />}
       {zona === 'misiones' && (

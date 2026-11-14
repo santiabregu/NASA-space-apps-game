@@ -39,10 +39,10 @@ export function mesesDesarrollo(piezas) {
 
 export function faltasDeDiseno(resuelto) {
   const faltas = []
-  if (!resuelto.estructura) faltas.push('Elige la estructura del satélite en el Laboratorio')
-  if (!resuelto.cofia) faltas.push('Elige una cofia en el Taller')
+  if (!resuelto.estructura) faltas.push('Choose the satellite structure in the Lab')
+  if (!resuelto.cofia) faltas.push('Choose a fairing in the Workshop')
   if (resuelto.etapas.some((etapa) => !etapa.motor || !etapa.tanque)) {
-    faltas.push('Cada etapa del cohete necesita motor y tanque')
+    faltas.push('Every rocket stage needs an engine and a tank')
   }
   return faltas
 }

@@ -20,10 +20,10 @@ export default function CentroControl({ lanzamiento, onVolverSede, onRedisenar }
 
   return (
     <main className="mx-auto max-w-4xl space-y-6 px-4 py-8">
-      <h1 className="text-2xl font-bold">📡 Centro de Control</h1>
+      <h1 className="font-display text-2xl font-bold">Mission Control</h1>
 
       <div className="grid gap-6 md:grid-cols-2">
-        <div className="relative flex h-80 items-end justify-center overflow-hidden rounded-xl border border-slate-800 bg-gradient-to-b from-slate-950 via-indigo-950 to-sky-900">
+        <div className="relative flex h-80 items-end justify-center overflow-hidden rounded-2xl border border-slate-400/20 bg-gradient-to-b from-slate-950 via-indigo-950 to-sky-900">
           {enOrbita ? (
             <Orbita />
           ) : (
@@ -40,12 +40,12 @@ export default function CentroControl({ lanzamiento, onVolverSede, onRedisenar }
           {simulacion.eventos.slice(0, fasesVistas).map((evento) => (
             <li
               key={evento.texto}
-              className={`rounded-lg px-3 py-2 text-sm ${evento.ok ? 'bg-slate-900/80' : 'bg-red-950 text-red-200'}`}
+              className={`rounded-lg px-3 py-2 text-sm backdrop-blur-md ${evento.ok ? 'bg-slate-900/70' : 'bg-red-950/80 text-red-200'}`}
             >
               {evento.texto}
             </li>
           ))}
-          {!terminado && <li className="animate-pulse px-3 text-sm text-slate-400">Telemetría en curso…</li>}
+          {!terminado && <li className="animate-pulse px-3 text-sm text-slate-400">Receiving telemetry…</li>}
         </ol>
       </div>
 

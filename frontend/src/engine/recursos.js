@@ -19,67 +19,67 @@ export function calcularRecursos({ resuelto, satelite, mision, dinero, coste, me
   return [
     {
       id: 'MASA',
-      nombre: 'Masa',
+      nombre: 'Mass',
       valor: satelite.masaKg,
       maximo: capacidadCofia,
       texto: resuelto.cofia
         ? `${formatoNumero(satelite.masaKg)} / ${formatoNumero(capacidadCofia)} kg`
-        : `${formatoNumero(satelite.masaKg)} kg · sin cofia`,
+        : `${formatoNumero(satelite.masaKg)} kg · no fairing`,
       estado: resuelto.cofia ? estadoMaximo(satelite.masaKg, capacidadCofia) : 'aviso',
-      explicacion: 'Lo que pesa el satélite. Tiene que caber en la cofia y cada kilo extra le quita Δv al cohete.',
+      explicacion: 'How much the satellite weighs. It has to fit in the fairing, and every extra kilo takes Δv away from the rocket.',
     },
     {
       id: 'POTENCIA',
-      nombre: 'Potencia',
+      nombre: 'Power',
       valor: satelite.potenciaConsumidaW,
       maximo: satelite.potenciaGeneradaW,
-      texto: `consume ${formatoNumero(satelite.potenciaConsumidaW)} / genera ${formatoNumero(satelite.potenciaGeneradaW)} W`,
+      texto: `uses ${formatoNumero(satelite.potenciaConsumidaW)} / makes ${formatoNumero(satelite.potenciaGeneradaW)} W`,
       estado: peorEstado(
         estadoMaximo(satelite.potenciaConsumidaW, satelite.potenciaGeneradaW),
         satelite.bateriaWh >= satelite.bateriaNecesariaWh ? 'ok' : 'aviso',
       ),
-      explicacion: `Los paneles son la central eléctrica. En la sombra de la Tierra (${formatoNumero(resuelto.orbita.eclipseHoras * 60)} min por vuelta) solo queda la batería: necesitas ${formatoNumero(satelite.bateriaNecesariaWh)} Wh y tienes ${formatoNumero(satelite.bateriaWh)} Wh.`,
+      explicacion: `Solar panels are the power plant. In the Earth’s shadow (${formatoNumero(resuelto.orbita.eclipseHoras * 60)} min per orbit) only the battery is left: you need ${formatoNumero(satelite.bateriaNecesariaWh)} Wh and you have ${formatoNumero(satelite.bateriaWh)} Wh.`,
     },
     {
       id: 'PRESUPUESTO',
-      nombre: 'Presupuesto',
+      nombre: 'Budget',
       valor: coste,
       maximo: dinero,
       texto: `${formatoDinero(coste)} / ${formatoDinero(dinero)}`,
       estado: estadoMaximo(coste, dinero),
-      explicacion: 'Las piezas las paga tu empresa al lanzar. El Gobierno solo paga si la misión sale bien; si no te llega el dinero, te presta la diferencia y la descuenta de tus próximos pagos.',
+      explicacion: 'Your company pays for the parts at launch. The Government only pays if the mission succeeds; if you are short of money, it lends you the difference and deducts it from your next payments.',
     },
     {
       id: 'DATOS',
-      nombre: 'Datos',
+      nombre: 'Data',
       valor: satelite.datosDescargadosMB,
       maximo: Math.max(requisitos.datosMinMB, 1),
-      texto: `${formatoNumero(satelite.datosDescargadosMB)} / ${formatoNumero(requisitos.datosMinMB)} MB al día`,
+      texto: `${formatoNumero(satelite.datosDescargadosMB)} / ${formatoNumero(requisitos.datosMinMB)} MB per day`,
       estado: estadoMinimo(satelite.datosDescargadosMB, requisitos.datosMinMB),
-      explicacion: 'La información que llega a la Tierra cada día. Cada foto o medición ocupa espacio, como en tu móvil.',
+      explicacion: 'The information that reaches Earth each day. Every photo or measurement takes up space, just like on your phone.',
     },
     {
       id: 'COMUNICACIONES',
-      nombre: 'Comunicaciones',
+      nombre: 'Communications',
       valor: satelite.datosGeneradosMB,
       maximo: satelite.descargaMB,
       texto: satelite.tieneAntena
-        ? `genera ${formatoNumero(satelite.datosGeneradosMB)} / descarga ${formatoNumero(satelite.descargaMB)} MB al día`
-        : 'sin antena',
+        ? `makes ${formatoNumero(satelite.datosGeneradosMB)} / downloads ${formatoNumero(satelite.descargaMB)} MB per day`
+        : 'no antenna',
       estado: satelite.tieneAntena ? estadoMaximo(satelite.datosGeneradosMB, satelite.descargaMB) : 'error',
-      explicacion: `Solo puedes enviar datos cuando el satélite pasa sobre una antena de tierra: ${resuelto.orbita.minutosContactoDia} minutos al día en esta órbita. Lo que no se descarga, se pierde.`,
+      explicacion: `You can only send data while the satellite passes over a ground antenna: ${resuelto.orbita.minutosContactoDia} minutes per day in this orbit. Whatever is not downloaded is lost.`,
     },
     {
       id: 'TIEMPO',
-      nombre: 'Tiempo',
+      nombre: 'Time',
       valor: meses,
       maximo: requisitos.plazoMeses,
-      texto: `${meses} / ${requisitos.plazoMeses} meses · vida ${formatoNumero(satelite.vidaUtilDias)} / ${requisitos.vidaUtilMinDias} días`,
+      texto: `${meses} / ${requisitos.plazoMeses} months · life ${formatoNumero(satelite.vidaUtilDias)} / ${requisitos.vidaUtilMinDias} days`,
       estado: peorEstado(
         estadoMaximo(meses, requisitos.plazoMeses),
         estadoMinimo(satelite.vidaUtilDias, requisitos.vidaUtilMinDias),
       ),
-      explicacion: 'Desarrollo: las piezas avanzadas tardan más en construirse. Vida útil: la estructura envejece y en órbita baja el aire frena el satélite hasta que cae.',
+      explicacion: 'Development: advanced parts take longer to build. Lifetime: the structure ages, and in low orbit the thin air slows the satellite down until it falls.',
     },
   ]
 }

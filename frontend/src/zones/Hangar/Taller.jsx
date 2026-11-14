@@ -20,29 +20,29 @@ export default function Taller({ catalogo, analisis, diseno, onCambiarDiseno, ni
       <DibujoCohete etapas={cohete.etapas.length} tieneCofia={Boolean(cohete.cofiaId)} empresa={empresa} />
 
       <div className="space-y-4">
-        <div className="space-y-3 rounded-xl border border-slate-800 bg-slate-900/60 p-4">
+        <div className="cristal space-y-3 p-4">
           <BarraRecurso
-            etiqueta="Δv (capacidad para cambiar de velocidad)"
+            etiqueta="Δv (how much speed the rocket can gain)"
             valor={analisis.deltaV}
             maximo={deltaVRequerido}
             texto={`${formatoNumero(Math.round(analisis.deltaV))} / ${formatoNumero(deltaVRequerido)} m/s`}
             color={COLOR_ESTADO[analisis.deltaV >= deltaVRequerido ? 'ok' : 'error']}
           />
           <BarraRecurso
-            etiqueta="Empuje / peso al despegar"
+            etiqueta="Thrust-to-weight at liftoff"
             valor={analisis.empujePeso}
             maximo={EMPUJE_PESO_MINIMO}
-            texto={`${formatoNumero(analisis.empujePeso)} (mínimo ${EMPUJE_PESO_MINIMO})`}
+            texto={`${formatoNumero(analisis.empujePeso)} (minimum ${EMPUJE_PESO_MINIMO})`}
             color={COLOR_ESTADO[analisis.empujePeso >= EMPUJE_PESO_MINIMO ? 'ok' : 'error']}
           />
           <p className="text-xs text-slate-400">
-            Para quedarse en órbita hay que ir a unos 28 000 km/h. El Δv mide cuánta velocidad puede ganar tu cohete:
-            más combustible ayuda, pero también pesa. Por eso los cohetes van por etapas que se sueltan al vaciarse.
+            To stay in orbit you need to travel at about 28,000 km/h. Δv measures how much speed your rocket can gain:
+            more propellant helps, but it also adds weight. That is why rockets use stages that drop off when empty.
           </p>
         </div>
 
         <SelectorPieza
-          titulo="Cofia (punta del cohete)"
+          titulo="Fairing (nose of the rocket)"
           piezas={deTipo('cofia')}
           valor={cohete.cofiaId}
           nivel={nivel}
@@ -50,31 +50,31 @@ export default function Taller({ catalogo, analisis, diseno, onCambiarDiseno, ni
         />
 
         {etapasDeArribaAAbajo.map(({ etapa, indice }) => (
-          <div key={indice} className="space-y-3 rounded-xl border border-slate-800 bg-slate-900/60 p-4">
+          <div key={indice} className="cristal space-y-3 p-4">
             <div className="flex items-center justify-between">
-              <h3 className="font-semibold">
-                Etapa {indice + 1} {indice === 0 ? '(despega desde el suelo)' : ''}
+              <h3 className="font-display font-semibold">
+                Stage {indice + 1} {indice === 0 ? '(lifts off from the ground)' : ''}
               </h3>
               {cohete.etapas.length > 1 && (
                 <button
                   onClick={() => cambiarCohete({ etapas: cohete.etapas.filter((_, i) => i !== indice) })}
                   className="text-sm text-slate-400 hover:text-red-300"
                 >
-                  Quitar etapa
+                  Remove stage
                 </button>
               )}
             </div>
-            <SelectorPieza titulo="Motor" piezas={deTipo('motor')} valor={etapa.motorId} nivel={nivel} onCambiar={(motorId) => cambiarEtapa(indice, { motorId })} />
-            <SelectorPieza titulo="Tanque" piezas={deTipo('tanque')} valor={etapa.tanqueId} nivel={nivel} onCambiar={(tanqueId) => cambiarEtapa(indice, { tanqueId })} />
+            <SelectorPieza titulo="Engine" piezas={deTipo('motor')} valor={etapa.motorId} nivel={nivel} onCambiar={(motorId) => cambiarEtapa(indice, { motorId })} />
+            <SelectorPieza titulo="Tank" piezas={deTipo('tanque')} valor={etapa.tanqueId} nivel={nivel} onCambiar={(tanqueId) => cambiarEtapa(indice, { tanqueId })} />
           </div>
         ))}
 
         {cohete.etapas.length < MAX_ETAPAS && (
           <button
             onClick={() => cambiarCohete({ etapas: [...cohete.etapas, { motorId: null, tanqueId: null }] })}
-            className="w-full rounded-xl border border-dashed border-slate-700 py-3 text-sm text-slate-300 hover:border-cyan-600"
+            className="w-full rounded-2xl border border-dashed border-slate-400/40 bg-slate-900/40 py-3 text-sm text-slate-300 backdrop-blur-md hover:border-cyan-400"
           >
-            + Añadir etapa superior
+            + Add upper stage
           </button>
         )}
       </div>
@@ -91,13 +91,13 @@ function SelectorPieza({ titulo, piezas, valor, nivel, onCambiar }) {
       <select
         value={valor ?? ''}
         onChange={(evento) => onCambiar(evento.target.value || null)}
-        className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2"
+        className="w-full rounded-lg border border-slate-400/20 bg-slate-950/80 px-3 py-2"
       >
-        <option value="">— Elegir —</option>
+        <option value="">— Choose —</option>
         {piezas.map((pieza) => (
           <option key={pieza.id} value={pieza.id} disabled={estaBloqueada(pieza, nivel)}>
             {pieza.nombre} · {formatoNumero(pieza.masaKg)} kg · {formatoDinero(pieza.coste)}
-            {estaBloqueada(pieza, nivel) ? ` · 🔒 nivel ${pieza.nivelRequerido}` : ''}
+            {estaBloqueada(pieza, nivel) ? ` · 🔒 level ${pieza.nivelRequerido}` : ''}
           </option>
         ))}
       </select>
@@ -123,7 +123,7 @@ function DibujoCohete({ etapas, tieneCofia, empresa }) {
         </div>
       ))}
       <div className="h-4 w-10 rounded-b-lg bg-slate-600" />
-      <p className="mt-2 text-center text-xs text-slate-500">Pintado con los colores de tu empresa</p>
+      <p className="mt-2 text-center text-xs text-slate-500">Painted in your company colors</p>
     </div>
   )
 }
