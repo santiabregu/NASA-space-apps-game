@@ -47,7 +47,29 @@ export function piezasDelDiseno(resuelto) {
   ].filter(Boolean)
 }
 
-export const costeTotal = (piezas) => piezas.reduce((total, pieza) => total + pieza.coste, 0)
+const TIPOS_COHETE = ['motor', 'tanque', 'cofia']
+
+// Inversa de piezasDelDiseno: las etapas llegan como motor, tanque, motor, tanque… de abajo arriba.
+export function disenoDesdePiezas(piezaIds, orbitaId, { piezasPorId }) {
+  const piezas = piezaIds.map((id) => piezasPorId[id]).filter(Boolean)
+  const etapas = []
+  for (const pieza of piezas.filter((p) => p.tipo === 'motor' || p.tipo === 'tanque')) {
+    const campo = pieza.tipo === 'motor' ? 'motorId' : 'tanqueId'
+    const ultima = etapas.at(-1)
+    if (ultima && !ultima[campo]) ultima[campo] = pieza.id
+    else etapas.push({ motorId: null, tanqueId: null, [campo]: pieza.id })
+  }
+  return {
+    orbitaId,
+    satelite: {
+      estructuraId: piezas.find((p) => p.tipo === 'estructura')?.id ?? null,
+      componentes: piezas.filter((p) => p.tipo !== 'estructura' && !TIPOS_COHETE.includes(p.tipo)).map((p) => p.id),
+    },
+    cohete: { cofiaId: piezas.find((p) => p.tipo === 'cofia')?.id ?? null, etapas },
+  }
+}
+
+export const costeTotal =(piezas) => piezas.reduce((total, pieza) => total + pieza.coste, 0)
 
 const MESES_INTEGRACION = 1
 

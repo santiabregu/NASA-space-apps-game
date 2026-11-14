@@ -5,16 +5,18 @@ import BahiaSatelite from './BahiaSatelite.jsx'
 
 const TIPOS_COMPONENTE = ['panel', 'bateria', 'ordenador', 'antena', 'actitud', 'instrumento']
 
-export default function Laboratorio({ catalogo, analisis, diseno, onCambio, ficha, nivel, recomendadas }) {
+export default function Laboratorio({ catalogo, analisis, diseno, onCambio, ficha, nivel, recomendadas, onPrevisualizar, onFinPrevisualizar }) {
   const { satelite } = diseno
   const { huecos, huecosUsados } = analisis.satelite
   const lleno = huecosUsados >= huecos
 
   const conSatelite = (cambios) => ({ ...diseno, satelite: { ...satelite, ...cambios } })
-  const anadir = (pieza) => onCambio(conSatelite({ componentes: [...satelite.componentes, pieza.id] }), pieza, 'instalada')
+  const conComponente = (pieza) => conSatelite({ componentes: [...satelite.componentes, pieza.id] })
+  const conEstructura = (estructura) => conSatelite({ estructuraId: estructura.id })
+  const anadir = (pieza) => onCambio(conComponente(pieza), pieza, 'instalada')
   const quitar = (indice) =>
     onCambio(conSatelite({ componentes: satelite.componentes.filter((_, i) => i !== indice) }), analisis.resuelto.componentes[indice], 'quitada')
-  const elegirEstructura = (estructura) => onCambio(conSatelite({ estructuraId: estructura.id }), estructura, 'instalada')
+  const elegirEstructura = (estructura) => onCambio(conEstructura(estructura), estructura, 'instalada')
 
   function avisoComponente() {
     if (!satelite.estructuraId) return 'Choose a structure first'
@@ -55,6 +57,8 @@ export default function Laboratorio({ catalogo, analisis, diseno, onCambio, fich
                     nivel={nivel}
                     instaladas={estructura.id === satelite.estructuraId ? 1 : 0}
                     onElegir={elegirEstructura}
+                    onPrevisualizar={(estructura) => onPrevisualizar(conEstructura(estructura), estructura)}
+                    onFinPrevisualizar={onFinPrevisualizar}
                     deshabilitada={estaBloqueada(estructura, nivel) || noCaben}
                     aviso={noCaben ? `Your ${satelite.componentes.length} components don’t fit` : null}
                   />
@@ -80,6 +84,8 @@ export default function Laboratorio({ catalogo, analisis, diseno, onCambio, fich
                       nivel={nivel}
                       instaladas={satelite.componentes.filter((id) => id === pieza.id).length}
                       onElegir={anadir}
+                      onPrevisualizar={(pieza) => onPrevisualizar(conComponente(pieza), pieza)}
+                      onFinPrevisualizar={onFinPrevisualizar}
                       deshabilitada={estaBloqueada(pieza, nivel) || !satelite.estructuraId || lleno}
                       aviso={avisoComponente()}
                     />

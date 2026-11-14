@@ -1,4 +1,5 @@
 import { Award } from 'lucide-react'
+import Valoracion from '../../components/Valoracion.jsx'
 import { formatoDinero } from '../../formato.js'
 
 const NOMBRE_PUNTOS = {
@@ -10,7 +11,7 @@ const NOMBRE_PUNTOS = {
 }
 
 export default function Informe({ lanzamiento, onVolverSede, onRedisenar }) {
-  const { mision, simulacion, respuesta } = lanzamiento
+  const { mision, simulacion, valoracion, respuesta } = lanzamiento
 
   return (
     <section className="cristal space-y-5 p-5">
@@ -34,14 +35,7 @@ export default function Informe({ lanzamiento, onVolverSede, onRedisenar }) {
         </ul>
       )}
 
-      <div className="space-y-2">
-        <h3 className="font-semibold">{simulacion.exito ? 'What happened' : 'Why it failed'}</h3>
-        <ul className="space-y-2 text-sm text-slate-300">
-          {simulacion.explicaciones.map((explicacion) => (
-            <li key={explicacion} className="rounded-lg bg-slate-950/60 p-3">{explicacion}</li>
-          ))}
-        </ul>
-      </div>
+      <Valoracion valoracion={valoracion} />
 
       <div className="grid gap-2 text-sm sm:grid-cols-2">
         <Dato etiqueta="Parts paid" valor={`−${formatoDinero(respuesta.costePagado)}`} />

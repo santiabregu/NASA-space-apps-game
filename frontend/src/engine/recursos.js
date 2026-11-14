@@ -20,8 +20,9 @@ export function calcularRecursos({ resuelto, satelite, mision, dinero, coste, me
     {
       id: 'MASA',
       nombre: 'Mass',
-      valor: satelite.masaKg,
-      maximo: capacidadCofia,
+      // Sin cofia no hay límite con el que comparar: la barra queda vacía en vez de llena.
+      valor: resuelto.cofia ? satelite.masaKg : 0,
+      maximo: capacidadCofia || 1,
       texto: resuelto.cofia
         ? `${formatoNumero(satelite.masaKg)} / ${formatoNumero(capacidadCofia)} kg`
         : `${formatoNumero(satelite.masaKg)} kg · no fairing`,

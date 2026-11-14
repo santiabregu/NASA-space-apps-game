@@ -28,6 +28,11 @@ class MisionController {
         return misionService.disponibles(Long.parseLong(token.getSubject()));
     }
 
+    @GetMapping("/lanzamientos")
+    List<LanzamientoResumen> historial(@AuthenticationPrincipal Jwt token) {
+        return misionService.historial(Long.parseLong(token.getSubject()));
+    }
+
     @PostMapping("/{misionId}/lanzamientos")
     LanzamientoResponse lanzar(@AuthenticationPrincipal Jwt token, @PathVariable String misionId,
             @Valid @RequestBody LanzamientoRequest lanzamiento) {

@@ -11,6 +11,7 @@ import CentroControl from './zones/CentroControl/CentroControl.jsx'
 import CentroMisiones from './zones/CentroMisiones/CentroMisiones.jsx'
 import Hangar from './zones/Hangar/Hangar.jsx'
 import Login from './zones/Login/Login.jsx'
+import RegistroMisiones from './zones/RegistroMisiones/RegistroMisiones.jsx'
 import Sede from './zones/Sede/Sede.jsx'
 
 export default function App() {
@@ -53,6 +54,12 @@ export default function App() {
       setMisionActiva(mision)
       setDiseno(disenoInicial(mision))
     }
+    setZona('hangar')
+  }
+
+  function cargarDiseno(mision, disenoGuardado) {
+    setMisionActiva(mision)
+    setDiseno(disenoGuardado)
     setZona('hangar')
   }
 
@@ -101,6 +108,7 @@ export default function App() {
         />
       )}
       {zona === 'academia' && <Academia catalogo={catalogo} />}
+      {zona === 'registro' && <RegistroMisiones jugador={jugador} catalogo={catalogo} onCargarDiseno={cargarDiseno} />}
       {zona === 'control' && (
         <CentroControl
           lanzamiento={lanzamiento}

@@ -1,12 +1,8 @@
 import { TriangleAlert } from 'lucide-react'
 import { useState } from 'react'
-import { COLOR_ESTADO } from '../../colores.js'
-import BarraRecurso from '../../components/BarraRecurso.jsx'
 import FichaPieza from '../../components/FichaPieza.jsx'
 import TarjetaPieza from '../../components/TarjetaPieza.jsx'
-import { EMPUJE_PESO_MINIMO } from '../../engine/cohete.js'
 import { instalarEnCohete, MAX_ETAPAS, quitarDelCohete } from '../../engine/diseno.js'
-import { formatoNumero } from '../../formato.js'
 import { estaBloqueada } from '../../piezas.js'
 import BahiaCohete from './BahiaCohete.jsx'
 
@@ -18,11 +14,10 @@ const SECCIONES = [
 
 const PIEZA_DE_CAMPO = { motorId: 'motor', tanqueId: 'tanque' }
 
-export default function Taller({ catalogo, analisis, diseno, onCambio, ficha, nivel, recomendadas, empresa }) {
+export default function Taller({ catalogo, analisis, diseno, onCambio, ficha, nivel, recomendadas, empresa, onPrevisualizar, onFinPrevisualizar }) {
   const [aviso, setAviso] = useState(null)
   const { cohete } = diseno
   const { resuelto } = analisis
-  const deltaVRequerido = resuelto.orbita.deltaVRequerido
   const idsInstalados = [cohete.cofiaId, ...cohete.etapas.flatMap((etapa) => [etapa.motorId, etapa.tanqueId])]
 
   const conCohete = (nuevoCohete) => ({ ...diseno, cohete: nuevoCohete })
@@ -35,6 +30,11 @@ export default function Taller({ catalogo, analisis, diseno, onCambio, ficha, ni
     }
     setAviso(null)
     onCambio(conCohete(nuevoCohete), pieza, 'instalada')
+  }
+
+  function previsualizar(pieza) {
+    const nuevoCohete = instalarEnCohete(cohete, pieza)
+    if (nuevoCohete) onPrevisualizar(conCohete(nuevoCohete), pieza)
   }
 
   function quitar(indiceEtapa, campo) {
@@ -62,27 +62,6 @@ export default function Taller({ catalogo, analisis, diseno, onCambio, ficha, ni
       </div>
 
       <div className="min-w-0 space-y-5">
-        <div className="cristal space-y-3 p-4">
-          <BarraRecurso
-            etiqueta="Δv (how much speed the rocket can gain)"
-            valor={analisis.deltaV}
-            maximo={deltaVRequerido}
-            texto={`${formatoNumero(Math.round(analisis.deltaV))} / ${formatoNumero(deltaVRequerido)} m/s`}
-            color={COLOR_ESTADO[analisis.deltaV >= deltaVRequerido ? 'ok' : 'error']}
-          />
-          <BarraRecurso
-            etiqueta="Thrust-to-weight at liftoff"
-            valor={analisis.empujePeso}
-            maximo={EMPUJE_PESO_MINIMO}
-            texto={`${formatoNumero(analisis.empujePeso)} (minimum ${EMPUJE_PESO_MINIMO})`}
-            color={COLOR_ESTADO[analisis.empujePeso >= EMPUJE_PESO_MINIMO ? 'ok' : 'error']}
-          />
-          <p className="text-xs text-slate-400">
-            To stay in orbit you need to travel at about 28,000 km/h. Δv measures how much speed your rocket can gain:
-            more propellant helps, but it also adds weight. That is why rockets use stages that drop off when empty.
-          </p>
-        </div>
-
         <div className="flex gap-3 rounded-xl border border-amber-300/40 bg-amber-950/60 p-4 text-sm text-amber-100 backdrop-blur-md">
           <TriangleAlert className="mt-0.5 h-5 w-5 shrink-0 text-amber-300" />
           <div className="space-y-1">
@@ -112,6 +91,8 @@ export default function Taller({ catalogo, analisis, diseno, onCambio, ficha, ni
                     nivel={nivel}
                     instaladas={idsInstalados.filter((id) => id === pieza.id).length}
                     onElegir={instalar}
+                    onPrevisualizar={previsualizar}
+                    onFinPrevisualizar={onFinPrevisualizar}
                     deshabilitada={estaBloqueada(pieza, nivel)}
                   />
                 ))}

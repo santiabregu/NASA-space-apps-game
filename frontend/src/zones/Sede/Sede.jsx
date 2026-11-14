@@ -6,7 +6,7 @@ const ZONAS = [
   { id: 'misiones', logo: LOGOS.centroMisiones, nombre: 'Mission Center', descripcion: 'Government contracts' },
   { id: 'hangar', logo: LOGOS.hangar, nombre: 'Hangar', descripcion: 'Build satellites and rockets' },
   { id: 'academia', logo: LOGOS.academia, nombre: 'Academy', descripcion: 'Learn the concepts' },
-  { id: null, logo: LOGOS.centroControl, nombre: 'Mission Control', descripcion: 'Opens when you launch' },
+  { id: 'registro', logo: LOGOS.centroControl, nombre: 'Mission Log', descripcion: 'Your launches: what worked and why' },
   { id: null, logo: LOGOS.social, nombre: 'Social', descripcion: 'Friends and team missions · Coming soon' },
 ]
 

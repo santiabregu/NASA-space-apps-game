@@ -42,6 +42,8 @@ export default function TarjetaPieza({
   instaladas = 0,
   recomendada = false,
   onElegir,
+  onPrevisualizar,
+  onFinPrevisualizar,
   deshabilitada = false,
   aviso,
 }) {
@@ -54,6 +56,10 @@ export default function TarjetaPieza({
       type="button"
       disabled={deshabilitada}
       onClick={() => onElegir(pieza)}
+      onMouseEnter={() => !deshabilitada && onPrevisualizar?.(pieza)}
+      onMouseLeave={onFinPrevisualizar}
+      onFocus={() => !deshabilitada && onPrevisualizar?.(pieza)}
+      onBlur={onFinPrevisualizar}
       className={`flex w-full items-center gap-3 rounded-xl border p-3 text-left backdrop-blur-md transition enabled:hover:-translate-y-0.5 enabled:hover:border-cyan-400/70 enabled:active:scale-[0.98] disabled:cursor-not-allowed ${estiloBorde(
         { instaladas, seleccionada, recomendada },
       )} ${atenuada ? 'opacity-55' : ''}`}

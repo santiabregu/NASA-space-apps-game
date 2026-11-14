@@ -17,15 +17,21 @@ import com.spaceapps.game.jugador.Jugador;
 import com.spaceapps.game.jugador.JugadorRepository;
 import com.spaceapps.game.jugador.JugadorResponse;
 
+import tools.jackson.databind.json.JsonMapper;
+
 @Service
 class MisionService {
 
     private final Catalogo catalogo;
     private final JugadorRepository jugadores;
+    private final LanzamientoRepository lanzamientos;
+    private final JsonMapper jsonMapper;
 
-    MisionService(Catalogo catalogo, JugadorRepository jugadores) {
+    MisionService(Catalogo catalogo, JugadorRepository jugadores, LanzamientoRepository lanzamientos, JsonMapper jsonMapper) {
         this.catalogo = catalogo;
         this.jugadores = jugadores;
+        this.lanzamientos = lanzamientos;
+        this.jsonMapper = jsonMapper;
     }
 
     List<String> disponibles(long jugadorId) {
@@ -71,8 +77,18 @@ class MisionService {
             jugador.getPerfil().registrarFallo();
         }
 
-        return new LanzamientoResponse(coste, prestamo, liquidacion.dinero(), deudaDevuelta, liquidacion.xp(),
-                liquidacion.cambioReputacion(), nivelesSubidos, JugadorResponse.de(jugador));
+        LanzamientoResponse respuesta = new LanzamientoResponse(coste, prestamo, liquidacion.dinero(), deudaDevuelta,
+                liquidacion.xp(), liquidacion.cambioReputacion(), nivelesSubidos, JugadorResponse.de(jugador));
+        lanzamientos.save(new Lanzamiento(jugador, mision.id(), respuesta, lanzamiento.exito(), lanzamiento.puntuacion(),
+                lanzamiento.piezas(), jsonMapper.writeValueAsString(lanzamiento.informe())));
+        return respuesta;
+    }
+
+    @Transactional(readOnly = true)
+    List<LanzamientoResumen> historial(long jugadorId) {
+        return lanzamientos.findByJugadorIdOrderByIdDesc(jugadorId).stream()
+                .map(guardado -> guardado.resumen(jsonMapper.readValue(guardado.getInforme(), InformeLanzamiento.class)))
+                .toList();
     }
 
     private long costeDePiezas(List<String> piezaIds, int nivelJugador) {

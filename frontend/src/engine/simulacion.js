@@ -10,6 +10,9 @@ const PENALIZACION_POR_AVISO = 5
 const PENALIZACION_RETRASO = 10
 const MARGEN_CIENCIA_EXCELENTE = 1.5
 
+// La explicación que cierra un fallo es la que lo provocó.
+export const causaDelFallo = ({ exito, explicaciones }) => (exito ? null : explicaciones.at(-1))
+
 export function simular(analisis, mision) {
   const { resuelto, satelite, empujePeso, cargaUtilKg, meses } = analisis
   const { orbita, cofia } = resuelto

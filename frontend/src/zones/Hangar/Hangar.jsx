@@ -1,6 +1,6 @@
 import { FlaskConical, ListChecks, Rocket, Warehouse } from 'lucide-react'
 import { useMemo, useState } from 'react'
-import PanelRecursos from '../../components/PanelRecursos.jsx'
+import PanelMision from '../../components/PanelMision.jsx'
 import { analizarDiseno } from '../../engine/analisis.js'
 import { efectosDelCambio } from '../../engine/efectos.js'
 import Almacen from './Almacen.jsx'
@@ -18,6 +18,7 @@ const AREAS = [
 export default function Hangar({ jugador, catalogo, mision, diseno, onCambiarDiseno, onLanzado, onIrA }) {
   const [area, setArea] = useState(mision ? 'laboratorio' : 'almacen')
   const [ficha, setFicha] = useState(null)
+  const [previa, setPrevia] = useState(null)
   const analisis = useMemo(
     () => mision && analizarDiseno({ diseno, catalogo, mision, dinero: jugador.dinero }),
     [diseno, catalogo, mision, jugador.dinero],
@@ -40,10 +41,12 @@ export default function Hangar({ jugador, catalogo, mision, diseno, onCambiarDis
     )
   }
 
+  const analizar = (otroDiseno) => analizarDiseno({ diseno: otroDiseno, catalogo, mision, dinero: jugador.dinero })
+
   function aplicarCambio(nuevoDiseno, pieza, accion) {
+    setPrevia(null)
     if (pieza) {
-      const despues = analizarDiseno({ diseno: nuevoDiseno, catalogo, mision, dinero: jugador.dinero })
-      setFicha({ pieza, accion, efectos: efectosDelCambio(analisis, despues) })
+      setFicha({ pieza, accion, efectos: efectosDelCambio(analisis, analizar(nuevoDiseno)) })
     } else {
       setFicha(null)
     }
@@ -53,6 +56,7 @@ export default function Hangar({ jugador, catalogo, mision, diseno, onCambiarDis
   function cambiarArea(nuevaArea) {
     setArea(nuevaArea)
     setFicha(null)
+    setPrevia(null)
   }
 
   const props = {
@@ -63,6 +67,8 @@ export default function Hangar({ jugador, catalogo, mision, diseno, onCambiarDis
     ficha,
     nivel: jugador.nivel,
     recomendadas: mision.piezasRecomendadas ?? [],
+    onPrevisualizar: (disenoPosible, pieza) => setPrevia({ pieza, analisis: analizar(disenoPosible) }),
+    onFinPrevisualizar: () => setPrevia(null),
   }
 
   return (
@@ -106,7 +112,7 @@ export default function Hangar({ jugador, catalogo, mision, diseno, onCambiarDis
           {area === 'almacen' && <Almacen catalogo={catalogo} nivel={jugador.nivel} />}
         </div>
         <aside className="lg:sticky lg:top-16 lg:self-start">
-          <PanelRecursos recursos={analisis.recursos} criticos={mision.recursosCriticos} />
+          <PanelMision analisis={analisis} previa={previa} mision={mision} />
         </aside>
       </div>
     </main>

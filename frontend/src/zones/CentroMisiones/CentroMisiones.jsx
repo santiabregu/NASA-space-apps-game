@@ -28,7 +28,6 @@ export default function CentroMisiones({ jugador, catalogo, misionActiva, onAcep
   const bloqueadasPorNivel = catalogo.misiones.filter(
     (mision) => mision.tipo === 'SOLO' && !disponibles.includes(mision.id) && mision.nivelMinimo > jugador.nivel,
   )
-  const terminadasNoRepetibles = catalogo.misiones.filter((mision) => mision.id in terminadas && !disponibles.includes(mision.id))
 
   return (
     <main className="mx-auto max-w-4xl space-y-6 px-4 py-8">
@@ -64,15 +63,6 @@ export default function CentroMisiones({ jugador, catalogo, misionActiva, onAcep
           </p>
         </TarjetaMision>
       ))}
-
-      {terminadasNoRepetibles.length > 0 && (
-        <section className="space-y-4">
-          <h2 className="font-display text-lg font-semibold">Completed missions</h2>
-          {terminadasNoRepetibles.map((mision) => (
-            <TarjetaMision key={mision.id} mision={mision} catalogo={catalogo} mejorPuntuacion={terminadas[mision.id]} />
-          ))}
-        </section>
-      )}
     </main>
   )
 }

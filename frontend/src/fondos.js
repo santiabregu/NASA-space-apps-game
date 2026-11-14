@@ -10,6 +10,7 @@ export const FONDOS = {
   sede: { imagen: sedeTierra, posicion: 'right center', capa: TIERRA_A_LA_DERECHA },
   misiones: { imagen: sedeTierra, posicion: 'right center', capa: 'rgba(2,6,23,.72)' },
   academia: { imagen: sedeTierra, posicion: 'right center', capa: 'rgba(2,6,23,.8)' },
+  registro: { imagen: hangarCabina, capa: 'rgba(2,6,23,.86)' },
   hangar: { imagen: hangarCabina, capa: 'rgba(2,6,23,.8)' },
   control: { imagen: hangarCabina, capa: 'rgba(2,6,23,.86)' },
 }

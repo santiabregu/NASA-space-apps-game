@@ -5,6 +5,7 @@ const ZONAS_NAVEGABLES = [
   { id: 'sede', nombre: 'HQ' },
   { id: 'misiones', nombre: 'Missions' },
   { id: 'hangar', nombre: 'Hangar' },
+  { id: 'registro', nombre: 'Mission Log' },
   { id: 'academia', nombre: 'Academy' },
 ]
 

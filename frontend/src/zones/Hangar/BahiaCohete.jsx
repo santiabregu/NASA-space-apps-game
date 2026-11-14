@@ -1,5 +1,8 @@
-const ANCHO_VISTA = 220
+const ANCHO_VISTA = 260
 const CENTRO = ANCHO_VISTA / 2
+const MARGEN_ROTULO = 4
+// Motores y cofia a la izquierda, tanques a la derecha: así los rótulos de piezas contiguas nunca se pisan.
+const LADO_ROTULO = { motor: -1, tanque: 1, cofia: -1 }
 const MARGEN_SUELO = 30
 const TANQUE_VACIO = { ancho: 40, alto: 70 }
 const MOTOR_VACIO = { ancho: 26, alto: 24 }
@@ -86,6 +89,7 @@ export default function BahiaCohete({ etapas, cofia, conSatelite, empresa, onQui
               ) : (
                 <Hueco forma={parte.forma} ancho={parte.ancho} alto={parte.alto} />
               )}
+              {parte.pieza && <Rotulo parte={parte} />}
             </g>
           )
         })}
@@ -98,6 +102,36 @@ export default function BahiaCohete({ etapas, cofia, conSatelite, empresa, onQui
       </svg>
       <p className="text-xs text-slate-500">Parts stack from the ground up · click a part here to remove it</p>
     </div>
+  )
+}
+
+// Punto del borde de la pieza del que sale la línea del rótulo, en coordenadas de la pieza (x medida desde el eje).
+function anclaje({ forma, ancho, alto }) {
+  if (forma === 'motor') return { x: ancho * 0.35, y: alto / 2 }
+  if (forma === 'cofia') return { x: ancho / 2, y: alto * 0.8 }
+  return { x: ancho / 2, y: alto / 2 }
+}
+
+function Rotulo({ parte }) {
+  const lado = LADO_ROTULO[parte.forma]
+  const punto = anclaje(parte)
+  const xPieza = lado * punto.x
+  const xTexto = lado * (CENTRO - MARGEN_ROTULO)
+  const alineacion = lado < 0 ? 'start' : 'end'
+
+  return (
+    <g className="pointer-events-none animate-aparecer" aria-hidden="true">
+      <line x1={xPieza} x2={xTexto} y1={punto.y} y2={punto.y} stroke="rgba(203,213,225,.55)" strokeWidth=".8" />
+      <circle cx={xPieza} cy={punto.y} r="1.6" fill="#cbd5e1" />
+      <text x={xTexto} y={punto.y - 3} textAnchor={alineacion} fontSize="9.5" fontWeight="600" fill="#e2e8f0">
+        {parte.pieza.nombre}
+      </text>
+      {parte.forma !== 'cofia' && (
+        <text x={xTexto} y={punto.y + 9} textAnchor={alineacion} fontSize="8" fill="#94a3b8">
+          Stage {parte.indice + 1}
+        </text>
+      )}
+    </g>
   )
 }
 
