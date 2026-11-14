@@ -7,7 +7,7 @@ const ZONAS = [
   { id: 'hangar', logo: LOGOS.hangar, nombre: 'Hangar', descripcion: 'Build satellites and rockets' },
   { id: 'academia', logo: LOGOS.academia, nombre: 'Academy', descripcion: 'Learn the concepts' },
   { id: 'registro', logo: LOGOS.centroControl, nombre: 'Mission Log', descripcion: 'Your launches: what worked and why' },
-  { id: null, logo: LOGOS.social, nombre: 'Social', descripcion: 'Friends and team missions · Coming soon' },
+  { id: 'social', logo: LOGOS.social, nombre: 'Social', descripcion: 'Friends and team missions' },
 ]
 
 const TEXTO_CONFIANZA = {

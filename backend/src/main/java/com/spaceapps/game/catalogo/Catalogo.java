@@ -4,6 +4,7 @@ import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
 
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -21,8 +22,11 @@ public class Catalogo {
     private final Map<String, PiezaCatalogo> piezas;
     private final List<MisionCatalogo> misiones;
     private final List<Destino> destinos;
+    private final List<Estrella> estrellas;
     private final KitInicial kitInicial;
     private final int mesLimite;
+    private final Map<String, Pregunta> preguntas;
+    private final ReglasEquipo reglasEquipo;
 
     Catalogo(JsonMapper jsonMapper, @Value("classpath:catalogo.json") Resource fichero) throws IOException {
         this.json = fichero.getContentAsByteArray();
@@ -30,8 +34,11 @@ public class Catalogo {
         this.piezas = contenido.piezas().stream().collect(toMap(PiezaCatalogo::id, identity()));
         this.misiones = contenido.misiones();
         this.destinos = contenido.destinos();
+        this.estrellas = contenido.estrellas();
         this.kitInicial = contenido.kitInicial();
         this.mesLimite = contenido.mesLimite();
+        this.preguntas = contenido.preguntas().stream().collect(toMap(Pregunta::id, identity()));
+        this.reglasEquipo = contenido.equipo();
     }
 
     public byte[] json() {
@@ -54,8 +61,17 @@ public class Catalogo {
         return destinos.stream().filter(destino -> destino.id().equals(id)).findFirst();
     }
 
+    // En el orden en que se alcanzan en la campaña.
+    public List<Destino> destinos() {
+        return destinos.stream().sorted(Comparator.comparingInt(Destino::orden)).toList();
+    }
+
     public Optional<Destino> destinoQueAlcanza(String misionId) {
         return destinos.stream().filter(destino -> misionId.equals(destino.misionId())).findFirst();
+    }
+
+    public Optional<Estrella> estrella(String id) {
+        return estrellas.stream().filter(estrella -> estrella.id().equals(id)).findFirst();
     }
 
     public KitInicial kitInicial() {
@@ -66,7 +82,15 @@ public class Catalogo {
         return mesLimite;
     }
 
+    public Optional<Pregunta> pregunta(String id) {
+        return Optional.ofNullable(preguntas.get(id));
+    }
+
+    public ReglasEquipo reglasEquipo() {
+        return reglasEquipo;
+    }
+
     private record Contenido(List<PiezaCatalogo> piezas, List<MisionCatalogo> misiones, List<Destino> destinos,
-            KitInicial kitInicial, int mesLimite) {
+            List<Estrella> estrellas, KitInicial kitInicial, int mesLimite, List<Pregunta> preguntas, ReglasEquipo equipo) {
     }
 }

@@ -1,12 +1,12 @@
 import { FlaskConical, ListChecks, Rocket, Warehouse } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import PanelMision from '../../components/PanelMision.jsx'
-import { analizarDiseno, esSuborbital } from '../../engine/analisis.js'
-import { efectosDelCambio } from '../../engine/efectos.js'
+import { esSuborbital } from '../../engine/analisis.js'
 import Almacen from './Almacen.jsx'
 import Laboratorio from './Laboratorio.jsx'
 import Plataforma from './Plataforma.jsx'
 import Taller from './Taller.jsx'
+import { useBancoDeTrabajo } from './useBancoDeTrabajo.js'
 
 const AREAS = [
   { id: 'laboratorio', nombre: 'Lab', Icono: FlaskConical },
@@ -17,12 +17,15 @@ const AREAS = [
 
 export default function Hangar({ jugador, catalogo, mision, diseno, onCambiarDiseno, onLanzado, onIrA }) {
   const [area, setArea] = useState(areaInicial(mision))
-  const [ficha, setFicha] = useState(null)
-  const [previa, setPrevia] = useState(null)
-  const analisis = useMemo(
-    () => mision && analizarDiseno({ diseno, catalogo, mision, dinero: jugador.dinero, inventario: jugador.inventario }),
-    [diseno, catalogo, mision, jugador.dinero, jugador.inventario],
-  )
+  const banco = useBancoDeTrabajo({
+    catalogo,
+    mision,
+    diseno,
+    dinero: jugador.dinero,
+    inventario: jugador.inventario,
+    onCambiarDiseno,
+  })
+  const { analisis, ficha, previa } = banco
 
   if (!mision) {
     return (
@@ -41,35 +44,21 @@ export default function Hangar({ jugador, catalogo, mision, diseno, onCambiarDis
     )
   }
 
-  const analizar = (otroDiseno) =>
-    analizarDiseno({ diseno: otroDiseno, catalogo, mision, dinero: jugador.dinero, inventario: jugador.inventario })
-
-  function aplicarCambio(nuevoDiseno, pieza, accion) {
-    setPrevia(null)
-    if (pieza) {
-      setFicha({ pieza, accion, efectos: efectosDelCambio(analisis, analizar(nuevoDiseno)) })
-    } else {
-      setFicha(null)
-    }
-    onCambiarDiseno(nuevoDiseno)
-  }
-
   function cambiarArea(nuevaArea) {
     setArea(nuevaArea)
-    setFicha(null)
-    setPrevia(null)
+    banco.limpiar()
   }
 
   const props = {
     catalogo,
     analisis,
     diseno,
-    onCambio: aplicarCambio,
+    onCambio: banco.aplicarCambio,
     ficha,
     jugador,
     recomendadas: mision.piezasRecomendadas ?? [],
-    onPrevisualizar: (disenoPosible, pieza) => setPrevia({ pieza, analisis: analizar(disenoPosible) }),
-    onFinPrevisualizar: () => setPrevia(null),
+    onPrevisualizar: banco.previsualizar,
+    onFinPrevisualizar: banco.finPrevisualizar,
   }
 
   return (

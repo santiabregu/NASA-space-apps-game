@@ -19,8 +19,8 @@ public record JugadorResponse(
         Map<String, Integer> inventario,
         EmpresaResponse empresa) {
 
-    // destinosAlcanzados: id del destino → mes de juego en que se alcanzó.
-    public record Campana(boolean introVista, int mesActual, int mesLimite, Map<String, Integer> destinosAlcanzados) {
+    // destinosAlcanzados: id del destino → mes de juego en que se alcanzó. diasPerdidos: lo que aún no llega a un mes.
+    public record Campana(boolean introVista, int mesActual, int diasPerdidos, int mesLimite, Map<String, Integer> destinosAlcanzados) {
     }
 
     public static JugadorResponse de(Jugador jugador) {
@@ -37,7 +37,7 @@ public record JugadorResponse(
                 perfil.getMisionesCompletadas(),
                 perfil.getMisionesFallidas(),
                 jugador.getMejorPuntuacionPorMision(),
-                new Campana(jugador.isIntroVista(), jugador.getMesActual(), jugador.getMesLimite(),
+                new Campana(jugador.isIntroVista(), jugador.getMesActual(), jugador.getDiasPerdidos(), jugador.getMesLimite(),
                         jugador.getMesPorDestinoAlcanzado()),
                 jugador.getInventario(),
                 EmpresaResponse.de(jugador.getEmpresa()));

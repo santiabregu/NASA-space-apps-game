@@ -16,6 +16,7 @@ import {
   Package,
   RadioTower,
   Rocket,
+  Star,
   Weight,
   Zap,
 } from 'lucide-react'
@@ -23,7 +24,7 @@ import { COLOR_ESTADO } from '../colores.js'
 import { objetivosMision } from '../engine/objetivos.js'
 import { formatoNumero } from '../formato.js'
 
-const ICONO_OBJETIVO = { altitud: ArrowUpToLine, orbita: Rocket, despegue: MoveUp, cofia: Package, ciencia: Atom, datos: Download, vida: Hourglass, plazo: CalendarClock }
+const ICONO_OBJETIVO = { altitud: ArrowUpToLine, orbita: Rocket, despegue: MoveUp, cofia: Package, obligatorias: Star, ciencia: Atom, datos: Download, vida: Hourglass, plazo: CalendarClock }
 const ICONO_RECURSO = { MASA: Weight, POTENCIA: Zap, PRESUPUESTO: CircleDollarSign, DATOS: Database, COMUNICACIONES: RadioTower, TIEMPO: Clock }
 const ICONO_ESTADO = {
   ok: { Icono: CircleCheck, color: 'text-emerald-400' },

@@ -1,4 +1,4 @@
-import { CircleCheck, Lock, Satellite, Star } from 'lucide-react'
+import { CircleCheck, Heart, Lock, Satellite, Star } from 'lucide-react'
 import { IMAGEN_PIEZA } from '../imagenes.js'
 
 function estiloBorde({ instaladas, seleccionada, recomendada }) {
@@ -34,7 +34,7 @@ function Marca({ bloqueadaHasta, instaladas, recomendada }) {
 }
 
 // seleccionada = la pieza que se está viendo (Almacén); instaladas = cuántas lleva ya el diseño.
-// disponibilidad = { enAlmacen, bloqueadaHasta } de piezas.js.
+// disponibilidad = { enAlmacen, bloqueadaHasta } de piezas.js. votos = compañeros que la proponen (misiones de equipo).
 export default function TarjetaPieza({
   pieza,
   disponibilidad,
@@ -46,6 +46,7 @@ export default function TarjetaPieza({
   onFinPrevisualizar,
   deshabilitada = false,
   aviso,
+  votos = 0,
 }) {
   const { enAlmacen, bloqueadaHasta } = disponibilidad
   const imagen = IMAGEN_PIEZA[pieza.id]
@@ -79,6 +80,11 @@ export default function TarjetaPieza({
         <span className="text-xs text-slate-400">{pieza.explicacion}</span>
         {enAlmacen > 0 && <span className="text-xs text-cyan-300">In your Warehouse: {enAlmacen}</span>}
         {aviso && <span className="text-xs text-amber-300">{aviso}</span>}
+        {votos > 0 && (
+          <span className="flex items-center gap-1 text-xs font-semibold text-pink-300">
+            <Heart className="h-3.5 w-3.5 fill-current" /> {votos} team {votos === 1 ? 'vote' : 'votes'}
+          </span>
+        )}
       </span>
     </button>
   )

@@ -273,3 +273,26 @@ export function RetratoControlador({ className }) {
     </svg>
   )
 }
+
+// Las estrellas de las misiones de equipo, a escala: las enanas rojas son pequeñas y Betelgeuse no cabe.
+const ESTRELLAS_MISION = {
+  'proxima-centauri': { radio: 6, luz: COLOR.rojo, sombra: COLOR.morado },
+  'trappist-1': { radio: 5, luz: COLOR.marron, sombra: COLOR.morado },
+  betelgeuse: { radio: 15, luz: COLOR.naranja, sombra: COLOR.rojo },
+  sol: { radio: 10, luz: COLOR.amarillo, sombra: COLOR.naranja },
+}
+const LADO_ESTRELLA = 32
+
+const MAPAS_ESTRELLA = Object.fromEntries(
+  Object.entries(ESTRELLAS_MISION).map(([id, { radio }]) => [id, mapaBola(radio, (x, y, enSombra) => (enSombra ? 'S' : 'L'))]),
+)
+
+export function EstrellaPixel({ id, className }) {
+  const { radio, luz, sombra } = ESTRELLAS_MISION[id]
+  const borde = LADO_ESTRELLA / 2 - radio
+  return (
+    <svg className={className} viewBox={`0 0 ${LADO_ESTRELLA} ${LADO_ESTRELLA}`} shapeRendering="crispEdges" aria-hidden="true">
+      <Sprite mapa={MAPAS_ESTRELLA[id]} paleta={{ k: sombra, L: luz, S: sombra, w: COLOR.blanco }} x={borde} y={borde} />
+    </svg>
+  )
+}

@@ -6,6 +6,11 @@ import { formatoNumero } from '../../formato.js'
 import { LOGOS } from '../../logos.js'
 
 const IMAGEN_ORBITA = { 'leo-400': orbitaLeo, 'sso-700': orbitaSso, geo: orbitaGeo }
+const MINUTOS_DIA = 1440
+
+// Las órbitas lejanas (L2, la solar) tardan meses: en minutos el número no se entiende.
+const periodo = (minutos) =>
+  minutos > 10 * MINUTOS_DIA ? `${formatoNumero(Math.round(minutos / MINUTOS_DIA))} days` : `${formatoNumero(minutos)} min`
 
 export default function Academia({ catalogo }) {
   return (
@@ -48,7 +53,7 @@ export default function Academia({ catalogo }) {
               <h3 className="font-display font-semibold">{orbita.nombre}</h3>
               <p className="mt-1 text-sm text-slate-300">{orbita.explicacion}</p>
               <p className="mt-2 text-xs text-slate-400">
-                Δv needed {formatoNumero(orbita.deltaVRequerido)} m/s · one orbit every {formatoNumero(orbita.periodoMin)} min ·
+                Δv needed {formatoNumero(orbita.deltaVRequerido)} m/s · one orbit every {periodo(orbita.periodoMin)} ·
                 {' '}{orbita.minutosContactoDia} min of contact per day · {formatoNumero(orbita.eclipseHoras * 60)} min of shadow per orbit
               </p>
             </div>

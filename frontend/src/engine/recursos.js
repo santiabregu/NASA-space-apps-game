@@ -51,7 +51,10 @@ export function calcularRecursos({ resuelto, satelite, mision, dinero, costeComp
       maximo: dinero,
       texto: `${formatoDinero(costeCompra)} to buy / ${formatoDinero(dinero)}`,
       estado: estadoMaximo(costeCompra, dinero),
-      explicacion: 'Parts in your Warehouse are already paid for. The ones you are missing are bought at launch; if you are short of money, the Government lends you the difference and deducts it from your next payments.',
+      explicacion:
+        mision.objetivo === 'EQUIPO'
+          ? 'The Government pays for the parts with the budget Finance raised. The satellite is paid first; the rocket gets whatever is left.'
+          : 'Parts in your Warehouse are already paid for. The ones you are missing are bought at launch; if you are short of money, the Government lends you the difference and deducts it from your next payments.',
     },
     {
       id: 'DATOS',

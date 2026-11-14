@@ -14,7 +14,7 @@ const SECCIONES = [
 
 const PIEZA_DE_CAMPO = { motorId: 'motor', tanqueId: 'tanque' }
 
-export default function Taller({ catalogo, analisis, diseno, onCambio, ficha, jugador, recomendadas, empresa, onPrevisualizar, onFinPrevisualizar }) {
+export default function Taller({ catalogo, analisis, diseno, onCambio, ficha, jugador, recomendadas, empresa, onPrevisualizar, onFinPrevisualizar, votos = {} }) {
   const [aviso, setAviso] = useState(null)
   const { cohete } = diseno
   const { resuelto } = analisis
@@ -90,6 +90,7 @@ export default function Taller({ catalogo, analisis, diseno, onCambio, ficha, ju
                       key={pieza.id}
                       pieza={pieza}
                       recomendada={recomendadas.includes(pieza.id)}
+                      votos={votos[pieza.id]}
                       disponibilidad={disponible}
                       instaladas={idsInstalados.filter((id) => id === pieza.id).length}
                       onElegir={instalar}

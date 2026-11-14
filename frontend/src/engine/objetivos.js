@@ -8,10 +8,11 @@ const comoMucho = (valor, maximo) => (valor <= maximo ? 'ok' : 'error')
 
 // Lo que decide si la misión sale bien. Complementa a los 6 recursos del reto, que miden consumo.
 export function objetivosMision(analisis, mision) {
-  const { resuelto, satelite, deltaV, empujePeso, apogeoKm, meses, suborbital } = analisis
+  const { resuelto, satelite, deltaV, empujePeso, apogeoKm, meses, suborbital, piezas } = analisis
   const { orbita, cofia } = resuelto
   const { requisitos } = mision
   const hayCohete = resuelto.etapas.some((etapa) => etapa.motor && etapa.tanque)
+  const obligatoriasInstaladas = (mision.obligatorias ?? []).filter((pieza) => piezas.some((instalada) => instalada.id === pieza.id))
 
   return [
     suborbital && {
@@ -61,6 +62,17 @@ export function objetivosMision(analisis, mision) {
         ? `${formatoNumero(satelite.masaKg)} / ${formatoNumero(cofia.capacidadKg)} kg`
         : `${formatoNumero(satelite.masaKg)} kg · choose a fairing`,
       explicacion: 'The fairing is the rocket’s nose: it shields the satellite from the air during ascent, and each one takes a maximum mass.',
+    },
+    mision.obligatorias?.length > 0 && {
+      id: 'obligatorias',
+      nombre: 'Mission parts',
+      valor: obligatoriasInstaladas.length,
+      objetivo: mision.obligatorias.length,
+      unidad: '',
+      mayorEsMejor: true,
+      estado: alMenos(obligatoriasInstaladas.length, mision.obligatorias.length),
+      texto: mision.obligatorias.map((pieza) => pieza.nombre).join(' + '),
+      explicacion: `This mission can't work without them. ${mision.descripcion}`,
     },
     requisitos.valorCientificoMin > 0 && {
       id: 'ciencia',

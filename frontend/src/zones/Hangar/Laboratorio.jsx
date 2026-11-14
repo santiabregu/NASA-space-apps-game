@@ -3,9 +3,9 @@ import TarjetaPieza from '../../components/TarjetaPieza.jsx'
 import { disponibilidad, NOMBRE_TIPO } from '../../piezas.js'
 import BahiaSatelite from './BahiaSatelite.jsx'
 
-const TIPOS_COMPONENTE = ['panel', 'bateria', 'ordenador', 'antena', 'actitud', 'instrumento']
+const TIPOS_COMPONENTE = ['panel', 'bateria', 'ordenador', 'antena', 'actitud', 'instrumento', 'escudo']
 
-export default function Laboratorio({ catalogo, analisis, diseno, onCambio, ficha, jugador, recomendadas, onPrevisualizar, onFinPrevisualizar }) {
+export default function Laboratorio({ catalogo, analisis, diseno, onCambio, ficha, jugador, recomendadas, onPrevisualizar, onFinPrevisualizar, votos = {} }) {
   const { satelite } = diseno
   const { huecos, huecosUsados } = analisis.satelite
   const lleno = huecosUsados >= huecos
@@ -55,6 +55,7 @@ export default function Laboratorio({ catalogo, analisis, diseno, onCambio, fich
                     key={estructura.id}
                     pieza={estructura}
                     recomendada={recomendadas.includes(estructura.id)}
+                    votos={votos[estructura.id]}
                     disponibilidad={disponible}
                     instaladas={estructura.id === satelite.estructuraId ? 1 : 0}
                     onElegir={elegirEstructura}
@@ -84,6 +85,7 @@ export default function Laboratorio({ catalogo, analisis, diseno, onCambio, fich
                         key={pieza.id}
                         pieza={pieza}
                         recomendada={recomendadas.includes(pieza.id)}
+                        votos={votos[pieza.id]}
                         disponibilidad={disponible}
                         instaladas={satelite.componentes.filter((id) => id === pieza.id).length}
                         onElegir={anadir}

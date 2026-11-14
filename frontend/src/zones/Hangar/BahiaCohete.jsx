@@ -52,7 +52,7 @@ export default function BahiaCohete({ etapas, cofia, conSatelite, empresa, onQui
     <div className="cristal space-y-2 p-3">
       <div className="flex items-center justify-between">
         <h3 className="font-display text-sm font-semibold">Assembly bay</h3>
-        {!vacio && (
+        {onVaciar && !vacio && (
           <button onClick={onVaciar} className="text-xs text-slate-400 hover:text-red-300">Clear rocket</button>
         )}
       </div>
@@ -78,10 +78,10 @@ export default function BahiaCohete({ etapas, cofia, conSatelite, empresa, onQui
             <g key={parte.clave} style={{ transform: `translate(${CENTRO}px, ${arriba}px)`, transition: 'transform 400ms ease' }}>
               {parte.pieza ? (
                 <g
-                  className="pieza-montaje animate-encajar cursor-pointer hover:brightness-125 motion-reduce:animate-aparecer"
-                  onClick={() => onQuitar(parte.indice, parte.campo)}
+                  className={`pieza-montaje animate-encajar motion-reduce:animate-aparecer ${onQuitar ? 'cursor-pointer hover:brightness-125' : ''}`}
+                  onClick={onQuitar && (() => onQuitar(parte.indice, parte.campo))}
                 >
-                  <title>{`${parte.pieza.nombre} · click to remove`}</title>
+                  <title>{onQuitar ? `${parte.pieza.nombre} · click to remove` : parte.pieza.nombre}</title>
                   {parte.forma === 'motor' && <Motor ancho={parte.ancho} alto={parte.alto} />}
                   {parte.forma === 'tanque' && <Tanque ancho={parte.ancho} alto={parte.alto} color={colores[parte.indice % 2]} numero={parte.indice + 1} />}
                   {parte.forma === 'cofia' && <Cofia ancho={parte.ancho} alto={parte.alto} color={empresa.colorSecundario} conSatelite={conSatelite} />}

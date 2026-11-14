@@ -6,6 +6,7 @@ export const NOMBRE_TIPO = {
   antena: 'Antennas',
   actitud: 'Attitude control',
   instrumento: 'Science instruments',
+  escudo: 'Heat shields',
   motor: 'Engines',
   tanque: 'Tanks',
   cofia: 'Fairings',

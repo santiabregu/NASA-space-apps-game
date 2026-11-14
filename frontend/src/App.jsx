@@ -13,6 +13,8 @@ import Hangar from './zones/Hangar/Hangar.jsx'
 import Login from './zones/Login/Login.jsx'
 import RegistroMisiones from './zones/RegistroMisiones/RegistroMisiones.jsx'
 import Sede from './zones/Sede/Sede.jsx'
+import SalaEquipo from './zones/Equipo/SalaEquipo.jsx'
+import Social from './zones/Social/Social.jsx'
 import Derrumbe from './zones/Transmision/Derrumbe.jsx'
 import Transmision from './zones/Transmision/Transmision.jsx'
 
@@ -27,6 +29,7 @@ export default function App() {
   const [lanzamiento, setLanzamiento] = useState(null)
   // Foto de la transmisión inicial que se rompe en ladrillos al aceptar la misión.
   const [escenaRota, setEscenaRota] = useState(null)
+  const [salaCodigo, setSalaCodigo] = useState(null)
 
   const cargarPartida = () =>
     Promise.all([obtenerJugador(), obtenerCatalogo()])
@@ -112,7 +115,7 @@ export default function App() {
 
   return (
     <>
-      <FondoZona {...FONDOS[zona]} />
+      {FONDOS[zona] && <FondoZona {...FONDOS[zona]} />}
       {escenaRota && (
         <Derrumbe
           escena={escenaRota}
@@ -139,6 +142,27 @@ export default function App() {
         />
       )}
       {zona === 'academia' && <Academia catalogo={catalogo} />}
+      {zona === 'social' && (
+        <Social
+          catalogo={catalogo}
+          onAbrirSala={(codigo) => {
+            setSalaCodigo(codigo)
+            setZona('sala')
+          }}
+        />
+      )}
+      {zona === 'sala' && (
+        <SalaEquipo
+          codigo={salaCodigo}
+          jugador={jugador}
+          catalogo={catalogo}
+          onJugadorActualizado={setJugador}
+          onSalir={() => {
+            setSalaCodigo(null)
+            setZona('social')
+          }}
+        />
+      )}
       {zona === 'registro' && <RegistroMisiones jugador={jugador} catalogo={catalogo} onCargarDiseno={cargarDiseno} />}
       {zona === 'control' && (
         <CentroControl

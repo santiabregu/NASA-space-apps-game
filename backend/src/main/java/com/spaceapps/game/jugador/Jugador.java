@@ -59,6 +59,10 @@ public class Jugador {
     @ColumnDefault("12")
     private int mesLimite;
 
+    // Los fallos en misiones de equipo cuestan días, no meses: aquí se acumulan hasta completar un mes.
+    @ColumnDefault("0")
+    private int diasPerdidos;
+
     @Embedded
     private Perfil perfil = new Perfil();
 
@@ -138,6 +142,10 @@ public class Jugador {
         return mesLimite;
     }
 
+    public int getDiasPerdidos() {
+        return diasPerdidos;
+    }
+
     public Perfil getPerfil() {
         return perfil;
     }
@@ -167,6 +175,12 @@ public class Jugador {
 
     public void avanzarReloj(int meses) {
         mesActual += meses;
+    }
+
+    public void perderDias(int dias, int diasPorMes) {
+        diasPerdidos += dias;
+        avanzarReloj(diasPerdidos / diasPorMes);
+        diasPerdidos %= diasPorMes;
     }
 
     public Map<String, Integer> getMejorPuntuacionPorMision() {

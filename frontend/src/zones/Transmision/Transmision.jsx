@@ -1,13 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import { marcarIntroVista } from '../../api/jugador.js'
 import { formatoDinero } from '../../formato.js'
+import { BOTON_PIXEL, CAJA_PIXEL } from '../../components/pixel/estilos.js'
+import { CieloPixel, RetratoControlador, TierraArdiendo } from '../../components/pixel/pixel.jsx'
+import TextoMaquina from '../../components/pixel/TextoMaquina.jsx'
 import { fotografiarEscena } from './fotografia.js'
-import { CieloPixel, RetratoControlador, TierraArdiendo } from './pixel.jsx'
 
-const MS_POR_LETRA = 32
-const CAJA_PIXEL = 'border-4 border-[#fff1e8] bg-[#1d2b53] shadow-[0_0_0_4px_#000,8px_8px_0_4px_rgba(0,0,0,.45)]'
-const BOTON_PIXEL =
-  'border-4 border-black px-4 py-3 text-xs uppercase text-black transition hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-60 sm:text-base'
 
 function paginasDelMensaje(jugador) {
   const presupuesto = jugador.dinero === 0 ? '$0' : formatoDinero(jugador.dinero)
@@ -148,32 +146,5 @@ function Dialogo({ jugador, onAceptada }) {
         </div>
       </div>
     </section>
-  )
-}
-
-// Escribe la frase letra a letra. El resto queda reservado pero invisible para que las palabras no salten de línea.
-// Va con un contador y no con una animación CSS por letra: Chromium no siempre repinta bien cientos de letras animadas.
-function TextoMaquina({ texto, completo, onTerminado }) {
-  const [mostradas, setMostradas] = useState(0)
-  const terminado = completo || mostradas >= texto.length
-
-  useEffect(() => {
-    if (terminado) return
-    const intervalo = setInterval(() => setMostradas((cantidad) => cantidad + 1), MS_POR_LETRA)
-    return () => clearInterval(intervalo)
-  }, [terminado])
-
-  useEffect(() => {
-    if (terminado && !completo) onTerminado()
-  }, [terminado, completo, onTerminado])
-
-  if (terminado) return <span>{texto}</span>
-  return (
-    <span aria-label={texto}>
-      <span aria-hidden="true">{texto.slice(0, mostradas)}</span>
-      <span aria-hidden="true" className="invisible">
-        {texto.slice(mostradas)}
-      </span>
-    </span>
   )
 }

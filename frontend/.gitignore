@@ -22,3 +22,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Material de trabajo: descargas, opciones descartadas y vídeos que el juego no usa
+src/assets/**/*.zip
+src/assets/background-options/
+src/assets/examples/
+src/assets/**/*.mp4

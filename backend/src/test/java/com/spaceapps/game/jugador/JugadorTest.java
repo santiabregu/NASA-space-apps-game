@@ -18,6 +18,17 @@ class JugadorTest {
     }
 
     @Test
+    void losDiasPerdidosSeConviertenEnMesesAlCompletarUno() {
+        Jugador jugador = conKit(Map.of());
+
+        jugador.perderDias(20, 30);
+        jugador.perderDias(15, 30);
+
+        assertThat(jugador.getMesActual()).isEqualTo(1);
+        assertThat(jugador.getDiasPerdidos()).isEqualTo(5);
+    }
+
+    @Test
     void guardaLaMejorPuntuacionDeCadaMision() {
         Jugador jugador = conKit(Map.of());
 
