@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import PanelRecursos from '../../components/PanelRecursos.jsx'
 import { analizarDiseno } from '../../engine/analisis.js'
+import { efectosDelCambio } from '../../engine/efectos.js'
 import Almacen from './Almacen.jsx'
 import Laboratorio from './Laboratorio.jsx'
 import Plataforma from './Plataforma.jsx'
@@ -15,6 +16,7 @@ const AREAS = [
 
 export default function Hangar({ jugador, catalogo, mision, diseno, onCambiarDiseno, onLanzado, onIrA }) {
   const [area, setArea] = useState(mision ? 'laboratorio' : 'almacen')
+  const [ficha, setFicha] = useState(null)
   const analisis = useMemo(
     () => mision && analizarDiseno({ diseno, catalogo, mision, dinero: jugador.dinero }),
     [diseno, catalogo, mision, jugador.dinero],
@@ -37,7 +39,22 @@ export default function Hangar({ jugador, catalogo, mision, diseno, onCambiarDis
     )
   }
 
-  const props = { catalogo, analisis, diseno, onCambiarDiseno, nivel: jugador.nivel }
+  function aplicarCambio(nuevoDiseno, pieza, accion) {
+    if (pieza) {
+      const despues = analizarDiseno({ diseno: nuevoDiseno, catalogo, mision, dinero: jugador.dinero })
+      setFicha({ pieza, accion, efectos: efectosDelCambio(analisis, despues) })
+    } else {
+      setFicha(null)
+    }
+    onCambiarDiseno(nuevoDiseno)
+  }
+
+  function cambiarArea(nuevaArea) {
+    setArea(nuevaArea)
+    setFicha(null)
+  }
+
+  const props = { catalogo, analisis, diseno, onCambio: aplicarCambio, ficha, nivel: jugador.nivel }
 
   return (
     <main className="mx-auto max-w-6xl space-y-4 px-4 py-6">
@@ -51,7 +68,7 @@ export default function Hangar({ jugador, catalogo, mision, diseno, onCambiarDis
           {AREAS.map((destino) => (
             <button
               key={destino.id}
-              onClick={() => setArea(destino.id)}
+              onClick={() => cambiarArea(destino.id)}
               className={`rounded-lg px-3 py-1.5 text-sm ${
                 area === destino.id ? 'bg-cyan-400 font-semibold text-slate-950' : 'bg-slate-800/80 text-slate-300 hover:bg-slate-700'
               }`}

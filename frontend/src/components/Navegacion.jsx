@@ -10,8 +10,8 @@ const ZONAS_NAVEGABLES = [
 
 export default function Navegacion({ jugador, zona, onIrA, onSalir }) {
   return (
-    <nav className="sticky top-0 z-10 border-b border-slate-400/20 bg-slate-950/55 backdrop-blur-md">
-      <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-2 px-4 py-2">
+    <nav className="sticky top-0 z-10 border-b border-slate-400/20 bg-slate-950/55 backdrop-blur-md md:h-14">
+      <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-2 px-4 py-2 md:h-full md:flex-nowrap md:py-0">
         <img src={LOGOS.logoJuego} alt="Stellar Strategy" className="h-9 w-9" />
         <span className="mr-2 font-bold" style={{ color: jugador.empresa.colorPrimario }}>{jugador.empresa.nombre}</span>
         {ZONAS_NAVEGABLES.map((destino) => (

@@ -3,10 +3,29 @@
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Orbitron", "Inter", ui-sans-serif, sans-serif;
+
+  --animate-encajar: encajar 0.55s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  @keyframes encajar {
+    0% { opacity: 0; transform: translateY(-48px) scale(0.92); }
+    65% { opacity: 1; transform: translateY(3px) scale(1.02); filter: drop-shadow(0 0 10px rgba(34, 211, 238, 0.9)); }
+    100% { opacity: 1; transform: translateY(0) scale(1); filter: drop-shadow(0 0 0 rgba(34, 211, 238, 0)); }
+  }
+
+  --animate-aparecer: aparecer 0.6s ease-out both;
+  @keyframes aparecer {
+    0% { opacity: 0; }
+    50% { opacity: 1; filter: drop-shadow(0 0 10px rgba(34, 211, 238, 0.9)); }
+    100% { opacity: 1; filter: drop-shadow(0 0 0 rgba(34, 211, 238, 0)); }
+  }
 }
 
 @utility cristal {
   @apply rounded-2xl border border-slate-400/20 bg-slate-900/60 backdrop-blur-md;
+}
+
+@utility pieza-montaje {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
 }
 
 body {

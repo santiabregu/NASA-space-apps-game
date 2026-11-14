@@ -29,10 +29,10 @@ export default function Login({ onEntrar, aviso }) {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center px-4 md:justify-start md:px-24">
-      <form onSubmit={enviar} className="cristal w-full max-w-sm space-y-4 p-7 shadow-2xl">
+    <main className="flex min-h-dvh items-center justify-center px-4 py-4 md:justify-start md:px-24">
+      <form onSubmit={enviar} className="cristal w-full max-w-sm space-y-[min(1rem,1.8vh)] p-[min(1.75rem,3vh)] shadow-2xl">
         <header className="text-center">
-          <img src={LOGOS.logoJuego} alt="" className="mx-auto w-36" />
+          <img src={LOGOS.logoJuego} alt="" className="mx-auto w-[min(9rem,15vh)]" />
           <h1 className="mt-3 whitespace-nowrap font-display text-2xl font-extrabold tracking-wide">STELLAR STRATEGY</h1>
           <p className="text-sm text-slate-400">
             {esRegistro ? 'Found your space company' : 'Welcome back to mission control'}

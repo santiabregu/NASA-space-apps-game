@@ -1,83 +1,90 @@
+import FichaPieza from '../../components/FichaPieza.jsx'
 import TarjetaPieza from '../../components/TarjetaPieza.jsx'
-import { NOMBRE_TIPO } from '../../piezas.js'
+import { estaBloqueada, NOMBRE_TIPO } from '../../piezas.js'
+import BahiaSatelite from './BahiaSatelite.jsx'
 
 const TIPOS_COMPONENTE = ['panel', 'bateria', 'ordenador', 'antena', 'actitud', 'instrumento']
 
-export default function Laboratorio({ catalogo, analisis, diseno, onCambiarDiseno, nivel }) {
+export default function Laboratorio({ catalogo, analisis, diseno, onCambio, ficha, nivel }) {
   const { satelite } = diseno
   const { huecos, huecosUsados } = analisis.satelite
   const lleno = huecosUsados >= huecos
 
-  const cambiarSatelite = (cambios) => onCambiarDiseno({ ...diseno, satelite: { ...satelite, ...cambios } })
-  const anadir = (piezaId) => cambiarSatelite({ componentes: [...satelite.componentes, piezaId] })
-  const quitar = (indice) => cambiarSatelite({ componentes: satelite.componentes.filter((_, i) => i !== indice) })
+  const conSatelite = (cambios) => ({ ...diseno, satelite: { ...satelite, ...cambios } })
+  const anadir = (pieza) => onCambio(conSatelite({ componentes: [...satelite.componentes, pieza.id] }), pieza, 'instalada')
+  const quitar = (indice) =>
+    onCambio(conSatelite({ componentes: satelite.componentes.filter((_, i) => i !== indice) }), analisis.resuelto.componentes[indice], 'quitada')
+  const elegirEstructura = (estructura) => onCambio(conSatelite({ estructuraId: estructura.id }), estructura, 'instalada')
+
+  function avisoComponente() {
+    if (!satelite.estructuraId) return 'Choose a structure first'
+    return lleno ? 'No free slots' : null
+  }
 
   return (
-    <section className="space-y-6">
-      <div className="space-y-2">
-        <h2 className="font-display font-semibold">1 · Structure</h2>
-        <p className="text-sm text-slate-400">The satellite’s skeleton: it sets how many components fit and how long it lasts.</p>
-        <div className="grid gap-3 sm:grid-cols-2">
-          {catalogo.piezas
-            .filter((pieza) => pieza.tipo === 'estructura')
-            .map((estructura) => {
-              const noCaben = satelite.componentes.length > estructura.huecos
-              return (
-                <TarjetaPieza key={estructura.id} pieza={estructura} nivel={nivel} seleccionada={estructura.id === satelite.estructuraId}>
-                  <button
-                    disabled={noCaben}
-                    onClick={() => cambiarSatelite({ estructuraId: estructura.id })}
-                    className="rounded-lg bg-slate-800 px-3 py-1 text-sm hover:bg-slate-700 disabled:opacity-40"
-                  >
-                    {noCaben ? `Your ${satelite.componentes.length} components don’t fit` : 'Use this structure'}
-                  </button>
-                </TarjetaPieza>
-              )
-            })}
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <h2 className="font-display font-semibold">2 · Installed components ({huecosUsados} / {huecos} slots)</h2>
-        {satelite.componentes.length === 0 ? (
-          <p className="text-sm text-slate-400">Nothing yet. A satellite needs at least power, a computer and an antenna.</p>
+    <section className="grid gap-6 md:grid-cols-[minmax(0,20rem)_1fr]">
+      <div className="space-y-3 md:sticky md:top-16 md:max-h-[calc(100vh-5rem)] md:self-start md:overflow-y-auto">
+        <BahiaSatelite
+          estructura={analisis.resuelto.estructura}
+          componentes={analisis.resuelto.componentes}
+          onQuitar={quitar}
+          onVaciar={() => onCambio(conSatelite({ componentes: [] }))}
+        />
+        {satelite.estructuraId && <p className="text-center text-sm text-slate-400">{huecosUsados} / {huecos} slots used</p>}
+        {ficha ? (
+          <FichaPieza key={`${ficha.pieza.id}-${ficha.accion}-${huecosUsados}`} {...ficha} nivel={nivel} />
         ) : (
-          <ul className="flex flex-wrap gap-2">
-            {analisis.resuelto.componentes.map((componente, indice) => (
-              <li key={indice} className="flex items-center gap-2 rounded-lg bg-slate-800/80 px-3 py-1 text-sm">
-                {componente.nombre}
-                <button onClick={() => quitar(indice)} className="text-slate-400 hover:text-red-300" aria-label={`Remove ${componente.nombre}`}>
-                  ✕
-                </button>
-              </li>
-            ))}
-          </ul>
+          <p className="cristal p-4 text-sm text-slate-400">Click a part to install it. Its details and its effect on your mission will appear here.</p>
         )}
       </div>
 
-      <div className="space-y-4">
-        <h2 className="font-display font-semibold">3 · Add components</h2>
-        {!satelite.estructuraId && <p className="text-sm text-amber-300">Choose a structure first.</p>}
-        {TIPOS_COMPONENTE.map((tipo) => (
-          <div key={tipo} className="space-y-2">
-            <h3 className="text-sm text-slate-300">{NOMBRE_TIPO[tipo]}</h3>
-            <div className="grid gap-3 sm:grid-cols-2">
-              {catalogo.piezas
-                .filter((pieza) => pieza.tipo === tipo)
-                .map((pieza) => (
-                  <TarjetaPieza key={pieza.id} pieza={pieza} nivel={nivel}>
-                    <button
-                      disabled={!satelite.estructuraId || lleno}
-                      onClick={() => anadir(pieza.id)}
-                      className="rounded-lg bg-slate-800 px-3 py-1 text-sm hover:bg-slate-700 disabled:opacity-40"
-                    >
-                      {lleno ? 'No free slots' : '+ Add'}
-                    </button>
-                  </TarjetaPieza>
-                ))}
-            </div>
+      <div className="min-w-0 space-y-6">
+        <div className="space-y-2">
+          <h2 className="font-display font-semibold">1 · Structure</h2>
+          <p className="text-sm text-slate-400">The satellite’s skeleton: it sets how many components fit and how long it lasts.</p>
+          <div className="grid gap-2 xl:grid-cols-2">
+            {catalogo.piezas
+              .filter((pieza) => pieza.tipo === 'estructura')
+              .map((estructura) => {
+                const noCaben = satelite.componentes.length > estructura.huecos
+                return (
+                  <TarjetaPieza
+                    key={estructura.id}
+                    pieza={estructura}
+                    nivel={nivel}
+                    seleccionada={estructura.id === satelite.estructuraId}
+                    onElegir={elegirEstructura}
+                    deshabilitada={estaBloqueada(estructura, nivel) || noCaben}
+                    aviso={noCaben ? `Your ${satelite.componentes.length} components don’t fit` : null}
+                  />
+                )
+              })}
           </div>
-        ))}
+        </div>
+
+        <div className="space-y-4">
+          <h2 className="font-display font-semibold">2 · Components</h2>
+          <p className="text-sm text-slate-400">Click a part to install it. A satellite needs at least power, a computer and an antenna.</p>
+          {TIPOS_COMPONENTE.map((tipo) => (
+            <div key={tipo} className="space-y-2">
+              <h3 className="text-sm text-slate-300">{NOMBRE_TIPO[tipo]}</h3>
+              <div className="grid gap-2 xl:grid-cols-2">
+                {catalogo.piezas
+                  .filter((pieza) => pieza.tipo === tipo)
+                  .map((pieza) => (
+                    <TarjetaPieza
+                      key={pieza.id}
+                      pieza={pieza}
+                      nivel={nivel}
+                      onElegir={anadir}
+                      deshabilitada={estaBloqueada(pieza, nivel) || !satelite.estructuraId || lleno}
+                      aviso={avisoComponente()}
+                    />
+                  ))}
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   )

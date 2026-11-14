@@ -81,15 +81,14 @@ function TarjetaMision({ mision, catalogo, bloqueada = false, children }) {
         </p>
       </div>
       <p className="text-slate-300">{mision.descripcion}</p>
-      <p className="text-sm text-slate-400">Orbit: {orbitas}</p>
-      <ul className="flex flex-wrap gap-2 text-xs">
-        {requisitosVisibles.map((texto) => (
-          <li key={texto} className="rounded bg-slate-800/80 px-2 py-1">{texto}</li>
-        ))}
-        {mision.recursosCriticos.map((recurso) => (
-          <li key={recurso} className="rounded bg-cyan-950/80 px-2 py-1 text-cyan-300">★ {NOMBRE_RECURSO[recurso]}</li>
-        ))}
-      </ul>
+      <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-sm">
+        <dt className="text-slate-400">Orbit</dt>
+        <dd>{orbitas}</dd>
+        <dt className="text-slate-400">Requirements</dt>
+        <dd>{requisitosVisibles.join(' · ')}</dd>
+        <dt className="text-slate-400">Critical resources</dt>
+        <dd className="text-cyan-300">★ {mision.recursosCriticos.map((recurso) => NOMBRE_RECURSO[recurso]).join(', ')}</dd>
+      </dl>
       {children}
     </article>
   )

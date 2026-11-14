@@ -1,25 +1,65 @@
+import { useState } from 'react'
 import { COLOR_ESTADO } from '../../colores.js'
 import BarraRecurso from '../../components/BarraRecurso.jsx'
+import FichaPieza from '../../components/FichaPieza.jsx'
+import TarjetaPieza from '../../components/TarjetaPieza.jsx'
 import { EMPUJE_PESO_MINIMO } from '../../engine/cohete.js'
-import { MAX_ETAPAS } from '../../engine/diseno.js'
-import { formatoDinero, formatoNumero } from '../../formato.js'
+import { instalarEnCohete, MAX_ETAPAS, quitarDelCohete } from '../../engine/diseno.js'
+import { formatoNumero } from '../../formato.js'
 import { estaBloqueada } from '../../piezas.js'
+import BahiaCohete from './BahiaCohete.jsx'
 
-export default function Taller({ catalogo, analisis, diseno, onCambiarDiseno, nivel, empresa }) {
+const SECCIONES = [
+  { tipo: 'motor', titulo: 'Engines', ayuda: 'An engine goes into the lowest stage that has none; if every stage has one, it starts a new stage on top.' },
+  { tipo: 'tanque', titulo: 'Tanks', ayuda: 'A tank sits on top of the lowest stage that has none; if every stage has one, it starts a new stage on top.' },
+  { tipo: 'cofia', titulo: 'Fairing', ayuda: 'The nose that protects the satellite. It goes on top.' },
+]
+
+const PIEZA_DE_CAMPO = { motorId: 'motor', tanqueId: 'tanque' }
+
+export default function Taller({ catalogo, analisis, diseno, onCambio, ficha, nivel, empresa }) {
+  const [aviso, setAviso] = useState(null)
   const { cohete } = diseno
-  const deTipo = (tipo) => catalogo.piezas.filter((pieza) => pieza.tipo === tipo)
-  const cambiarCohete = (cambios) => onCambiarDiseno({ ...diseno, cohete: { ...cohete, ...cambios } })
-  const cambiarEtapa = (indice, cambios) =>
-    cambiarCohete({ etapas: cohete.etapas.map((etapa, i) => (i === indice ? { ...etapa, ...cambios } : etapa)) })
+  const { resuelto } = analisis
+  const deltaVRequerido = resuelto.orbita.deltaVRequerido
 
-  const deltaVRequerido = analisis.resuelto.orbita.deltaVRequerido
-  const etapasDeArribaAAbajo = cohete.etapas.map((etapa, indice) => ({ etapa, indice })).reverse()
+  const conCohete = (nuevoCohete) => ({ ...diseno, cohete: nuevoCohete })
+
+  function instalar(pieza) {
+    const nuevoCohete = instalarEnCohete(cohete, pieza)
+    if (!nuevoCohete) {
+      setAviso(`A rocket can have up to ${MAX_ETAPAS} stages. Remove a part in the assembly bay first.`)
+      return
+    }
+    setAviso(null)
+    onCambio(conCohete(nuevoCohete), pieza, 'instalada')
+  }
+
+  function quitar(indiceEtapa, campo) {
+    setAviso(null)
+    const pieza = campo === 'cofiaId' ? resuelto.cofia : resuelto.etapas[indiceEtapa][PIEZA_DE_CAMPO[campo]]
+    onCambio(conCohete(quitarDelCohete(cohete, indiceEtapa, campo)), pieza, 'quitada')
+  }
 
   return (
-    <section className="grid gap-6 md:grid-cols-[10rem_1fr]">
-      <DibujoCohete etapas={cohete.etapas.length} tieneCofia={Boolean(cohete.cofiaId)} empresa={empresa} />
+    <section className="grid gap-6 md:grid-cols-[minmax(0,17rem)_1fr]">
+      <div className="space-y-3 md:sticky md:top-16 md:max-h-[calc(100vh-5rem)] md:self-start md:overflow-y-auto">
+        <BahiaCohete
+          etapas={resuelto.etapas}
+          cofia={resuelto.cofia}
+          conSatelite={Boolean(resuelto.estructura)}
+          empresa={empresa}
+          onQuitar={quitar}
+          onVaciar={() => onCambio(conCohete({ cofiaId: null, etapas: [] }))}
+        />
+        {ficha ? (
+          <FichaPieza key={`${ficha.pieza.id}-${ficha.accion}-${analisis.piezas.length}`} {...ficha} nivel={nivel} />
+        ) : (
+          <p className="cristal p-4 text-sm text-slate-400">Click a part to install it. Its details and its effect on your mission will appear here.</p>
+        )}
+      </div>
 
-      <div className="space-y-4">
+      <div className="min-w-0 space-y-5">
         <div className="cristal space-y-3 p-4">
           <BarraRecurso
             etiqueta="Δv (how much speed the rocket can gain)"
@@ -41,89 +81,29 @@ export default function Taller({ catalogo, analisis, diseno, onCambiarDiseno, ni
           </p>
         </div>
 
-        <SelectorPieza
-          titulo="Fairing (nose of the rocket)"
-          piezas={deTipo('cofia')}
-          valor={cohete.cofiaId}
-          nivel={nivel}
-          onCambiar={(cofiaId) => cambiarCohete({ cofiaId })}
-        />
+        {aviso && <p className="rounded-lg bg-amber-950/70 p-3 text-sm text-amber-200">{aviso}</p>}
 
-        {etapasDeArribaAAbajo.map(({ etapa, indice }) => (
-          <div key={indice} className="cristal space-y-3 p-4">
-            <div className="flex items-center justify-between">
-              <h3 className="font-display font-semibold">
-                Stage {indice + 1} {indice === 0 ? '(lifts off from the ground)' : ''}
-              </h3>
-              {cohete.etapas.length > 1 && (
-                <button
-                  onClick={() => cambiarCohete({ etapas: cohete.etapas.filter((_, i) => i !== indice) })}
-                  className="text-sm text-slate-400 hover:text-red-300"
-                >
-                  Remove stage
-                </button>
-              )}
+        {SECCIONES.map((seccion) => (
+          <div key={seccion.tipo} className="space-y-2">
+            <h2 className="font-display font-semibold">{seccion.titulo}</h2>
+            <p className="text-sm text-slate-400">{seccion.ayuda}</p>
+            <div className="grid gap-2 xl:grid-cols-2">
+              {catalogo.piezas
+                .filter((pieza) => pieza.tipo === seccion.tipo)
+                .map((pieza) => (
+                  <TarjetaPieza
+                    key={pieza.id}
+                    pieza={pieza}
+                    nivel={nivel}
+                    seleccionada={pieza.id === cohete.cofiaId}
+                    onElegir={instalar}
+                    deshabilitada={estaBloqueada(pieza, nivel)}
+                  />
+                ))}
             </div>
-            <SelectorPieza titulo="Engine" piezas={deTipo('motor')} valor={etapa.motorId} nivel={nivel} onCambiar={(motorId) => cambiarEtapa(indice, { motorId })} />
-            <SelectorPieza titulo="Tank" piezas={deTipo('tanque')} valor={etapa.tanqueId} nivel={nivel} onCambiar={(tanqueId) => cambiarEtapa(indice, { tanqueId })} />
           </div>
         ))}
-
-        {cohete.etapas.length < MAX_ETAPAS && (
-          <button
-            onClick={() => cambiarCohete({ etapas: [...cohete.etapas, { motorId: null, tanqueId: null }] })}
-            className="w-full rounded-2xl border border-dashed border-slate-400/40 bg-slate-900/40 py-3 text-sm text-slate-300 backdrop-blur-md hover:border-cyan-400"
-          >
-            + Add upper stage
-          </button>
-        )}
       </div>
     </section>
-  )
-}
-
-function SelectorPieza({ titulo, piezas, valor, nivel, onCambiar }) {
-  const elegida = piezas.find((pieza) => pieza.id === valor)
-
-  return (
-    <label className="block space-y-1 text-sm">
-      <span className="text-slate-300">{titulo}</span>
-      <select
-        value={valor ?? ''}
-        onChange={(evento) => onCambiar(evento.target.value || null)}
-        className="w-full rounded-lg border border-slate-400/20 bg-slate-950/80 px-3 py-2"
-      >
-        <option value="">— Choose —</option>
-        {piezas.map((pieza) => (
-          <option key={pieza.id} value={pieza.id} disabled={estaBloqueada(pieza, nivel)}>
-            {pieza.nombre} · {formatoNumero(pieza.masaKg)} kg · {formatoDinero(pieza.coste)}
-            {estaBloqueada(pieza, nivel) ? ` · 🔒 level ${pieza.nivelRequerido}` : ''}
-          </option>
-        ))}
-      </select>
-      {elegida && <span className="block text-xs text-slate-400">{elegida.explicacion}</span>}
-    </label>
-  )
-}
-
-function DibujoCohete({ etapas, tieneCofia, empresa }) {
-  return (
-    <div className="flex flex-col items-center" aria-hidden="true">
-      <div
-        className={`h-0 w-0 border-x-[1.75rem] border-b-[3rem] border-x-transparent transition-opacity ${tieneCofia ? '' : 'opacity-20'}`}
-        style={{ borderBottomColor: empresa.colorSecundario }}
-      />
-      {Array.from({ length: etapas }, (_, indice) => etapas - indice).map((numero) => (
-        <div
-          key={numero}
-          className="flex h-20 w-14 items-center justify-center border-y border-slate-950 text-xs font-bold text-slate-950"
-          style={{ backgroundColor: numero % 2 ? empresa.colorPrimario : empresa.colorSecundario }}
-        >
-          {numero}
-        </div>
-      ))}
-      <div className="h-4 w-10 rounded-b-lg bg-slate-600" />
-      <p className="mt-2 text-center text-xs text-slate-500">Painted in your company colors</p>
-    </div>
   )
 }

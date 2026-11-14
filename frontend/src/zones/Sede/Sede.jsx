@@ -20,10 +20,10 @@ export default function Sede({ jugador, onIrA }) {
   const { empresa } = jugador
 
   return (
-    <main className="mx-auto max-w-6xl space-y-6 px-4 py-8 md:px-8">
+    <main className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-6 md:h-[calc(100dvh-3.5rem)] md:justify-center-safe md:gap-[3vh] md:px-8 md:py-[3vh]">
       <header>
         <h1
-          className="font-display text-4xl font-extrabold"
+          className="font-display text-3xl font-extrabold md:text-[clamp(1.75rem,5.5vh,2.75rem)]"
           style={{ color: empresa.colorPrimario, textShadow: '0 0 24px rgba(34,211,238,.35)' }}
         >
           {empresa.nombre}
@@ -55,14 +55,14 @@ export default function Sede({ jugador, onIrA }) {
             key={zona.nombre}
             disabled={!zona.id}
             onClick={() => onIrA(zona.id)}
-            className="cristal p-4 text-center transition enabled:hover:-translate-y-1 enabled:hover:border-cyan-400/60 disabled:opacity-55"
+            className="cristal p-4 text-center transition enabled:hover:-translate-y-1 enabled:hover:border-cyan-400/60 disabled:opacity-55 md:p-[min(1rem,2vh)]"
           >
             <img
               src={zona.logo}
               alt=""
-              className="mx-auto h-28 object-contain drop-shadow-[0_6px_18px_rgba(34,211,238,.35)]"
+              className="mx-auto h-24 object-contain drop-shadow-[0_6px_18px_rgba(34,211,238,.35)] md:h-[min(7rem,14vh)]"
             />
-            <p className="mt-3 font-display font-semibold">{zona.nombre}</p>
+            <p className="mt-2 font-display font-semibold">{zona.nombre}</p>
             <p className="mt-1 text-sm text-slate-400">{zona.descripcion}</p>
           </button>
         ))}
@@ -73,7 +73,7 @@ export default function Sede({ jugador, onIrA }) {
 
 function Tarjeta({ titulo, children }) {
   return (
-    <div className="cristal space-y-2 p-4">
+    <div className="cristal space-y-2 p-4 md:p-[min(1rem,2vh)]">
       <p className="text-sm text-slate-400">{titulo}</p>
       {children}
     </div>
