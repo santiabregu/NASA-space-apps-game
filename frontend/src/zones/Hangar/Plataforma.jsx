@@ -1,3 +1,4 @@
+import { CircleCheck, CircleX, Landmark, Rocket, TriangleAlert } from 'lucide-react'
 import { useState } from 'react'
 import { registrarLanzamiento } from '../../api/misiones.js'
 import { EMPUJE_PESO_MINIMO } from '../../engine/cohete.js'
@@ -11,14 +12,19 @@ export default function Plataforma({ analisis, mision, dinero, deuda, onLanzado 
   const deltaVRequerido = analisis.resuelto.orbita.deltaVRequerido
   const prestamo = Math.max(0, analisis.coste - dinero)
   const bloqueado = analisis.faltas.length > 0
+  const cienciaMinima = mision.requisitos.valorCientificoMin
   const comprobaciones = [
     {
       texto: `Δv ${formatoNumero(Math.round(analisis.deltaV))} of ${formatoNumero(deltaVRequerido)} m/s`,
       ok: analisis.deltaV >= deltaVRequerido,
     },
     { texto: `Thrust-to-weight ${formatoNumero(analisis.empujePeso)} (minimum ${EMPUJE_PESO_MINIMO})`, ok: analisis.empujePeso >= EMPUJE_PESO_MINIMO },
+    cienciaMinima > 0 && {
+      texto: `Science value ${analisis.satelite.valorCientifico} of ${cienciaMinima}`,
+      ok: analisis.satelite.valorCientifico >= cienciaMinima,
+    },
     ...analisis.recursos.map((recurso) => ({ texto: `${recurso.nombre}: ${recurso.texto}`, ok: recurso.estado !== 'error' })),
-  ]
+  ].filter(Boolean)
   const hayRiesgos = comprobaciones.some((comprobacion) => !comprobacion.ok)
 
   async function lanzar() {
@@ -45,14 +51,22 @@ export default function Plataforma({ analisis, mision, dinero, deuda, onLanzado 
 
       {analisis.faltas.length > 0 && (
         <ul className="space-y-1 rounded-xl bg-amber-950/70 p-4 text-sm text-amber-200">
-          {analisis.faltas.map((falta) => <li key={falta}>⚠️ {falta}</li>)}
+          {analisis.faltas.map((falta) => (
+            <li key={falta} className="flex items-center gap-2">
+              <TriangleAlert className="h-4 w-4 shrink-0" /> {falta}
+            </li>
+          ))}
         </ul>
       )}
 
       <ul className="space-y-2">
         {comprobaciones.map((comprobacion) => (
-          <li key={comprobacion.texto} className="flex gap-2 rounded-lg bg-slate-900/70 px-3 py-2 text-sm backdrop-blur-md">
-            <span>{comprobacion.ok ? '✅' : '❌'}</span>
+          <li key={comprobacion.texto} className="flex items-center gap-2 rounded-lg bg-slate-900/70 px-3 py-2 text-sm backdrop-blur-md">
+            {comprobacion.ok ? (
+              <CircleCheck className="h-4 w-4 shrink-0 text-emerald-400" />
+            ) : (
+              <CircleX className="h-4 w-4 shrink-0 text-red-400" />
+            )}
             <span>{comprobacion.texto}</span>
           </li>
         ))}
@@ -80,11 +94,19 @@ export default function Plataforma({ analisis, mision, dinero, deuda, onLanzado 
       <button
         disabled={bloqueado || lanzando}
         onClick={lanzar}
-        className="w-full rounded-xl bg-emerald-400 py-3 text-lg font-bold text-slate-950 shadow-[0_0_24px_rgba(52,211,153,.35)] transition hover:bg-emerald-300 disabled:opacity-40"
+        className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-400 py-3 text-lg font-bold text-slate-950 shadow-[0_0_24px_rgba(52,211,153,.35)] transition hover:bg-emerald-300 disabled:opacity-40"
       >
         {lanzando && 'Launching…'}
-        {!lanzando && prestamo > 0 && `🏦 Borrow ${formatoDinero(prestamo)} and launch`}
-        {!lanzando && prestamo === 0 && (hayRiesgos ? '🚀 Launch anyway' : '🚀 LAUNCH')}
+        {!lanzando && prestamo > 0 && (
+          <>
+            <Landmark className="h-5 w-5" /> Borrow {formatoDinero(prestamo)} and launch
+          </>
+        )}
+        {!lanzando && prestamo === 0 && (
+          <>
+            <Rocket className="h-5 w-5" /> {hayRiesgos ? 'Launch anyway' : 'LAUNCH'}
+          </>
+        )}
       </button>
     </section>
   )

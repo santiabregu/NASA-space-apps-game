@@ -5,7 +5,7 @@ import BahiaSatelite from './BahiaSatelite.jsx'
 
 const TIPOS_COMPONENTE = ['panel', 'bateria', 'ordenador', 'antena', 'actitud', 'instrumento']
 
-export default function Laboratorio({ catalogo, analisis, diseno, onCambio, ficha, nivel }) {
+export default function Laboratorio({ catalogo, analisis, diseno, onCambio, ficha, nivel, recomendadas }) {
   const { satelite } = diseno
   const { huecos, huecosUsados } = analisis.satelite
   const lleno = huecosUsados >= huecos
@@ -51,8 +51,9 @@ export default function Laboratorio({ catalogo, analisis, diseno, onCambio, fich
                   <TarjetaPieza
                     key={estructura.id}
                     pieza={estructura}
+                    recomendada={recomendadas.includes(estructura.id)}
                     nivel={nivel}
-                    seleccionada={estructura.id === satelite.estructuraId}
+                    instaladas={estructura.id === satelite.estructuraId ? 1 : 0}
                     onElegir={elegirEstructura}
                     deshabilitada={estaBloqueada(estructura, nivel) || noCaben}
                     aviso={noCaben ? `Your ${satelite.componentes.length} components don’t fit` : null}
@@ -75,7 +76,9 @@ export default function Laboratorio({ catalogo, analisis, diseno, onCambio, fich
                     <TarjetaPieza
                       key={pieza.id}
                       pieza={pieza}
+                      recomendada={recomendadas.includes(pieza.id)}
                       nivel={nivel}
+                      instaladas={satelite.componentes.filter((id) => id === pieza.id).length}
                       onElegir={anadir}
                       deshabilitada={estaBloqueada(pieza, nivel) || !satelite.estructuraId || lleno}
                       aviso={avisoComponente()}

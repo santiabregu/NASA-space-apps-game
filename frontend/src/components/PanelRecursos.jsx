@@ -1,3 +1,4 @@
+import { Flag } from 'lucide-react'
 import { COLOR_ESTADO } from '../colores.js'
 import BarraRecurso from './BarraRecurso.jsx'
 
@@ -11,7 +12,12 @@ export default function PanelRecursos({ recursos, criticos }) {
           <details key={recurso.id} className={`rounded-lg p-2 ${critico ? 'bg-slate-800/60 ring-1 ring-cyan-700' : ''}`}>
             <summary className="cursor-pointer list-none">
               <BarraRecurso
-                etiqueta={`${critico ? '★ ' : ''}${recurso.nombre}`}
+                etiqueta={
+                  <span className="flex items-center gap-1.5">
+                    {critico && <Flag className="h-3.5 w-3.5 fill-current text-cyan-300" />}
+                    {recurso.nombre}
+                  </span>
+                }
                 valor={recurso.valor}
                 maximo={recurso.maximo}
                 texto={recurso.texto}
@@ -22,7 +28,9 @@ export default function PanelRecursos({ recursos, criticos }) {
           </details>
         )
       })}
-      <p className="text-xs text-slate-500">★ Critical for this mission · Tap a resource to learn what it means</p>
+      <p className="flex items-center gap-1.5 text-xs text-slate-500">
+        <Flag className="h-3 w-3 shrink-0 fill-current" /> Critical for this mission · Tap a resource to learn what it means
+      </p>
     </section>
   )
 }

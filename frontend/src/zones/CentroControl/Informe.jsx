@@ -1,3 +1,4 @@
+import { Award } from 'lucide-react'
 import { formatoDinero } from '../../formato.js'
 
 const NOMBRE_PUNTOS = {
@@ -54,8 +55,9 @@ export default function Informe({ lanzamiento, onVolverSede, onRedisenar }) {
         />
       </div>
       {respuesta.nivelesSubidos > 0 && (
-        <p className="rounded-lg bg-violet-950/80 p-3 text-violet-200">
-          ⭐ You reached level {respuesta.jugador.nivel}! New parts are available in the Warehouse.
+        <p className="flex items-center gap-2 rounded-lg bg-violet-950/80 p-3 text-violet-200">
+          <Award className="h-5 w-5 shrink-0" />
+          You reached level {respuesta.jugador.nivel}! New parts are available in the Warehouse.
         </p>
       )}
 

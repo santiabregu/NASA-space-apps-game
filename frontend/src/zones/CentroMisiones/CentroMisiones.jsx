@@ -1,3 +1,4 @@
+import { Flag, Lock } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { obtenerMisionesDisponibles } from '../../api/misiones.js'
 import { formatoDinero, formatoNumero } from '../../formato.js'
@@ -56,7 +57,9 @@ export default function CentroMisiones({ jugador, catalogo, misionActiva, onAcep
 
       {bloqueadasPorNivel.map((mision) => (
         <TarjetaMision key={mision.id} mision={mision} catalogo={catalogo} bloqueada>
-          <p className="text-sm text-slate-400">🔒 Requires level {mision.nivelMinimo}</p>
+          <p className="flex items-center gap-1.5 text-sm text-slate-400">
+            <Lock className="h-4 w-4" /> Requires level {mision.nivelMinimo}
+          </p>
         </TarjetaMision>
       ))}
     </main>
@@ -92,7 +95,9 @@ function TarjetaMision({ mision, catalogo, bloqueada = false, children }) {
           <dt className="text-slate-400">Requirements</dt>
           <dd>{requisitosVisibles.join(' · ')}</dd>
           <dt className="text-slate-400">Critical resources</dt>
-          <dd className="text-cyan-300">★ {mision.recursosCriticos.map((recurso) => NOMBRE_RECURSO[recurso]).join(', ')}</dd>
+          <dd className="flex items-center gap-1.5 text-cyan-300">
+            <Flag className="h-3.5 w-3.5 shrink-0 fill-current" />
+            {mision.recursosCriticos.map((recurso) => NOMBRE_RECURSO[recurso]).join(', ')}</dd>
         </dl>
         {children}
       </div>

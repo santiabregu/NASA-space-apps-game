@@ -16,7 +16,7 @@ export function simular(analisis, mision) {
   const { requisitos } = mision
   const eventos = []
   const explicaciones = []
-  const ocurre = (texto) => eventos.push({ texto, ok: true })
+  const ocurre = (texto, icono) => eventos.push({ texto, icono, ok: true })
   const fallo = (texto, explicacion) => ({
     exito: false,
     puntuacion: 0,
@@ -33,7 +33,7 @@ export function simular(analisis, mision) {
       `The first-stage engine pushes ${formatoNumero(empujeKN)} kN, but the rocket weighs ${formatoNumero(pesoKN)} kN. You need a more powerful engine or less weight: thrust-to-weight must be above ${EMPUJE_PESO_MINIMO}.`,
     )
   }
-  ocurre('🔥 Liftoff')
+  ocurre('Liftoff', 'despegue')
 
   let deltaVConseguido = analisis.deltaV
   if (empujePeso < EMPUJE_PESO_MINIMO) {
@@ -45,13 +45,13 @@ export function simular(analisis, mision) {
 
   if (satelite.masaKg > cofia.capacidadKg) {
     return fallo(
-      '💥 The fairing fails during ascent',
+      'The fairing fails during ascent',
       `The satellite weighs ${formatoNumero(satelite.masaKg)} kg and the ${cofia.nombre} only takes ${formatoNumero(cofia.capacidadKg)} kg. Use a bigger fairing or make the satellite lighter.`,
     )
   }
 
-  resuelto.etapas.slice(0, -1).forEach((_, indice) => ocurre(`Stage ${indice + 1} separation`))
-  ocurre('Fairing separation')
+  resuelto.etapas.slice(0, -1).forEach((_, indice) => ocurre(`Stage ${indice + 1} separation`, 'separacion'))
+  ocurre('Fairing separation', 'separacion')
 
   if (deltaVConseguido < orbita.deltaVRequerido) {
     const faltan = orbita.deltaVRequerido - deltaVConseguido
@@ -60,7 +60,7 @@ export function simular(analisis, mision) {
       `It was ${formatoNumero(Math.round(faltan))} m/s of Δv short: the rocket reached ${formatoNumero(Math.round(deltaVConseguido))} m/s and the ${orbita.nombre} needs ${formatoNumero(orbita.deltaVRequerido)} m/s. Add a stage, use higher-Isp engines or lighten the payload (${formatoNumero(cargaUtilKg)} kg).`,
     )
   }
-  ocurre(`🛰️ Satellite deployed in ${orbita.nombre}`)
+  ocurre(`Satellite deployed in ${orbita.nombre}`, 'orbita')
 
   if (!satelite.tieneOrdenador) {
     return fallo('The satellite does not respond', 'Without an onboard computer the satellite cannot switch on its equipment or follow commands.')
@@ -71,7 +71,7 @@ export function simular(analisis, mision) {
   if (satelite.potenciaGeneradaW === 0) {
     return fallo('The battery dies within hours', 'Without solar panels there is no way to recharge the battery, and the satellite shuts down for good.')
   }
-  ocurre('📡 First contact with the ground station')
+  ocurre('First contact with the ground station', 'contacto')
 
   const avisos = avisosDeOperacion(satelite, orbita)
   explicaciones.push(...avisos)
@@ -79,9 +79,9 @@ export function simular(analisis, mision) {
   const fallosObjetivo = fallosDeObjetivo(satelite, requisitos)
   if (fallosObjetivo.length > 0) {
     explicaciones.push(...fallosObjetivo.slice(1))
-    return fallo('❌ The mission does not meet its objective', fallosObjetivo[0])
+    return fallo('The mission does not meet its objective', fallosObjetivo[0])
   }
-  ocurre('✅ Objective achieved')
+  ocurre('Objective achieved', 'objetivo')
 
   const retraso = meses > requisitos.plazoMeses
   if (retraso) {

@@ -1,3 +1,5 @@
+import { Antenna, BatteryFull, Cpu, RotateCw, Sun, Telescope } from 'lucide-react'
+
 const ANCHO_VISTA = 300
 const ALTO_VISTA = 270
 const CX = ANCHO_VISTA / 2
@@ -6,13 +8,15 @@ const FILAS = 4
 const SEPARACION = 4
 const RELLENO = 6
 
+const TAMANO_ICONO = 12
+
 const ESTILO_TIPO = {
-  panel: { color: '#38bdf8', icono: '☀️' },
-  bateria: { color: '#34d399', icono: '🔋' },
-  ordenador: { color: '#a78bfa', icono: '🧠' },
-  antena: { color: '#f472b6', icono: '📡' },
-  actitud: { color: '#fbbf24', icono: '🌀' },
-  instrumento: { color: '#fb923c', icono: '🔭' },
+  panel: { color: '#38bdf8', Icono: Sun },
+  bateria: { color: '#34d399', Icono: BatteryFull },
+  ordenador: { color: '#a78bfa', Icono: Cpu },
+  antena: { color: '#f472b6', Icono: Antenna },
+  actitud: { color: '#fbbf24', Icono: RotateCw },
+  instrumento: { color: '#fb923c', Icono: Telescope },
 }
 
 function formatoCuerpo(estructura) {
@@ -157,7 +161,13 @@ function Satelite({ estructura, componentes, onQuitar }) {
         return (
           <Pieza key={`hueco-${indice}-${componente.id}`} pieza={componente} onQuitar={() => onQuitar(indice)}>
             <rect x={x} y={y} width={anchoHueco} height={altoHueco} rx="2" fill={estilo.color} fillOpacity=".85" />
-            <text x={x + anchoHueco / 2} y={y + altoHueco / 2 + 4} textAnchor="middle" fontSize="11">{estilo.icono}</text>
+            <estilo.Icono
+              x={x + (anchoHueco - TAMANO_ICONO) / 2}
+              y={y + (altoHueco - TAMANO_ICONO) / 2}
+              size={TAMANO_ICONO}
+              color="#020617"
+              strokeWidth={2.25}
+            />
           </Pieza>
         )
       })}

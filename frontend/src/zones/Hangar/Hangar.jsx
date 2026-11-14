@@ -1,3 +1,4 @@
+import { FlaskConical, ListChecks, Rocket, Warehouse } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import PanelRecursos from '../../components/PanelRecursos.jsx'
 import { analizarDiseno } from '../../engine/analisis.js'
@@ -8,10 +9,10 @@ import Plataforma from './Plataforma.jsx'
 import Taller from './Taller.jsx'
 
 const AREAS = [
-  { id: 'laboratorio', nombre: '🔬 Lab' },
-  { id: 'taller', nombre: '🚀 Workshop' },
-  { id: 'plataforma', nombre: '🟢 Launch pad' },
-  { id: 'almacen', nombre: '📦 Warehouse' },
+  { id: 'laboratorio', nombre: 'Lab', Icono: FlaskConical },
+  { id: 'taller', nombre: 'Workshop', Icono: Rocket },
+  { id: 'plataforma', nombre: 'Launch pad', Icono: ListChecks },
+  { id: 'almacen', nombre: 'Warehouse', Icono: Warehouse },
 ]
 
 export default function Hangar({ jugador, catalogo, mision, diseno, onCambiarDiseno, onLanzado, onIrA }) {
@@ -54,7 +55,15 @@ export default function Hangar({ jugador, catalogo, mision, diseno, onCambiarDis
     setFicha(null)
   }
 
-  const props = { catalogo, analisis, diseno, onCambio: aplicarCambio, ficha, nivel: jugador.nivel }
+  const props = {
+    catalogo,
+    analisis,
+    diseno,
+    onCambio: aplicarCambio,
+    ficha,
+    nivel: jugador.nivel,
+    recomendadas: mision.piezasRecomendadas ?? [],
+  }
 
   return (
     <main className="mx-auto max-w-6xl space-y-4 px-4 py-6">
@@ -69,10 +78,11 @@ export default function Hangar({ jugador, catalogo, mision, diseno, onCambiarDis
             <button
               key={destino.id}
               onClick={() => cambiarArea(destino.id)}
-              className={`rounded-lg px-3 py-1.5 text-sm ${
+              className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm ${
                 area === destino.id ? 'bg-cyan-400 font-semibold text-slate-950' : 'bg-slate-800/80 text-slate-300 hover:bg-slate-700'
               }`}
             >
+              <destino.Icono className="h-4 w-4" />
               {destino.nombre}
             </button>
           ))}

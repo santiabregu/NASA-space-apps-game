@@ -17,11 +17,12 @@ const SECCIONES = [
 
 const PIEZA_DE_CAMPO = { motorId: 'motor', tanqueId: 'tanque' }
 
-export default function Taller({ catalogo, analisis, diseno, onCambio, ficha, nivel, empresa }) {
+export default function Taller({ catalogo, analisis, diseno, onCambio, ficha, nivel, recomendadas, empresa }) {
   const [aviso, setAviso] = useState(null)
   const { cohete } = diseno
   const { resuelto } = analisis
   const deltaVRequerido = resuelto.orbita.deltaVRequerido
+  const idsInstalados = [cohete.cofiaId, ...cohete.etapas.flatMap((etapa) => [etapa.motorId, etapa.tanqueId])]
 
   const conCohete = (nuevoCohete) => ({ ...diseno, cohete: nuevoCohete })
 
@@ -94,8 +95,9 @@ export default function Taller({ catalogo, analisis, diseno, onCambio, ficha, ni
                   <TarjetaPieza
                     key={pieza.id}
                     pieza={pieza}
+                    recomendada={recomendadas.includes(pieza.id)}
                     nivel={nivel}
-                    seleccionada={pieza.id === cohete.cofiaId}
+                    instaladas={idsInstalados.filter((id) => id === pieza.id).length}
                     onElegir={instalar}
                     deshabilitada={estaBloqueada(pieza, nivel)}
                   />

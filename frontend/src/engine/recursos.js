@@ -33,7 +33,7 @@ export function calcularRecursos({ resuelto, satelite, mision, dinero, coste, me
       nombre: 'Power',
       valor: satelite.potenciaConsumidaW,
       maximo: satelite.potenciaGeneradaW,
-      texto: `uses ${formatoNumero(satelite.potenciaConsumidaW)} / makes ${formatoNumero(satelite.potenciaGeneradaW)} W`,
+      texto: `uses ${formatoNumero(satelite.potenciaConsumidaW)} / makes ${formatoNumero(satelite.potenciaGeneradaW)} W · battery ${formatoNumero(satelite.bateriaWh)} / ${formatoNumero(satelite.bateriaNecesariaWh)} Wh`,
       estado: peorEstado(
         estadoMaximo(satelite.potenciaConsumidaW, satelite.potenciaGeneradaW),
         satelite.bateriaWh >= satelite.bateriaNecesariaWh ? 'ok' : 'aviso',

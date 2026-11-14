@@ -1,5 +1,8 @@
+import { CircleCheck, CircleX, Earth, Flame, Layers, Radio, Rocket, Satellite } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import Informe from './Informe.jsx'
+
+const ICONO_EVENTO = { despegue: Rocket, separacion: Layers, orbita: Satellite, contacto: Radio, objetivo: CircleCheck }
 
 const MS_POR_FASE = 1100
 const ALTURA_VUELO_PX = 220
@@ -28,23 +31,31 @@ export default function CentroControl({ lanzamiento, onVolverSede, onRedisenar }
             <Orbita />
           ) : (
             <span
-              className="mb-4 text-5xl transition-transform duration-1000 ease-in"
+              className="mb-4 transition-transform duration-1000 ease-in"
               style={{ transform: `translateY(-${altura}px)` }}
             >
-              {terminado ? '💥' : '🚀'}
+              {terminado ? (
+                <Flame className="h-12 w-12 text-orange-400" strokeWidth={1.5} />
+              ) : (
+                <Rocket className="h-12 w-12 -rotate-45 text-slate-100" strokeWidth={1.5} />
+              )}
             </span>
           )}
         </div>
 
         <ol className="space-y-2">
-          {simulacion.eventos.slice(0, fasesVistas).map((evento) => (
-            <li
-              key={evento.texto}
-              className={`rounded-lg px-3 py-2 text-sm backdrop-blur-md ${evento.ok ? 'bg-slate-900/70' : 'bg-red-950/80 text-red-200'}`}
-            >
-              {evento.texto}
-            </li>
-          ))}
+          {simulacion.eventos.slice(0, fasesVistas).map((evento) => {
+            const Icono = evento.ok ? ICONO_EVENTO[evento.icono] : CircleX
+            return (
+              <li
+                key={evento.texto}
+                className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm backdrop-blur-md ${evento.ok ? 'bg-slate-900/70' : 'bg-red-950/80 text-red-200'}`}
+              >
+                <Icono className={`h-4 w-4 shrink-0 ${evento.ok ? 'text-cyan-300' : 'text-red-300'}`} />
+                {evento.texto}
+              </li>
+            )
+          })}
           {!terminado && <li className="animate-pulse px-3 text-sm text-slate-400">Receiving telemetry…</li>}
         </ol>
       </div>
@@ -57,9 +68,9 @@ export default function CentroControl({ lanzamiento, onVolverSede, onRedisenar }
 function Orbita() {
   return (
     <div className="absolute inset-0 flex items-center justify-center">
-      <span className="text-6xl">🌍</span>
+      <Earth className="h-16 w-16 text-sky-300" strokeWidth={1.25} />
       <div className="absolute h-56 w-56 animate-spin rounded-full border border-dashed border-slate-500 [animation-duration:6s]">
-        <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-2xl">🛰️</span>
+        <Satellite className="absolute -top-3 left-1/2 h-6 w-6 -translate-x-1/2 text-cyan-300" />
       </div>
     </div>
   )

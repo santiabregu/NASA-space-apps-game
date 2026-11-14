@@ -35,7 +35,7 @@ export function analizarSatelite({ estructura, componentes }, orbita) {
     bateriaNecesariaWh,
     datosGeneradosMB,
     descargaMB,
-    datosDescargadosMB: Math.min(datosGeneradosMB, descargaMB) * factorEnergia,
+    datosDescargadosMB: Math.min(datosGeneradosMB, descargaMB) * factorEnergia * factorBateria,
     vidaUtilDias: estructura ? Math.min(estructura.vidaUtilDias, orbita.vidaOrbitalDias) : 0,
     valorCientifico: Math.round(valorInstrumentos * factorEnergia * factorBateria * factorDescarga),
     tieneOrdenador: deTipo(componentes, 'ordenador').length > 0,
