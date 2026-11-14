@@ -1,16 +1,23 @@
 package com.spaceapps.game.jugador;
 
 import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.spaceapps.game.empresa.Empresa;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.MapKeyColumn;
 import jakarta.persistence.OneToOne;
 
 @Entity
@@ -45,6 +52,13 @@ public class Jugador {
 
     @OneToOne(cascade = CascadeType.ALL, optional = false)
     private Empresa empresa;
+
+    // EAGER porque /api/jugador/me lo serializa fuera de una transacción.
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "mision_terminada", joinColumns = @JoinColumn(name = "jugador_id"))
+    @MapKeyColumn(name = "mision_id")
+    @Column(name = "mejor_puntuacion", nullable = false)
+    private Map<String, Integer> mejorPuntuacionPorMision = new HashMap<>();
 
     protected Jugador() {
     }
@@ -99,5 +113,13 @@ public class Jugador {
 
     public void cobrar(long cantidad) {
         dinero += cantidad;
+    }
+
+    public Map<String, Integer> getMejorPuntuacionPorMision() {
+        return Map.copyOf(mejorPuntuacionPorMision);
+    }
+
+    public void registrarMisionTerminada(String misionId, int puntuacion) {
+        mejorPuntuacionPorMision.merge(misionId, puntuacion, Math::max);
     }
 }

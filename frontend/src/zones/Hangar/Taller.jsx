@@ -1,3 +1,4 @@
+import { TriangleAlert } from 'lucide-react'
 import { useState } from 'react'
 import { COLOR_ESTADO } from '../../colores.js'
 import BarraRecurso from '../../components/BarraRecurso.jsx'
@@ -80,6 +81,18 @@ export default function Taller({ catalogo, analisis, diseno, onCambio, ficha, ni
             To stay in orbit you need to travel at about 28,000 km/h. Δv measures how much speed your rocket can gain:
             more propellant helps, but it also adds weight. That is why rockets use stages that drop off when empty.
           </p>
+        </div>
+
+        <div className="flex gap-3 rounded-xl border border-amber-300/40 bg-amber-950/60 p-4 text-sm text-amber-100 backdrop-blur-md">
+          <TriangleAlert className="mt-0.5 h-5 w-5 shrink-0 text-amber-300" />
+          <div className="space-y-1">
+            <p className="font-display font-semibold text-amber-300">Order matters!</p>
+            <p>
+              Parts stack from the ground up. The first engine and tank you click become stage 1, the bottom stage that
+              has to lift the whole rocket: start with your most powerful engine. To change the order, click a part in the
+              assembly bay to remove it.
+            </p>
+          </div>
         </div>
 
         {aviso && <p className="rounded-lg bg-amber-950/70 p-3 text-sm text-amber-200">{aviso}</p>}

@@ -1,5 +1,7 @@
 package com.spaceapps.game.jugador;
 
+import java.util.Map;
+
 import com.spaceapps.game.empresa.EmpresaResponse;
 
 public record JugadorResponse(
@@ -13,6 +15,7 @@ public record JugadorResponse(
         int misionesCompletadas,
         int misionesFallidas,
         boolean tutorialCompletado,
+        Map<String, Integer> misionesTerminadas,
         EmpresaResponse empresa) {
 
     public static JugadorResponse de(Jugador jugador) {
@@ -29,6 +32,7 @@ public record JugadorResponse(
                 perfil.getMisionesCompletadas(),
                 perfil.getMisionesFallidas(),
                 perfil.isTutorialCompletado(),
+                jugador.getMejorPuntuacionPorMision(),
                 EmpresaResponse.de(jugador.getEmpresa()));
     }
 }

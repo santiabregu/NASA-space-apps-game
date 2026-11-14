@@ -71,6 +71,7 @@ export default function Hangar({ jugador, catalogo, mision, diseno, onCambiarDis
         <div>
           <p className="text-sm text-slate-400">Mission in design</p>
           <h1 className="font-display text-2xl font-bold">{mision.titulo}</h1>
+          <p className="mt-1 max-w-3xl text-slate-300">{mision.descripcion}</p>
         </div>
         <SelectorOrbita catalogo={catalogo} mision={mision} diseno={diseno} onCambiarDiseno={onCambiarDiseno} />
         <div className="flex flex-wrap gap-2">

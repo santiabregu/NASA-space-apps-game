@@ -66,6 +66,7 @@ class MisionService {
         empresa.cambiarReputacion(liquidacion.cambioReputacion());
         if (lanzamiento.exito()) {
             jugador.getPerfil().registrarExito(mision.tipo() == TipoMision.TUTORIAL);
+            jugador.registrarMisionTerminada(mision.id(), lanzamiento.puntuacion());
         } else {
             jugador.getPerfil().registrarFallo();
         }

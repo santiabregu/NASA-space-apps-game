@@ -1,4 +1,4 @@
-import { Flag, Lock } from 'lucide-react'
+import { CircleCheck, Flag, Lock } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { obtenerMisionesDisponibles } from '../../api/misiones.js'
 import { formatoDinero, formatoNumero } from '../../formato.js'
@@ -24,9 +24,11 @@ export default function CentroMisiones({ jugador, catalogo, misionActiva, onAcep
   if (error) return <p className="p-8 text-center text-red-300">{error}</p>
   if (!disponibles) return <p className="p-8 text-center text-slate-400">Contacting the Government…</p>
 
+  const terminadas = jugador.misionesTerminadas
   const bloqueadasPorNivel = catalogo.misiones.filter(
     (mision) => mision.tipo === 'SOLO' && !disponibles.includes(mision.id) && mision.nivelMinimo > jugador.nivel,
   )
+  const terminadasNoRepetibles = catalogo.misiones.filter((mision) => mision.id in terminadas && !disponibles.includes(mision.id))
 
   return (
     <main className="mx-auto max-w-4xl space-y-6 px-4 py-8">
@@ -40,13 +42,13 @@ export default function CentroMisiones({ jugador, catalogo, misionActiva, onAcep
       {catalogo.misiones
         .filter((mision) => disponibles.includes(mision.id))
         .map((mision) => (
-          <TarjetaMision key={mision.id} mision={mision} catalogo={catalogo}>
+          <TarjetaMision key={mision.id} mision={mision} catalogo={catalogo} mejorPuntuacion={terminadas[mision.id]}>
             <div className="flex flex-wrap gap-2">
               <button
                 onClick={() => onAceptar(mision)}
                 className="rounded-lg bg-cyan-400 px-4 py-2 font-semibold text-slate-950 hover:bg-cyan-300"
               >
-                {misionActiva?.id === mision.id ? 'Continue design' : 'Accept solo'}
+                {textoBotonAceptar(mision.id === misionActiva?.id, mision.id in terminadas)}
               </button>
               <button disabled className="rounded-lg border border-slate-400/30 px-4 py-2 text-slate-500" title="Coming soon">
                 As a team · coming soon
@@ -62,11 +64,26 @@ export default function CentroMisiones({ jugador, catalogo, misionActiva, onAcep
           </p>
         </TarjetaMision>
       ))}
+
+      {terminadasNoRepetibles.length > 0 && (
+        <section className="space-y-4">
+          <h2 className="font-display text-lg font-semibold">Completed missions</h2>
+          {terminadasNoRepetibles.map((mision) => (
+            <TarjetaMision key={mision.id} mision={mision} catalogo={catalogo} mejorPuntuacion={terminadas[mision.id]} />
+          ))}
+        </section>
+      )}
     </main>
   )
 }
 
-function TarjetaMision({ mision, catalogo, bloqueada = false, children }) {
+function textoBotonAceptar(enDiseno, terminada) {
+  if (enDiseno) return 'Continue design'
+  return terminada ? 'Play again' : 'Accept solo'
+}
+
+function TarjetaMision({ mision, catalogo, bloqueada = false, mejorPuntuacion, children }) {
+  const terminada = mejorPuntuacion !== undefined
   const { requisitos, recompensa } = mision
   const orbitas = mision.orbitasPermitidas.map((id) => catalogo.orbitasPorId[id].nombre).join(' or ')
   const requisitosVisibles = [
@@ -79,7 +96,7 @@ function TarjetaMision({ mision, catalogo, bloqueada = false, children }) {
   const banner = BANNER_MISION[mision.id]
 
   return (
-    <article className={`cristal overflow-hidden ${bloqueada ? 'opacity-50' : ''}`}>
+    <article className={`cristal overflow-hidden ${bloqueada ? 'opacity-50' : ''} ${terminada ? 'ring-1 ring-emerald-400/50' : ''}`}>
       {banner && <img src={banner} alt="" loading="lazy" className="h-40 w-full object-cover" />}
       <div className="space-y-3 p-5">
         <div className="flex flex-wrap items-start justify-between gap-2">
@@ -89,6 +106,11 @@ function TarjetaMision({ mision, catalogo, bloqueada = false, children }) {
           </p>
         </div>
         <p className="text-slate-300">{mision.descripcion}</p>
+        {terminada && (
+          <p className="flex items-center gap-1.5 text-sm font-semibold text-emerald-300">
+            <CircleCheck className="h-4 w-4" /> Completed · best score {mejorPuntuacion} / 100
+          </p>
+        )}
         <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-sm">
           <dt className="text-slate-400">Orbit</dt>
           <dd>{orbitas}</dd>
