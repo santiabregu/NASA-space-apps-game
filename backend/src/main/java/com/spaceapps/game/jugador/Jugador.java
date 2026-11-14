@@ -89,4 +89,15 @@ public class Jugador {
     public Empresa getEmpresa() {
         return empresa;
     }
+
+    public void pagar(long cantidad) {
+        if (cantidad > dinero) {
+            throw new IllegalStateException("El jugador " + id + " no puede pagar " + cantidad + " con " + dinero);
+        }
+        dinero -= cantidad;
+    }
+
+    public void cobrar(long cantidad) {
+        dinero += cantidad;
+    }
 }

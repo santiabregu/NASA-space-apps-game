@@ -1,0 +1,107 @@
+package com.spaceapps.game.mision;
+
+import java.util.List;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
+
+import com.spaceapps.game.catalogo.Catalogo;
+import com.spaceapps.game.catalogo.MisionCatalogo;
+import com.spaceapps.game.catalogo.PiezaCatalogo;
+import com.spaceapps.game.catalogo.TipoMision;
+import com.spaceapps.game.empresa.Empresa;
+import com.spaceapps.game.empresa.NivelConfianza;
+import com.spaceapps.game.jugador.Jugador;
+import com.spaceapps.game.jugador.JugadorRepository;
+import com.spaceapps.game.jugador.JugadorResponse;
+
+@Service
+class MisionService {
+
+    private final Catalogo catalogo;
+    private final JugadorRepository jugadores;
+
+    MisionService(Catalogo catalogo, JugadorRepository jugadores) {
+        this.catalogo = catalogo;
+        this.jugadores = jugadores;
+    }
+
+    List<String> disponibles(long jugadorId) {
+        Jugador jugador = buscarJugador(jugadorId);
+        return catalogo.misiones().stream()
+                .filter(mision -> estaDisponible(mision, jugador))
+                .map(MisionCatalogo::id)
+                .toList();
+    }
+
+    // El resultado lo simula el cliente: el servidor solo garantiza el cobro de las piezas y que la misión y las piezas estén permitidas.
+    @Transactional
+    LanzamientoResponse lanzar(long jugadorId, String misionId, LanzamientoRequest lanzamiento) {
+        Jugador jugador = buscarJugador(jugadorId);
+        MisionCatalogo mision = catalogo.mision(misionId)
+                .filter(candidata -> estaDisponible(candidata, jugador))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.CONFLICT, "La misión " + misionId + " no está disponible para ti"));
+
+        Empresa empresa = jugador.getEmpresa();
+        long coste = costeDePiezas(lanzamiento.piezas(), jugador.getConocimiento().getNivel());
+        long prestamo = Math.max(0, coste - jugador.getDinero());
+        if (prestamo > 0) {
+            if (!lanzamiento.aceptaPrestamo()) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT,
+                        "El diseño cuesta " + coste + " $ y tu empresa tiene " + jugador.getDinero() + " $");
+            }
+            empresa.pedirPrestamo(prestamo);
+            jugador.cobrar(prestamo);
+        }
+        jugador.pagar(coste);
+
+        Liquidacion liquidacion = Liquidacion.de(mision, lanzamiento.exito(), lanzamiento.puntuacion());
+        jugador.cobrar(liquidacion.dinero());
+        long deudaDevuelta = Math.min(empresa.getDeuda(), liquidacion.dinero());
+        jugador.pagar(deudaDevuelta);
+        empresa.devolverDeuda(deudaDevuelta);
+        int nivelesSubidos = jugador.getConocimiento().ganarXp(liquidacion.xp());
+        empresa.cambiarReputacion(liquidacion.cambioReputacion());
+        if (lanzamiento.exito()) {
+            jugador.getPerfil().registrarExito(mision.tipo() == TipoMision.TUTORIAL);
+        } else {
+            jugador.getPerfil().registrarFallo();
+        }
+
+        return new LanzamientoResponse(coste, prestamo, liquidacion.dinero(), deudaDevuelta, liquidacion.xp(),
+                liquidacion.cambioReputacion(), nivelesSubidos, JugadorResponse.de(jugador));
+    }
+
+    private long costeDePiezas(List<String> piezaIds, int nivelJugador) {
+        long total = 0;
+        for (String piezaId : piezaIds) {
+            PiezaCatalogo pieza = catalogo.pieza(piezaId)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "La pieza " + piezaId + " no existe"));
+            if (pieza.nivelRequerido() > nivelJugador) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                        pieza.nombre() + " requiere nivel " + pieza.nivelRequerido() + " y tienes nivel " + nivelJugador);
+            }
+            total += pieza.coste();
+        }
+        return total;
+    }
+
+    private static boolean estaDisponible(MisionCatalogo mision, Jugador jugador) {
+        if (!jugador.getPerfil().isTutorialCompletado()) {
+            return mision.tipo() == TipoMision.TUTORIAL;
+        }
+        boolean enObservacion = jugador.getEmpresa().nivelConfianza() == NivelConfianza.EN_OBSERVACION;
+        return switch (mision.tipo()) {
+            case TUTORIAL -> false;
+            case PRUEBA -> enObservacion;
+            case SOLO -> !enObservacion && jugador.getConocimiento().getNivel() >= mision.nivelMinimo();
+        };
+    }
+
+    private Jugador buscarJugador(long jugadorId) {
+        return jugadores.findById(jugadorId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "La cuenta " + jugadorId + " ya no existe"));
+    }
+}

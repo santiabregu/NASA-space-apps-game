@@ -10,6 +10,8 @@ import jakarta.persistence.Id;
 public class Empresa {
 
     private static final int REPUTACION_INICIAL = 50;
+    private static final int REPUTACION_SOCIO = 70;
+    private static final int REPUTACION_NORMAL = 30;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -55,5 +57,27 @@ public class Empresa {
 
     public long getDeuda() {
         return deuda;
+    }
+
+    public NivelConfianza nivelConfianza() {
+        if (reputacion >= REPUTACION_SOCIO) {
+            return NivelConfianza.SOCIO;
+        }
+        return reputacion >= REPUTACION_NORMAL ? NivelConfianza.NORMAL : NivelConfianza.EN_OBSERVACION;
+    }
+
+    public void cambiarReputacion(int cambio) {
+        reputacion = Math.clamp(reputacion + cambio, 0, 100);
+    }
+
+    public void pedirPrestamo(long cantidad) {
+        deuda += cantidad;
+    }
+
+    public void devolverDeuda(long cantidad) {
+        if (cantidad > deuda) {
+            throw new IllegalStateException("La empresa " + id + " intenta devolver " + cantidad + " de una deuda de " + deuda);
+        }
+        deuda -= cantidad;
     }
 }

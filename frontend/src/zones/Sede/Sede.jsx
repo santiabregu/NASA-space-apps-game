@@ -2,26 +2,27 @@ import BarraRecurso from '../../components/BarraRecurso.jsx'
 import { formatoDinero } from '../../formato.js'
 
 const ZONAS = [
-  { icono: '🛠️', nombre: 'Hangar', descripcion: 'Construye satélites y cohetes' },
-  { icono: '🏛️', nombre: 'Centro de Misiones', descripcion: 'Contratos del Gobierno' },
-  { icono: '📡', nombre: 'Centro de Control', descripcion: 'Sigue tus lanzamientos' },
-  { icono: '👥', nombre: 'Social', descripcion: 'Amigos y misiones de grupo' },
-  { icono: '📚', nombre: 'Academia', descripcion: 'Aprende los conceptos' },
+  { id: 'misiones', icono: '🏛️', nombre: 'Centro de Misiones', descripcion: 'Contratos del Gobierno' },
+  { id: 'hangar', icono: '🛠️', nombre: 'Hangar', descripcion: 'Construye satélites y cohetes' },
+  { id: 'academia', icono: '📚', nombre: 'Academia', descripcion: 'Aprende los conceptos' },
+  { id: null, icono: '📡', nombre: 'Centro de Control', descripcion: 'Se abre al lanzar una misión' },
+  { id: null, icono: '👥', nombre: 'Social', descripcion: 'Amigos y misiones de grupo · Próximamente' },
 ]
 
-export default function Sede({ jugador, onSalir }) {
+const TEXTO_CONFIANZA = {
+  SOCIO: 'Socio de confianza: el Gobierno te ofrece sus mejores contratos.',
+  NORMAL: 'El Gobierno te paga al completar cada misión.',
+  EN_OBSERVACION: 'En observación: el Gobierno ha dejado de pagarte. Supera una prueba de confianza.',
+}
+
+export default function Sede({ jugador, onIrA }) {
   const { empresa } = jugador
 
   return (
     <main className="mx-auto max-w-4xl space-y-6 px-4 py-8">
-      <header className="flex items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold" style={{ color: empresa.colorPrimario }}>{empresa.nombre}</h1>
-          <p className="text-slate-400">Dirigida por {jugador.nombreUsuario}</p>
-        </div>
-        <button onClick={onSalir} className="rounded-lg border border-slate-700 px-3 py-1 text-sm hover:bg-slate-800">
-          Salir
-        </button>
+      <header>
+        <h1 className="text-3xl font-bold" style={{ color: empresa.colorPrimario }}>{empresa.nombre}</h1>
+        <p className="text-slate-400">Dirigida por {jugador.nombreUsuario}</p>
       </header>
 
       <section className="grid gap-4 sm:grid-cols-3">
@@ -34,6 +35,7 @@ export default function Sede({ jugador, onSalir }) {
         </Tarjeta>
         <Tarjeta titulo="Confianza del Gobierno">
           <BarraRecurso etiqueta="Reputación" valor={empresa.reputacion} maximo={100} color="bg-emerald-400" />
+          <p className="text-xs text-slate-400">{TEXTO_CONFIANZA[empresa.confianza]}</p>
         </Tarjeta>
       </section>
 
@@ -43,12 +45,16 @@ export default function Sede({ jugador, onSalir }) {
 
       <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {ZONAS.map((zona) => (
-          <div key={zona.nombre} className="rounded-xl border border-slate-800 bg-slate-900/50 p-4 opacity-60">
+          <button
+            key={zona.nombre}
+            disabled={!zona.id}
+            onClick={() => onIrA(zona.id)}
+            className="rounded-xl border border-slate-800 bg-slate-900/50 p-4 text-left transition enabled:hover:border-cyan-700 disabled:opacity-50"
+          >
             <p className="text-2xl">{zona.icono}</p>
             <p className="font-semibold">{zona.nombre}</p>
             <p className="text-sm text-slate-400">{zona.descripcion}</p>
-            <p className="mt-2 text-xs uppercase tracking-wide text-slate-500">Próximamente</p>
-          </div>
+          </button>
         ))}
       </section>
     </main>

@@ -70,15 +70,15 @@ backend/
 
 | Método | Ruta | Para qué |
 |---|---|---|
-| POST | `/api/auth/registro` | Correo, contraseña, nombre de usuario y nombre de empresa |
-| POST | `/api/auth/login` | Devuelve el JWT |
-| GET | `/api/jugador/me` | Jugador + perfil + empresa + conocimiento |
+| POST | `/api/auth/registro` ✅ | Correo, contraseña, nombre de usuario y nombre de empresa |
+| POST | `/api/auth/login` ✅ | Devuelve el JWT |
+| GET | `/api/jugador/me` ✅ | Jugador + perfil + empresa + conocimiento |
+| GET | `/api/catalogo` ✅ | Piezas, órbitas y misiones (`backend/src/main/resources/catalogo.json`, única fuente de datos) |
+| GET | `/api/misiones/disponibles` ✅ | Misiones disponibles según tutorial, nivel y reputación |
+| POST | `/api/misiones/{id}/lanzamientos` ✅ | Cobra las piezas (con préstamo si hace falta) y aplica pago, XP, reputación y devolución de deuda |
 | PATCH | `/api/empresa` | Personalizar nombre, logo y colores |
-| POST | `/api/hangar/comprar` | Comprar piezas (descuenta dinero) |
 | GET / POST | `/api/hangar/plantillas` | Diseños de cohete guardados |
-| GET | `/api/misiones` | Misiones disponibles según nivel y reputación |
-| POST | `/api/misiones/{id}/aceptar` | Crea una SesionMision (SOLO o GRUPO) |
-| POST | `/api/sesiones/{id}/resultado` | Guarda el resultado y aplica el pago, la XP y la reputación |
+| POST | `/api/sesiones` | Sala de misión de GRUPO |
 | GET / POST | `/api/amigos` | Lista de amigos y enviar solicitud |
 | POST | `/api/amigos/{id}/aceptar` | Aceptar una solicitud |
 | WS | `/ws` → `/topic/sala/{codigo}` | Cambios del diseño compartido, roles y "Listo" |
@@ -90,8 +90,8 @@ backend/
 | Fase | Horas | Entregable | Prioridad |
 |---|---|---|---|
 | **0. Arranque** | 0–2 | Repo con `frontend/` y `backend/` funcionando, UML revisado, reparto de tareas | Imprescindible |
-| **1. Núcleo** | 2–14 | ~~**Back:** registro, login, JWT, entidades JPA de jugador y empresa~~ ✅ hecho. **Front:** ~~login~~ ✅, `engine/` con las fórmulas de los 6 recursos, catálogo, navegación entre zonas, Hangar funcional con el **panel de recursos** | Imprescindible |
-| **2. Misiones y economía** | 14–22 | Centro de Misiones, Centro de Control con lanzamiento animado, informe final; pago, XP, niveles, reputación y préstamo | Imprescindible |
+| **1. Núcleo** ✅ | 2–14 | Registro, login, JWT, jugador y empresa; `engine/` con las fórmulas de los 6 recursos; catálogo; navegación entre zonas; Hangar (Laboratorio, Taller, Plataforma, Almacén) con el **panel de recursos** | Imprescindible |
+| **2. Misiones y economía** ✅ | 14–22 | Centro de Misiones, Centro de Control con lanzamiento animado, informe que explica el porqué; pago, XP, niveles, reputación y préstamo; Academia | Imprescindible |
 | **3. Tutorial** | 22–28 | ORBI + los pasos de [02-TUTORIAL.md](02-TUTORIAL.md) | Imprescindible |
 | **4. Social y multijugador** | 28–38 | Personalización de empresa y cohete, amigos, sala de grupo por WebSocket con roles y recursos compartidos | Importante |
 | **5. Pulido** | 38–44 | Animaciones, eventos aleatorios (fallo de panel, tormenta solar…), 3–5 misiones más, Academia | Deseable |

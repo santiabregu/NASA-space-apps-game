@@ -1,0 +1,110 @@
+import { useMemo, useState } from 'react'
+import PanelRecursos from '../../components/PanelRecursos.jsx'
+import { analizarDiseno } from '../../engine/analisis.js'
+import Almacen from './Almacen.jsx'
+import Laboratorio from './Laboratorio.jsx'
+import Plataforma from './Plataforma.jsx'
+import Taller from './Taller.jsx'
+
+const AREAS = [
+  { id: 'laboratorio', nombre: '🔬 Laboratorio' },
+  { id: 'taller', nombre: '🚀 Taller' },
+  { id: 'plataforma', nombre: '🟢 Plataforma' },
+  { id: 'almacen', nombre: '📦 Almacén' },
+]
+
+export default function Hangar({ jugador, catalogo, mision, diseno, onCambiarDiseno, onLanzado, onIrA }) {
+  const [area, setArea] = useState(mision ? 'laboratorio' : 'almacen')
+  const analisis = useMemo(
+    () => mision && analizarDiseno({ diseno, catalogo, mision, dinero: jugador.dinero }),
+    [diseno, catalogo, mision, jugador.dinero],
+  )
+
+  if (!mision) {
+    return (
+      <main className="mx-auto max-w-6xl space-y-6 px-4 py-8">
+        <header className="space-y-2">
+          <h1 className="text-2xl font-bold">🛠️ Hangar</h1>
+          <p className="text-slate-400">
+            Aquí se construye. Primero acepta una misión del Gobierno: así sabrás qué satélite y qué cohete necesitas.
+          </p>
+          <button onClick={() => onIrA('misiones')} className="rounded-lg bg-cyan-500 px-4 py-2 font-semibold text-slate-950">
+            Ver misiones
+          </button>
+        </header>
+        <Almacen catalogo={catalogo} nivel={jugador.nivel} />
+      </main>
+    )
+  }
+
+  const props = { catalogo, analisis, diseno, onCambiarDiseno, nivel: jugador.nivel }
+
+  return (
+    <main className="mx-auto max-w-6xl space-y-4 px-4 py-6">
+      <header className="space-y-3">
+        <div>
+          <p className="text-sm text-slate-400">Misión en diseño</p>
+          <h1 className="text-2xl font-bold">{mision.titulo}</h1>
+        </div>
+        <SelectorOrbita catalogo={catalogo} mision={mision} diseno={diseno} onCambiarDiseno={onCambiarDiseno} />
+        <div className="flex flex-wrap gap-2">
+          {AREAS.map((destino) => (
+            <button
+              key={destino.id}
+              onClick={() => setArea(destino.id)}
+              className={`rounded-lg px-3 py-1.5 text-sm ${
+                area === destino.id ? 'bg-cyan-500 font-semibold text-slate-950' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+              }`}
+            >
+              {destino.nombre}
+            </button>
+          ))}
+        </div>
+      </header>
+
+      <div className="grid gap-6 lg:grid-cols-[1fr_22rem]">
+        <div className="min-w-0">
+          {area === 'laboratorio' && <Laboratorio {...props} />}
+          {area === 'taller' && <Taller {...props} empresa={jugador.empresa} />}
+          {area === 'plataforma' && (
+            <Plataforma
+              analisis={analisis}
+              mision={mision}
+              dinero={jugador.dinero}
+              deuda={jugador.empresa.deuda}
+              onLanzado={onLanzado}
+            />
+          )}
+          {area === 'almacen' && <Almacen catalogo={catalogo} nivel={jugador.nivel} />}
+        </div>
+        <aside className="lg:sticky lg:top-16 lg:self-start">
+          <PanelRecursos recursos={analisis.recursos} criticos={mision.recursosCriticos} />
+        </aside>
+      </div>
+    </main>
+  )
+}
+
+function SelectorOrbita({ catalogo, mision, diseno, onCambiarDiseno }) {
+  const orbita = catalogo.orbitasPorId[diseno.orbitaId]
+
+  return (
+    <div className="space-y-2 rounded-xl border border-slate-800 bg-slate-900/60 p-3">
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-sm text-slate-400">Órbita:</span>
+        {mision.orbitasPermitidas.map((id) => (
+          <button
+            key={id}
+            onClick={() => onCambiarDiseno({ ...diseno, orbitaId: id })}
+            className={`rounded-lg px-3 py-1 text-sm ${
+              id === diseno.orbitaId ? 'bg-slate-700 text-white ring-1 ring-cyan-400' : 'bg-slate-800 text-slate-400'
+            }`}
+          >
+            {catalogo.orbitasPorId[id].nombre}
+          </button>
+        ))}
+      </div>
+      <p className="text-xs text-slate-400">{orbita.explicacion}</p>
+    </div>
+  )
+}

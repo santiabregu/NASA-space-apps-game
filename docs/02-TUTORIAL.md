@@ -42,7 +42,7 @@
 | 1 | Bienvenida | Pone nombre a su empresa y elige colores y logo | Que es dueño/a de una empresa espacial | Nombre escrito |
 | 2 | Sede | Mira las barras de dinero, nivel, conocimiento y reputación | **Tú pagas las piezas** y el Gobierno paga si la misión sale bien. Si fallas mucho, baja tu reputación y deja de pagarte | Pulsar "Entendido" |
 | 3 | Centro de Misiones | Abre el contrato del Gobierno "Misión 0" y lo acepta en modo **Solo** | Cada misión tiene objetivo, requisitos y recompensa. El botón "Grupo" aparece bloqueado, con el texto *"Disponible al terminar el tutorial"* | Misión aceptada |
-| 4 | Hangar → Almacén | **Compra** las piezas del tutorial con su dinero (≈ 6,8 M$ de 10 M$) | Cada pieza tiene **masa, coste y potencia**, y todo suma | Piezas compradas |
+| 4 | Hangar → Almacén | Mira el catálogo de piezas. Se pagan **al lanzar** (el tutorial cuesta ≈ 6,8 M$ de 10 M$) | Cada pieza tiene **masa, coste y potencia**, y todo suma | Pulsar "Ir al laboratorio" |
 | 5 | Laboratorio | Monta un CubeSat 3U: estructura + panel solar + batería + ordenador + antena | **Balance de potencia:** el panel tiene que generar más de lo que se consume, y la batería cubre el tiempo en la sombra de la Tierra | Barra de potencia en verde |
 | 6 | Taller de cohetes | Pone **solo la etapa 1** + cofia con el satélite | — | — |
 | 7 | Taller de cohetes | Ve que la barra de **Δv** se queda corta (≈ 6,8 de 9,4 km/s). ORBI lo explica | **Δv:** lo que hace falta para llegar a órbita. Una sola etapa carga con demasiado peso muerto | Pulsar "¿Cómo lo arreglo?" |

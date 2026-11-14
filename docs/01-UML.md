@@ -503,7 +503,7 @@ S-->>A: informe + recompensa
 
 | Concepto | Regla |
 |---|---|
-| Piezas del cohete y del satélite | Las paga el jugador con el dinero de su empresa |
+| Piezas del cohete y del satélite | Las paga el jugador con el dinero de su empresa **al lanzar**. Se puede diseñar y probar combinaciones gratis; no hay inventario de piezas |
 | Cohete al lanzarse | Se consume; el diseño queda guardado como **plantilla** para reconstruirlo |
 | Misión cumplida | El Gobierno paga `recompensa × (puntuación / 100)` + XP · **reputación +10** |
 | Misión fallida | 0 M$ y el **30 % de la XP** (también se aprende de los fallos) · **reputación −15** |
@@ -516,7 +516,7 @@ S-->>A: informe + recompensa
 | 30–69 | **NORMAL** | Paga al completar la misión |
 | 0–29 | **EN_OBSERVACION** | **Deja de pagar.** Solo ofrece **misiones de prueba**: baratas, dan XP y +15 de reputación pero 0 M$. Así recuperas la confianza |
 
-**Préstamo de rescate:** si no tienes dinero ni para el cohete más barato, el Gobierno presta lo justo (`Empresa.deudaM`). Se descuenta automáticamente de las siguientes recompensas, así nunca te quedas bloqueado.
+**Préstamo de rescate:** si al lanzar no te llega el dinero, el Gobierno presta la diferencia (`Empresa.deuda`). La deuda se descuenta automáticamente de los siguientes pagos, así nunca te quedas bloqueado. No hay límite de préstamos: con uno solo, la partida se bloqueaba tras una prueba de confianza (que no paga).
 
 ---
 

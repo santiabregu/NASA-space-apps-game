@@ -1,33 +1,106 @@
 import { useEffect, useState } from 'react'
+import { obtenerCatalogo } from './api/catalogo.js'
 import { borrarToken, leerToken } from './api/client.js'
 import { obtenerJugador } from './api/jugador.js'
+import Navegacion from './components/Navegacion.jsx'
+import { disenoInicial } from './engine/diseno.js'
+import Academia from './zones/Academia/Academia.jsx'
+import CentroControl from './zones/CentroControl/CentroControl.jsx'
+import CentroMisiones from './zones/CentroMisiones/CentroMisiones.jsx'
+import Hangar from './zones/Hangar/Hangar.jsx'
 import Login from './zones/Login/Login.jsx'
 import Sede from './zones/Sede/Sede.jsx'
 
 export default function App() {
   const [jugador, setJugador] = useState(null)
+  const [catalogo, setCatalogo] = useState(null)
   const [cargando, setCargando] = useState(() => leerToken() !== null)
   const [aviso, setAviso] = useState(null)
+  const [zona, setZona] = useState('sede')
+  const [misionActiva, setMisionActiva] = useState(null)
+  const [diseno, setDiseno] = useState(null)
+  const [lanzamiento, setLanzamiento] = useState(null)
 
-  const cargarJugador = () =>
-    obtenerJugador()
-      .then(setJugador)
+  const cargarPartida = () =>
+    Promise.all([obtenerJugador(), obtenerCatalogo()])
+      .then(([datosJugador, datosCatalogo]) => {
+        setJugador(datosJugador)
+        setCatalogo(datosCatalogo)
+      })
       .catch((error) => {
         if (error.estado === 401) borrarToken()
         setAviso(error.message)
       })
       .finally(() => setCargando(false))
 
+  useEffect(() => {
+    if (leerToken()) cargarPartida()
+  }, [])
+
   function salir() {
     borrarToken()
     setJugador(null)
+    setZona('sede')
+    setMisionActiva(null)
+    setDiseno(null)
+    setLanzamiento(null)
   }
 
-  useEffect(() => {
-    if (leerToken()) cargarJugador()
-  }, [])
+  function aceptarMision(mision) {
+    if (misionActiva?.id !== mision.id) {
+      setMisionActiva(mision)
+      setDiseno(disenoInicial(mision))
+    }
+    setZona('hangar')
+  }
+
+  function alLanzar(nuevoLanzamiento) {
+    setJugador(nuevoLanzamiento.respuesta.jugador)
+    setLanzamiento(nuevoLanzamiento)
+    setZona('control')
+  }
+
+  function volverASede() {
+    if (lanzamiento?.simulacion.exito) {
+      setMisionActiva(null)
+      setDiseno(null)
+    }
+    setLanzamiento(null)
+    setZona('sede')
+  }
 
   if (cargando) return <p className="p-8 text-center text-slate-400">Conectando con el centro de control…</p>
-  if (!jugador) return <Login onEntrar={cargarJugador} aviso={aviso} />
-  return <Sede jugador={jugador} onSalir={salir} />
+  if (!jugador) return <Login onEntrar={cargarPartida} aviso={aviso} />
+
+  return (
+    <>
+      {zona !== 'control' && <Navegacion jugador={jugador} zona={zona} onIrA={setZona} onSalir={salir} />}
+      {zona === 'sede' && <Sede jugador={jugador} onIrA={setZona} />}
+      {zona === 'misiones' && (
+        <CentroMisiones jugador={jugador} catalogo={catalogo} misionActiva={misionActiva} onAceptar={aceptarMision} />
+      )}
+      {zona === 'hangar' && (
+        <Hangar
+          jugador={jugador}
+          catalogo={catalogo}
+          mision={misionActiva}
+          diseno={diseno}
+          onCambiarDiseno={setDiseno}
+          onLanzado={alLanzar}
+          onIrA={setZona}
+        />
+      )}
+      {zona === 'academia' && <Academia catalogo={catalogo} />}
+      {zona === 'control' && (
+        <CentroControl
+          lanzamiento={lanzamiento}
+          onVolverSede={volverASede}
+          onRedisenar={() => {
+            setLanzamiento(null)
+            setZona('hangar')
+          }}
+        />
+      )}
+    </>
+  )
 }

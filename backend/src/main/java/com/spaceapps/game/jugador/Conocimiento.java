@@ -21,4 +21,14 @@ public class Conocimiento {
     public int xpParaSiguienteNivel() {
         return XP_POR_NIVEL * nivel;
     }
+
+    public int ganarXp(int cantidad) {
+        int nivelAnterior = nivel;
+        xp += cantidad;
+        while (xp >= xpParaSiguienteNivel()) {
+            xp -= xpParaSiguienteNivel();
+            nivel++;
+        }
+        return nivel - nivelAnterior;
+    }
 }

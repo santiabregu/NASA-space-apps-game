@@ -20,4 +20,15 @@ public class Perfil {
     public boolean isTutorialCompletado() {
         return tutorialCompletado;
     }
+
+    public void registrarExito(boolean eraTutorial) {
+        misionesCompletadas++;
+        if (eraTutorial) {
+            tutorialCompletado = true;
+        }
+    }
+
+    public void registrarFallo() {
+        misionesFallidas++;
+    }
 }

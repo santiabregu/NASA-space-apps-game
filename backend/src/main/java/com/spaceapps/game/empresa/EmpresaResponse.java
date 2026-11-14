@@ -5,6 +5,7 @@ public record EmpresaResponse(
         String colorPrimario,
         String colorSecundario,
         int reputacion,
+        NivelConfianza confianza,
         long deuda) {
 
     public static EmpresaResponse de(Empresa empresa) {
@@ -13,6 +14,7 @@ public record EmpresaResponse(
                 empresa.getColorPrimario(),
                 empresa.getColorSecundario(),
                 empresa.getReputacion(),
+                empresa.nivelConfianza(),
                 empresa.getDeuda());
     }
 }

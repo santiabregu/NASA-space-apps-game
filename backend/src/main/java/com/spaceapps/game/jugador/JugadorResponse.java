@@ -15,7 +15,7 @@ public record JugadorResponse(
         boolean tutorialCompletado,
         EmpresaResponse empresa) {
 
-    static JugadorResponse de(Jugador jugador) {
+    public static JugadorResponse de(Jugador jugador) {
         Conocimiento conocimiento = jugador.getConocimiento();
         Perfil perfil = jugador.getPerfil();
         return new JugadorResponse(
