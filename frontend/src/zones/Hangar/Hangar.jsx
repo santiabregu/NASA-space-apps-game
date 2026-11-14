@@ -1,7 +1,7 @@
 import { FlaskConical, ListChecks, Rocket, Warehouse } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import PanelMision from '../../components/PanelMision.jsx'
-import { analizarDiseno } from '../../engine/analisis.js'
+import { analizarDiseno, esSuborbital } from '../../engine/analisis.js'
 import { efectosDelCambio } from '../../engine/efectos.js'
 import Almacen from './Almacen.jsx'
 import Laboratorio from './Laboratorio.jsx'
@@ -16,12 +16,12 @@ const AREAS = [
 ]
 
 export default function Hangar({ jugador, catalogo, mision, diseno, onCambiarDiseno, onLanzado, onIrA }) {
-  const [area, setArea] = useState(mision ? 'laboratorio' : 'almacen')
+  const [area, setArea] = useState(areaInicial(mision))
   const [ficha, setFicha] = useState(null)
   const [previa, setPrevia] = useState(null)
   const analisis = useMemo(
-    () => mision && analizarDiseno({ diseno, catalogo, mision, dinero: jugador.dinero }),
-    [diseno, catalogo, mision, jugador.dinero],
+    () => mision && analizarDiseno({ diseno, catalogo, mision, dinero: jugador.dinero, inventario: jugador.inventario }),
+    [diseno, catalogo, mision, jugador.dinero, jugador.inventario],
   )
 
   if (!mision) {
@@ -36,12 +36,13 @@ export default function Hangar({ jugador, catalogo, mision, diseno, onCambiarDis
             See missions
           </button>
         </header>
-        <Almacen catalogo={catalogo} nivel={jugador.nivel} />
+        <Almacen catalogo={catalogo} jugador={jugador} />
       </main>
     )
   }
 
-  const analizar = (otroDiseno) => analizarDiseno({ diseno: otroDiseno, catalogo, mision, dinero: jugador.dinero })
+  const analizar = (otroDiseno) =>
+    analizarDiseno({ diseno: otroDiseno, catalogo, mision, dinero: jugador.dinero, inventario: jugador.inventario })
 
   function aplicarCambio(nuevoDiseno, pieza, accion) {
     setPrevia(null)
@@ -65,7 +66,7 @@ export default function Hangar({ jugador, catalogo, mision, diseno, onCambiarDis
     diseno,
     onCambio: aplicarCambio,
     ficha,
-    nivel: jugador.nivel,
+    jugador,
     recomendadas: mision.piezasRecomendadas ?? [],
     onPrevisualizar: (disenoPosible, pieza) => setPrevia({ pieza, analisis: analizar(disenoPosible) }),
     onFinPrevisualizar: () => setPrevia(null),
@@ -79,9 +80,11 @@ export default function Hangar({ jugador, catalogo, mision, diseno, onCambiarDis
           <h1 className="font-display text-2xl font-bold">{mision.titulo}</h1>
           <p className="mt-1 max-w-3xl text-slate-300">{mision.descripcion}</p>
         </div>
-        <SelectorOrbita catalogo={catalogo} mision={mision} diseno={diseno} onCambiarDiseno={onCambiarDiseno} />
+        {!analisis.suborbital && (
+          <SelectorOrbita catalogo={catalogo} mision={mision} diseno={diseno} onCambiarDiseno={onCambiarDiseno} />
+        )}
         <div className="flex flex-wrap gap-2">
-          {AREAS.map((destino) => (
+          {areasDe(mision).map((destino) => (
             <button
               key={destino.id}
               onClick={() => cambiarArea(destino.id)}
@@ -109,7 +112,7 @@ export default function Hangar({ jugador, catalogo, mision, diseno, onCambiarDis
               onLanzado={onLanzado}
             />
           )}
-          {area === 'almacen' && <Almacen catalogo={catalogo} nivel={jugador.nivel} />}
+          {area === 'almacen' && <Almacen catalogo={catalogo} jugador={jugador} />}
         </div>
         <aside className="lg:sticky lg:top-16 lg:self-start">
           <PanelMision analisis={analisis} previa={previa} mision={mision} />
@@ -117,6 +120,14 @@ export default function Hangar({ jugador, catalogo, mision, diseno, onCambiarDis
       </div>
     </main>
   )
+}
+
+// Los vuelos suborbitales no llevan satélite: el Laboratorio no pinta nada.
+const areasDe = (mision) => (esSuborbital(mision) ? AREAS.filter((area) => area.id !== 'laboratorio') : AREAS)
+
+function areaInicial(mision) {
+  if (!mision) return 'almacen'
+  return esSuborbital(mision) ? 'taller' : 'laboratorio'
 }
 
 function SelectorOrbita({ catalogo, mision, diseno, onCambiarDiseno }) {

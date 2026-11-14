@@ -1,11 +1,11 @@
 import FichaPieza from '../../components/FichaPieza.jsx'
 import TarjetaPieza from '../../components/TarjetaPieza.jsx'
-import { estaBloqueada, NOMBRE_TIPO } from '../../piezas.js'
+import { disponibilidad, NOMBRE_TIPO } from '../../piezas.js'
 import BahiaSatelite from './BahiaSatelite.jsx'
 
 const TIPOS_COMPONENTE = ['panel', 'bateria', 'ordenador', 'antena', 'actitud', 'instrumento']
 
-export default function Laboratorio({ catalogo, analisis, diseno, onCambio, ficha, nivel, recomendadas, onPrevisualizar, onFinPrevisualizar }) {
+export default function Laboratorio({ catalogo, analisis, diseno, onCambio, ficha, jugador, recomendadas, onPrevisualizar, onFinPrevisualizar }) {
   const { satelite } = diseno
   const { huecos, huecosUsados } = analisis.satelite
   const lleno = huecosUsados >= huecos
@@ -34,7 +34,7 @@ export default function Laboratorio({ catalogo, analisis, diseno, onCambio, fich
         />
         {satelite.estructuraId && <p className="text-center text-sm text-slate-400">{huecosUsados} / {huecos} slots used</p>}
         {ficha ? (
-          <FichaPieza key={`${ficha.pieza.id}-${ficha.accion}-${huecosUsados}`} {...ficha} nivel={nivel} />
+          <FichaPieza key={`${ficha.pieza.id}-${ficha.accion}-${huecosUsados}`} {...ficha} disponibilidad={disponibilidad(ficha.pieza, jugador, catalogo)} />
         ) : (
           <p className="cristal p-4 text-sm text-slate-400">Click a part to install it. Its details and its effect on your mission will appear here.</p>
         )}
@@ -49,17 +49,18 @@ export default function Laboratorio({ catalogo, analisis, diseno, onCambio, fich
               .filter((pieza) => pieza.tipo === 'estructura')
               .map((estructura) => {
                 const noCaben = satelite.componentes.length > estructura.huecos
+                const disponible = disponibilidad(estructura, jugador, catalogo)
                 return (
                   <TarjetaPieza
                     key={estructura.id}
                     pieza={estructura}
                     recomendada={recomendadas.includes(estructura.id)}
-                    nivel={nivel}
+                    disponibilidad={disponible}
                     instaladas={estructura.id === satelite.estructuraId ? 1 : 0}
                     onElegir={elegirEstructura}
                     onPrevisualizar={(estructura) => onPrevisualizar(conEstructura(estructura), estructura)}
                     onFinPrevisualizar={onFinPrevisualizar}
-                    deshabilitada={estaBloqueada(estructura, nivel) || noCaben}
+                    deshabilitada={Boolean(disponible.bloqueadaHasta) || noCaben}
                     aviso={noCaben ? `Your ${satelite.componentes.length} components don’t fit` : null}
                   />
                 )
@@ -76,20 +77,23 @@ export default function Laboratorio({ catalogo, analisis, diseno, onCambio, fich
               <div className="grid gap-2 2xl:grid-cols-2">
                 {catalogo.piezas
                   .filter((pieza) => pieza.tipo === tipo)
-                  .map((pieza) => (
-                    <TarjetaPieza
-                      key={pieza.id}
-                      pieza={pieza}
-                      recomendada={recomendadas.includes(pieza.id)}
-                      nivel={nivel}
-                      instaladas={satelite.componentes.filter((id) => id === pieza.id).length}
-                      onElegir={anadir}
-                      onPrevisualizar={(pieza) => onPrevisualizar(conComponente(pieza), pieza)}
-                      onFinPrevisualizar={onFinPrevisualizar}
-                      deshabilitada={estaBloqueada(pieza, nivel) || !satelite.estructuraId || lleno}
-                      aviso={avisoComponente()}
-                    />
-                  ))}
+                  .map((pieza) => {
+                    const disponible = disponibilidad(pieza, jugador, catalogo)
+                    return (
+                      <TarjetaPieza
+                        key={pieza.id}
+                        pieza={pieza}
+                        recomendada={recomendadas.includes(pieza.id)}
+                        disponibilidad={disponible}
+                        instaladas={satelite.componentes.filter((id) => id === pieza.id).length}
+                        onElegir={anadir}
+                        onPrevisualizar={(pieza) => onPrevisualizar(conComponente(pieza), pieza)}
+                        onFinPrevisualizar={onFinPrevisualizar}
+                        deshabilitada={Boolean(disponible.bloqueadaHasta) || !satelite.estructuraId || lleno}
+                        aviso={avisoComponente()}
+                      />
+                    )
+                  })}
               </div>
             </div>
           ))}

@@ -14,9 +14,14 @@ public record JugadorResponse(
         int xpSiguienteNivel,
         int misionesCompletadas,
         int misionesFallidas,
-        boolean tutorialCompletado,
         Map<String, Integer> misionesTerminadas,
+        Campana campana,
+        Map<String, Integer> inventario,
         EmpresaResponse empresa) {
+
+    // destinosAlcanzados: id del destino → mes de juego en que se alcanzó.
+    public record Campana(boolean introVista, int mesActual, int mesLimite, Map<String, Integer> destinosAlcanzados) {
+    }
 
     public static JugadorResponse de(Jugador jugador) {
         Conocimiento conocimiento = jugador.getConocimiento();
@@ -31,8 +36,10 @@ public record JugadorResponse(
                 conocimiento.xpParaSiguienteNivel(),
                 perfil.getMisionesCompletadas(),
                 perfil.getMisionesFallidas(),
-                perfil.isTutorialCompletado(),
                 jugador.getMejorPuntuacionPorMision(),
+                new Campana(jugador.isIntroVista(), jugador.getMesActual(), jugador.getMesLimite(),
+                        jugador.getMesPorDestinoAlcanzado()),
+                jugador.getInventario(),
                 EmpresaResponse.de(jugador.getEmpresa()));
     }
 }

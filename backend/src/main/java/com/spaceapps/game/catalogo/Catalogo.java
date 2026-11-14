@@ -20,12 +20,18 @@ public class Catalogo {
     private final byte[] json;
     private final Map<String, PiezaCatalogo> piezas;
     private final List<MisionCatalogo> misiones;
+    private final List<Destino> destinos;
+    private final KitInicial kitInicial;
+    private final int mesLimite;
 
     Catalogo(JsonMapper jsonMapper, @Value("classpath:catalogo.json") Resource fichero) throws IOException {
         this.json = fichero.getContentAsByteArray();
         Contenido contenido = jsonMapper.readValue(json, Contenido.class);
         this.piezas = contenido.piezas().stream().collect(toMap(PiezaCatalogo::id, identity()));
         this.misiones = contenido.misiones();
+        this.destinos = contenido.destinos();
+        this.kitInicial = contenido.kitInicial();
+        this.mesLimite = contenido.mesLimite();
     }
 
     public byte[] json() {
@@ -44,6 +50,23 @@ public class Catalogo {
         return misiones;
     }
 
-    private record Contenido(List<PiezaCatalogo> piezas, List<MisionCatalogo> misiones) {
+    public Optional<Destino> destino(String id) {
+        return destinos.stream().filter(destino -> destino.id().equals(id)).findFirst();
+    }
+
+    public Optional<Destino> destinoQueAlcanza(String misionId) {
+        return destinos.stream().filter(destino -> misionId.equals(destino.misionId())).findFirst();
+    }
+
+    public KitInicial kitInicial() {
+        return kitInicial;
+    }
+
+    public int mesLimite() {
+        return mesLimite;
+    }
+
+    private record Contenido(List<PiezaCatalogo> piezas, List<MisionCatalogo> misiones, List<Destino> destinos,
+            KitInicial kitInicial, int mesLimite) {
     }
 }

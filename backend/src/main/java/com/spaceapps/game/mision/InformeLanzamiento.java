@@ -11,8 +11,9 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 // Lo genera la simulación del cliente; el servidor solo lo guarda para el historial, nunca decide nada con él.
+// orbitaId es null en los vuelos suborbitales.
 public record InformeLanzamiento(
-        @NotBlank @Size(max = 40) String orbitaId,
+        @Size(max = 40) String orbitaId,
         @NotNull @Size(max = 20) List<@Valid Evento> eventos,
         @NotNull @Size(max = 20) List<@NotBlank @Size(max = 600) String> explicaciones,
         @NotNull @Size(max = 20) List<@Valid Valoracion> valoracion,

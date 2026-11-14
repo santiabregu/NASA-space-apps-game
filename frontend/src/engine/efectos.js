@@ -16,7 +16,8 @@ const MEDIDAS = [
   { etiqueta: 'satellite lifetime', valor: (a) => a.satelite.vidaUtilDias, formato: conUnidad('days'), mayorEsMejor: true },
   { etiqueta: 'Δv', valor: (a) => Math.round(a.deltaV), formato: conUnidad('m/s'), mayorEsMejor: true },
   { etiqueta: 'thrust-to-weight', valor: (a) => a.empujePeso, formato: sinDecimalesExtra, mayorEsMejor: true },
-  { etiqueta: 'budget left', valor: (a) => -a.coste, formato: formatoDinero, mayorEsMejor: true },
+  { etiqueta: 'parts to buy', valor: (a) => a.costeCompra, formato: formatoDinero, mayorEsMejor: false },
+  { etiqueta: 'maximum altitude', valor: (a) => (a.suborbital && Number.isFinite(a.apogeoKm) ? Math.round(a.apogeoKm) : 0), formato: conUnidad('km'), mayorEsMejor: true },
   { etiqueta: 'development time', valor: (a) => a.meses, formato: conUnidad('months'), mayorEsMejor: false },
 ]
 

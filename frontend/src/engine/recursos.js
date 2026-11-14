@@ -12,11 +12,14 @@ const estadoMinimo = (valor, minimo) => (valor >= minimo ? 'ok' : 'error')
 const ORDEN_ESTADOS = ['ok', 'aviso', 'error']
 const peorEstado = (...estados) => ORDEN_ESTADOS[Math.max(...estados.map((estado) => ORDEN_ESTADOS.indexOf(estado)))]
 
-export function calcularRecursos({ resuelto, satelite, mision, dinero, coste, meses }) {
+// En los vuelos suborbitales no hay satélite: solo cuentan el presupuesto y el tiempo.
+const RECURSOS_SUBORBITALES = ['PRESUPUESTO', 'TIEMPO']
+
+export function calcularRecursos({ resuelto, satelite, mision, dinero, costeCompra, meses, suborbital }) {
   const { requisitos } = mision
   const capacidadCofia = resuelto.cofia?.capacidadKg ?? 0
 
-  return [
+  const recursos = [
     {
       id: 'MASA',
       nombre: 'Mass',
@@ -39,16 +42,16 @@ export function calcularRecursos({ resuelto, satelite, mision, dinero, coste, me
         estadoMaximo(satelite.potenciaConsumidaW, satelite.potenciaGeneradaW),
         satelite.bateriaWh >= satelite.bateriaNecesariaWh ? 'ok' : 'aviso',
       ),
-      explicacion: `Solar panels are the power plant. In the Earth’s shadow (${formatoNumero(resuelto.orbita.eclipseHoras * 60)} min per orbit) only the battery is left: you need ${formatoNumero(satelite.bateriaNecesariaWh)} Wh and you have ${formatoNumero(satelite.bateriaWh)} Wh.`,
+      explicacion: `Solar panels are the power plant. In the Earth’s shadow (${formatoNumero(resuelto.orbita?.eclipseHoras * 60)} min per orbit) only the battery is left: you need ${formatoNumero(satelite.bateriaNecesariaWh)} Wh and you have ${formatoNumero(satelite.bateriaWh)} Wh.`,
     },
     {
       id: 'PRESUPUESTO',
       nombre: 'Budget',
-      valor: coste,
+      valor: costeCompra,
       maximo: dinero,
-      texto: `${formatoDinero(coste)} / ${formatoDinero(dinero)}`,
-      estado: estadoMaximo(coste, dinero),
-      explicacion: 'Your company pays for the parts at launch. The Government only pays if the mission succeeds; if you are short of money, it lends you the difference and deducts it from your next payments.',
+      texto: `${formatoDinero(costeCompra)} to buy / ${formatoDinero(dinero)}`,
+      estado: estadoMaximo(costeCompra, dinero),
+      explicacion: 'Parts in your Warehouse are already paid for. The ones you are missing are bought at launch; if you are short of money, the Government lends you the difference and deducts it from your next payments.',
     },
     {
       id: 'DATOS',
@@ -68,14 +71,16 @@ export function calcularRecursos({ resuelto, satelite, mision, dinero, coste, me
         ? `makes ${formatoNumero(satelite.datosGeneradosMB)} / downloads ${formatoNumero(satelite.descargaMB)} MB per day`
         : 'no antenna',
       estado: satelite.tieneAntena ? estadoMaximo(satelite.datosGeneradosMB, satelite.descargaMB) : 'error',
-      explicacion: `You can only send data while the satellite passes over a ground antenna: ${resuelto.orbita.minutosContactoDia} minutes per day in this orbit. Whatever is not downloaded is lost.`,
+      explicacion: `You can only send data while the satellite passes over a ground antenna: ${resuelto.orbita?.minutosContactoDia} minutes per day in this orbit. Whatever is not downloaded is lost.`,
     },
     {
       id: 'TIEMPO',
       nombre: 'Time',
       valor: meses,
       maximo: requisitos.plazoMeses,
-      texto: `${meses} / ${requisitos.plazoMeses} months · life ${formatoNumero(satelite.vidaUtilDias)} / ${requisitos.vidaUtilMinDias} days`,
+      texto: suborbital
+        ? `${meses} / ${requisitos.plazoMeses} months`
+        : `${meses} / ${requisitos.plazoMeses} months · life ${formatoNumero(satelite.vidaUtilDias)} / ${requisitos.vidaUtilMinDias} days`,
       estado: peorEstado(
         estadoMaximo(meses, requisitos.plazoMeses),
         estadoMinimo(satelite.vidaUtilDias, requisitos.vidaUtilMinDias),
@@ -83,4 +88,5 @@ export function calcularRecursos({ resuelto, satelite, mision, dinero, coste, me
       explicacion: 'Development: advanced parts take longer to build. Lifetime: the structure ages, and in low orbit the thin air slows the satellite down until it falls.',
     },
   ]
+  return suborbital ? recursos.filter((recurso) => RECURSOS_SUBORBITALES.includes(recurso.id)) : recursos
 }

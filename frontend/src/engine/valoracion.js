@@ -1,12 +1,56 @@
 import { formatoDinero, formatoNumero } from '../formato.js'
 import { EMPUJE_PESO_MINIMO } from './cohete.js'
+import { formatoAltitud } from './objetivos.js'
 
 const redondo = (valor) => formatoNumero(Math.round(valor))
 const aspecto = (nombre, ok, siBien, siMal) => ({ ok, aspecto: nombre, texto: ok ? siBien : siMal })
 
 // La simulación se detiene en el primer fallo; esta valoración repasa todo el diseño para explicar qué salió bien y qué mal.
 export function valorarDiseno(analisis, mision, dinero) {
-  const { resuelto, satelite, deltaV, empujePeso, coste, meses } = analisis
+  const { empujePeso, costeCompra, meses } = analisis
+  const { requisitos } = mision
+  const despegue = aspecto(
+    'Liftoff',
+    empujePeso >= EMPUJE_PESO_MINIMO,
+    `Thrust-to-weight ${formatoNumero(empujePeso)}: the first stage left the pad quickly, wasting little propellant against gravity.`,
+    empujePeso < 1
+      ? `Thrust-to-weight ${formatoNumero(empujePeso)}: the first-stage engine pushes less than the rocket weighs, so it cannot leave the pad. Put the most powerful engine in stage 1.`
+      : `Thrust-to-weight ${formatoNumero(empujePeso)}: a slow liftoff burns extra propellant fighting gravity. Aim for at least ${EMPUJE_PESO_MINIMO}.`,
+  )
+  const plazo = aspecto(
+    'Deadline',
+    meses <= requisitos.plazoMeses,
+    `Built in ${meses} months, within the ${requisitos.plazoMeses}-month deadline.`,
+    `It took ${meses} months to build and the deadline was ${requisitos.plazoMeses}: advanced parts take longer.`,
+  )
+  const presupuesto = aspecto(
+    'Budget',
+    costeCompra <= dinero,
+    costeCompra === 0
+      ? 'Every part came from your Warehouse: nothing to buy.'
+      : `The missing parts cost ${formatoDinero(costeCompra)} and your company had ${formatoDinero(dinero)}.`,
+    `The missing parts cost ${formatoDinero(costeCompra)} but your company had ${formatoDinero(dinero)}, so it needed a rescue loan.`,
+  )
+
+  if (analisis.suborbital) {
+    const { apogeoKm } = analisis
+    return [
+      aspecto(
+        'Reach altitude',
+        apogeoKm >= requisitos.altitudMinKm,
+        `The rocket climbed ${formatoAltitud(apogeoKm)} km and the goal was ${formatoNumero(requisitos.altitudMinKm)} km.`,
+        `The rocket climbed ${formatoAltitud(apogeoKm)} km and the goal was ${formatoNumero(requisitos.altitudMinKm)} km. More propellant, a second stage or a lighter rocket would climb higher.`,
+      ),
+      despegue,
+      plazo,
+      presupuesto,
+    ]
+  }
+  return valorarPuestaEnOrbita(analisis, mision, [despegue, plazo, presupuesto])
+}
+
+function valorarPuestaEnOrbita(analisis, mision, [despegue, plazo, presupuesto]) {
+  const { resuelto, satelite, deltaV } = analisis
   const { orbita, cofia } = resuelto
   const { requisitos } = mision
   const margenDeltaV = deltaV - orbita.deltaVRequerido
@@ -24,14 +68,7 @@ export function valorarDiseno(analisis, mision, dinero) {
       `The rocket had ${redondo(deltaV)} m/s of Δv and the ${orbita.nombre} needs ${redondo(orbita.deltaVRequerido)}: ${redondo(margenDeltaV)} m/s to spare.`,
       `The rocket had ${redondo(deltaV)} m/s of Δv and the ${orbita.nombre} needs ${redondo(orbita.deltaVRequerido)}: ${redondo(-margenDeltaV)} m/s short. Another stage, higher-Isp engines or a lighter payload would close the gap.`,
     ),
-    aspecto(
-      'Liftoff',
-      empujePeso >= EMPUJE_PESO_MINIMO,
-      `Thrust-to-weight ${formatoNumero(empujePeso)}: the first stage left the pad quickly, wasting little propellant against gravity.`,
-      empujePeso < 1
-        ? `Thrust-to-weight ${formatoNumero(empujePeso)}: the first-stage engine pushes less than the rocket weighs, so it cannot leave the pad. Put the most powerful engine in stage 1.`
-        : `Thrust-to-weight ${formatoNumero(empujePeso)}: a slow liftoff burns extra propellant fighting gravity. Aim for at least ${EMPUJE_PESO_MINIMO}.`,
-    ),
+    despegue,
     aspecto(
       'Fits in the fairing',
       satelite.masaKg <= cofia.capacidadKg,
@@ -84,17 +121,7 @@ export function valorarDiseno(analisis, mision, dinero) {
         `The satellite lasts ${formatoNumero(satelite.vidaUtilDias)} days and the mission needs ${formatoNumero(requisitos.vidaUtilMinDias)}.`,
         `The satellite lasts ${formatoNumero(satelite.vidaUtilDias)} days (structure ${formatoNumero(resuelto.estructura.vidaUtilDias)}, before air drag brings it down ${formatoNumero(orbita.vidaOrbitalDias)}) and the mission needs ${formatoNumero(requisitos.vidaUtilMinDias)}.`,
       ),
-    aspecto(
-      'Deadline',
-      meses <= requisitos.plazoMeses,
-      `Built in ${meses} months, within the ${requisitos.plazoMeses}-month deadline.`,
-      `It took ${meses} months to build and the deadline was ${requisitos.plazoMeses}: advanced parts take longer.`,
-    ),
-    aspecto(
-      'Budget',
-      coste <= dinero,
-      `The parts cost ${formatoDinero(coste)} and your company had ${formatoDinero(dinero)}.`,
-      `The parts cost ${formatoDinero(coste)} but your company had ${formatoDinero(dinero)}, so it needed a rescue loan.`,
-    ),
+    plazo,
+    presupuesto,
   ].filter(Boolean)
 }

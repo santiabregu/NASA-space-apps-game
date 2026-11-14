@@ -29,3 +29,24 @@ export function relacionEmpujePeso(etapas, cargaUtilKg) {
   if (!primera || !estaCompleta(primera)) return 0
   return (primera.motor.empujeKN * 1000) / (masaDespegueKg(etapas, cargaUtilKg) * GRAVEDAD)
 }
+
+const RADIO_TIERRA_M = 6_371_000
+// El rozamiento con el aire durante la subida; en cohetes pequeños pesa mucho.
+export const PERDIDA_ARRASTRE = 300
+
+// En vuelo vertical, cada segundo de motor encendido la gravedad le quita g·t de velocidad.
+export function perdidaPorGravedad(etapas) {
+  return etapas.filter(estaCompleta).reduce((total, { motor, tanque }) => {
+    const segundosEncendido = (tanque.combustibleKg * motor.ispS * GRAVEDAD) / (motor.empujeKN * 1000)
+    return total + GRAVEDAD * segundosEncendido
+  }, 0)
+}
+
+// Altura máxima de un vuelo vertical, con la gravedad que se debilita al subir. Infinity si escapa de la Tierra.
+export function apogeoKm(etapas, cargaUtilKg) {
+  const velocidad = deltaV(etapas, cargaUtilKg) - perdidaPorGravedad(etapas) - PERDIDA_ARRASTRE
+  if (velocidad <= 0) return 0
+  const escape = 2 * GRAVEDAD * RADIO_TIERRA_M
+  if (velocidad ** 2 >= escape) return Infinity
+  return (RADIO_TIERRA_M * velocidad ** 2) / (escape - velocidad ** 2) / 1000
+}

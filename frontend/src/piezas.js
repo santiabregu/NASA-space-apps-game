@@ -11,4 +11,10 @@ export const NOMBRE_TIPO = {
   cofia: 'Fairings',
 }
 
-export const estaBloqueada = (pieza, nivel) => pieza.nivelRequerido > nivel
+// Una pieza se puede usar si ya se alcanzó su destino o si quedan unidades en el almacén (el kit inicial, por ejemplo).
+export function disponibilidad(pieza, jugador, catalogo) {
+  const enAlmacen = jugador.inventario[pieza.id] ?? 0
+  const destino = pieza.destinoRequerido
+  const bloqueada = Boolean(destino) && !(destino in jugador.campana.destinosAlcanzados) && enAlmacen === 0
+  return { enAlmacen, bloqueadaHasta: bloqueada ? catalogo.destinosPorId[destino].nombre : null }
+}

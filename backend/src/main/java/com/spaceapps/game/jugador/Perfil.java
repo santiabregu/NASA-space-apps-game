@@ -7,7 +7,6 @@ public class Perfil {
 
     private int misionesCompletadas;
     private int misionesFallidas;
-    private boolean tutorialCompletado;
 
     public int getMisionesCompletadas() {
         return misionesCompletadas;
@@ -17,15 +16,8 @@ public class Perfil {
         return misionesFallidas;
     }
 
-    public boolean isTutorialCompletado() {
-        return tutorialCompletado;
-    }
-
-    public void registrarExito(boolean eraTutorial) {
+    public void registrarExito() {
         misionesCompletadas++;
-        if (eraTutorial) {
-            tutorialCompletado = true;
-        }
     }
 
     public void registrarFallo() {

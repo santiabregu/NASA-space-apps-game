@@ -28,6 +28,7 @@ public class TokenService {
         Instant ahora = Instant.now();
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .subject(jugador.getId().toString())
+                .claim(ValidadorCuentaDelToken.CLAIM_ALTA, jugador.getCreadoEn().toEpochMilli())
                 .issuedAt(ahora)
                 .expiresAt(ahora.plus(duracion))
                 .build();

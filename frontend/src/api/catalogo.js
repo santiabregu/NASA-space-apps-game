@@ -8,5 +8,6 @@ export async function obtenerCatalogo() {
     ...catalogo,
     piezasPorId: indexarPorId(catalogo.piezas),
     orbitasPorId: indexarPorId(catalogo.orbitas),
+    destinosPorId: indexarPorId(catalogo.destinos),
   }
 }

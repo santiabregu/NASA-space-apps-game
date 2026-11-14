@@ -10,5 +10,8 @@ public record LanzamientoResponse(
         int xpGanada,
         int cambioReputacion,
         int nivelesSubidos,
+        String destinoAlcanzado,
+        long financiacion,
+        int mesJuego,
         JugadorResponse jugador) {
 }

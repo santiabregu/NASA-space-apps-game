@@ -7,7 +7,7 @@ const TITULO_ACCION = {
   quitada: { texto: 'Removed', color: 'text-red-300' },
 }
 
-function especificaciones(pieza, nivel) {
+function especificaciones(pieza, { enAlmacen, bloqueadaHasta }) {
   const filas = [
     ['Mass', `${formatoNumero(pieza.masaKg)} kg`],
     ['Cost', formatoDinero(pieza.coste)],
@@ -23,11 +23,12 @@ function especificaciones(pieza, nivel) {
   if (pieza.tasaMbps) filas.push(['Data rate', `${formatoNumero(pieza.tasaMbps * 1000)} kbit/s`])
   if (pieza.datosPorDiaMB) filas.push(['Data produced', `${formatoNumero(pieza.datosPorDiaMB)} MB per day`], ['Science value', pieza.valorCientifico])
   if (pieza.requiereApuntado) filas.push(['Pointing', 'needs reaction wheels'])
-  if (pieza.nivelRequerido > nivel) filas.push(['Unlocks at', `level ${pieza.nivelRequerido}`])
+  if (enAlmacen > 0) filas.push(['In your Warehouse', enAlmacen])
+  if (bloqueadaHasta) filas.push(['Unlocks when you reach', bloqueadaHasta])
   return filas
 }
 
-export default function FichaPieza({ pieza, accion, efectos = [], nivel }) {
+export default function FichaPieza({ pieza, accion, efectos = [], disponibilidad }) {
   const titulo = TITULO_ACCION[accion]
   const imagen = IMAGEN_PIEZA[pieza.id]
 
@@ -41,7 +42,7 @@ export default function FichaPieza({ pieza, accion, efectos = [], nivel }) {
       </div>
 
       <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-sm">
-        {especificaciones(pieza, nivel).map(([etiqueta, valor]) => (
+        {especificaciones(pieza, disponibilidad).map(([etiqueta, valor]) => (
           <Fragment key={etiqueta}>
             <dt className="text-slate-400">{etiqueta}</dt>
             <dd className="text-right">{valor}</dd>

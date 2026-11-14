@@ -1,17 +1,18 @@
-import { Award } from 'lucide-react'
+import { Award, Milestone } from 'lucide-react'
 import Valoracion from '../../components/Valoracion.jsx'
 import { formatoDinero } from '../../formato.js'
 
 const NOMBRE_PUNTOS = {
   objetivo: 'Objective achieved',
   ciencia: 'Science value',
+  altitud: 'Altitude margin',
   eficiencia: 'Efficient use of resources',
   equipo: 'Teamwork',
   retraso: 'Delay',
 }
 
 export default function Informe({ lanzamiento, onVolverSede, onRedisenar }) {
-  const { mision, simulacion, valoracion, respuesta } = lanzamiento
+  const { mision, simulacion, valoracion, respuesta, destino } = lanzamiento
 
   return (
     <section className="cristal space-y-5 p-5">
@@ -35,14 +36,29 @@ export default function Informe({ lanzamiento, onVolverSede, onRedisenar }) {
         </ul>
       )}
 
+      {destino && (
+        <div className="flex gap-3 rounded-xl border border-amber-300/40 bg-amber-950/60 p-4 text-amber-100">
+          <Milestone className="mt-0.5 h-5 w-5 shrink-0 text-amber-300" />
+          <div className="space-y-1">
+            <p className="font-display font-semibold text-amber-300">Destination reached: {destino.nombre}!</p>
+            <p>New parts and missions are unlocked. {destino.referenciaReal}</p>
+            {respuesta.financiacion > 0 && (
+              <p>Investors are impressed: a {formatoDinero(respuesta.financiacion)} funding round has closed.</p>
+            )}
+          </div>
+        </div>
+      )}
+
       <Valoracion valoracion={valoracion} />
 
       <div className="grid gap-2 text-sm sm:grid-cols-2">
-        <Dato etiqueta="Parts paid" valor={`−${formatoDinero(respuesta.costePagado)}`} />
+        <Dato etiqueta="Parts bought" valor={`−${formatoDinero(respuesta.costePagado)}`} />
         <Dato etiqueta="Government payment" valor={`+${formatoDinero(respuesta.dineroGanado)}`} />
+        {respuesta.financiacion > 0 && <Dato etiqueta="Investors" valor={`+${formatoDinero(respuesta.financiacion)}`} />}
         {respuesta.prestamo > 0 && <Dato etiqueta="Rescue loan" valor={`+${formatoDinero(respuesta.prestamo)}`} />}
         {respuesta.deudaDevuelta > 0 && <Dato etiqueta="Debt repaid" valor={`−${formatoDinero(respuesta.deudaDevuelta)}`} />}
         <Dato etiqueta="Knowledge" valor={`+${respuesta.xpGanada} XP`} />
+        <Dato etiqueta="Campaign time" valor={`month ${respuesta.mesJuego} of ${respuesta.jugador.campana.mesLimite}`} />
         <Dato
           etiqueta="Reputation"
           valor={respuesta.cambioReputacion >= 0 ? `+${respuesta.cambioReputacion}` : respuesta.cambioReputacion}
@@ -51,7 +67,7 @@ export default function Informe({ lanzamiento, onVolverSede, onRedisenar }) {
       {respuesta.nivelesSubidos > 0 && (
         <p className="flex items-center gap-2 rounded-lg bg-violet-950/80 p-3 text-violet-200">
           <Award className="h-5 w-5 shrink-0" />
-          You reached level {respuesta.jugador.nivel}! New parts are available in the Warehouse.
+          You reached level {respuesta.jugador.nivel}!
         </p>
       )}
 

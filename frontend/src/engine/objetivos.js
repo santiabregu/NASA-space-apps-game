@@ -2,18 +2,31 @@ import { formatoNumero } from '../formato.js'
 import { EMPUJE_PESO_MINIMO } from './cohete.js'
 
 const redondo = (valor) => formatoNumero(Math.round(valor))
+export const formatoAltitud = (km) => (Number.isFinite(km) ? redondo(km) : 'escapes Earth')
 const alMenos = (valor, minimo) => (valor >= minimo ? 'ok' : 'error')
 const comoMucho = (valor, maximo) => (valor <= maximo ? 'ok' : 'error')
 
 // Lo que decide si la misión sale bien. Complementa a los 6 recursos del reto, que miden consumo.
 export function objetivosMision(analisis, mision) {
-  const { resuelto, satelite, deltaV, empujePeso, meses } = analisis
+  const { resuelto, satelite, deltaV, empujePeso, apogeoKm, meses, suborbital } = analisis
   const { orbita, cofia } = resuelto
   const { requisitos } = mision
   const hayCohete = resuelto.etapas.some((etapa) => etapa.motor && etapa.tanque)
 
   return [
-    {
+    suborbital && {
+      id: 'altitud',
+      nombre: `Reach ${formatoNumero(requisitos.altitudMinKm)} km`,
+      valor: apogeoKm,
+      objetivo: requisitos.altitudMinKm,
+      unidad: 'km',
+      mayorEsMejor: true,
+      estado: hayCohete ? alMenos(apogeoKm, requisitos.altitudMinKm) : 'pendiente',
+      texto: `${formatoAltitud(apogeoKm)} / ${formatoNumero(requisitos.altitudMinKm)} km`,
+      explicacion:
+        'How high the rocket climbs before falling back into the sea. While the engine burns, gravity takes 9.8 m/s of speed away every second, and the air slows small rockets a lot. Space begins at 100 km, the Kármán line.',
+    },
+    !suborbital && {
       id: 'orbita',
       nombre: 'Reach orbit',
       valor: deltaV,
@@ -36,7 +49,7 @@ export function objetivosMision(analisis, mision) {
       texto: `${formatoNumero(empujePeso)} / ${EMPUJE_PESO_MINIMO} thrust-to-weight`,
       explicacion: `The first-stage engine must push harder than the whole rocket weighs. Below 1 it cannot leave the pad; below ${EMPUJE_PESO_MINIMO} it climbs slowly and wastes propellant fighting gravity.`,
     },
-    {
+    !suborbital && {
       id: 'cofia',
       nombre: 'Fits in fairing',
       valor: satelite.masaKg,

@@ -10,7 +10,7 @@ import com.spaceapps.game.catalogo.TipoMision;
 class LiquidacionTest {
 
     private static MisionCatalogo mision(TipoMision tipo) {
-        return new MisionCatalogo("m", "Misión", tipo, 1, new MisionCatalogo.Recompensa(10_000_000, 200));
+        return new MisionCatalogo("m", "Misión", tipo, null, 1, new MisionCatalogo.Recompensa(10_000_000, 200));
     }
 
     @Test
@@ -26,8 +26,8 @@ class LiquidacionTest {
     }
 
     @Test
-    void fallarElTutorialNoQuitaReputacion() {
-        assertThat(Liquidacion.de(mision(TipoMision.TUTORIAL), false, 0).cambioReputacion()).isZero();
+    void fallarUnHitoNoQuitaReputacion() {
+        assertThat(Liquidacion.de(mision(TipoMision.HITO), false, 0).cambioReputacion()).isZero();
     }
 
     @Test

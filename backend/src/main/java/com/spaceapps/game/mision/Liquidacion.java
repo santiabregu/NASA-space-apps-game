@@ -13,7 +13,7 @@ record Liquidacion(long dinero, int xp, int cambioReputacion) {
     static Liquidacion de(MisionCatalogo mision, boolean exito, int puntuacion) {
         MisionCatalogo.Recompensa recompensa = mision.recompensa();
         if (!exito) {
-            int reputacion = mision.tipo() == TipoMision.TUTORIAL ? 0 : REPUTACION_POR_FALLO;
+            int reputacion = mision.tipo() == TipoMision.HITO ? 0 : REPUTACION_POR_FALLO;
             return new Liquidacion(0, recompensa.xp() * PORCENTAJE_XP_SI_FALLA / 100, reputacion);
         }
         int reputacion = mision.tipo() == TipoMision.PRUEBA ? REPUTACION_POR_PRUEBA : REPUTACION_POR_EXITO;

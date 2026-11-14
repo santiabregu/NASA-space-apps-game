@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.spaceapps.game.catalogo.Catalogo;
 import com.spaceapps.game.empresa.Empresa;
 import com.spaceapps.game.jugador.Jugador;
 import com.spaceapps.game.jugador.JugadorRepository;
@@ -18,11 +19,13 @@ public class AuthService {
     private final JugadorRepository jugadores;
     private final PasswordEncoder passwordEncoder;
     private final TokenService tokenService;
+    private final Catalogo catalogo;
 
-    AuthService(JugadorRepository jugadores, PasswordEncoder passwordEncoder, TokenService tokenService) {
+    AuthService(JugadorRepository jugadores, PasswordEncoder passwordEncoder, TokenService tokenService, Catalogo catalogo) {
         this.jugadores = jugadores;
         this.passwordEncoder = passwordEncoder;
         this.tokenService = tokenService;
+        this.catalogo = catalogo;
     }
 
     @Transactional
@@ -36,7 +39,8 @@ public class AuthService {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "The username " + nombreUsuario + " is already taken");
         }
         Empresa empresa = new Empresa(datos.nombreEmpresa().trim());
-        Jugador jugador = jugadores.save(new Jugador(email, passwordEncoder.encode(datos.password()), nombreUsuario, empresa));
+        Jugador jugador = jugadores.save(new Jugador(email, passwordEncoder.encode(datos.password()), nombreUsuario, empresa,
+                catalogo.kitInicial(), catalogo.mesLimite()));
         return tokenService.emitir(jugador);
     }
 

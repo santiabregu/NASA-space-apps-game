@@ -2,7 +2,7 @@ export const MAX_ETAPAS = 3
 
 export function disenoInicial(mision) {
   return {
-    orbitaId: mision.orbitasPermitidas[0],
+    orbitaId: mision.orbitasPermitidas[0] ?? null,
     satelite: { estructuraId: null, componentes: [] },
     cohete: { cofiaId: null, etapas: [] },
   }
@@ -69,7 +69,7 @@ export function disenoDesdePiezas(piezaIds, orbitaId, { piezasPorId }) {
   }
 }
 
-export const costeTotal =(piezas) => piezas.reduce((total, pieza) => total + pieza.coste, 0)
+export const costeTotal = (piezas) => piezas.reduce((total, pieza) => total + pieza.coste, 0)
 
 const MESES_INTEGRACION = 1
 
@@ -78,13 +78,25 @@ export function mesesDesarrollo(piezas) {
   return Math.max(...piezas.map((pieza) => pieza.mesesDesarrollo)) + MESES_INTEGRACION
 }
 
-export function faltasDeDiseno(resuelto) {
+export function faltasDeDiseno(resuelto, suborbital) {
   const faltas = []
-  if (!resuelto.estructura) faltas.push('Choose the satellite structure in the Lab')
+  if (!suborbital && !resuelto.estructura) faltas.push('Choose the satellite structure in the Lab')
   if (resuelto.etapas.length === 0) faltas.push('Build at least one rocket stage in the Workshop')
-  if (!resuelto.cofia) faltas.push('Choose a fairing in the Workshop')
+  if (!resuelto.cofia) faltas.push('Choose a nose cone or fairing in the Workshop')
   if (resuelto.etapas.some((etapa) => !etapa.motor || !etapa.tanque)) {
     faltas.push('Every rocket stage needs an engine and a tank')
   }
   return faltas
+}
+
+// Las piezas del diseño que el inventario no cubre, contando las repetidas. Se compran al lanzar.
+export function piezasQueFaltan(piezas, inventario) {
+  const disponibles = { ...inventario }
+  return piezas.filter((pieza) => {
+    if ((disponibles[pieza.id] ?? 0) > 0) {
+      disponibles[pieza.id] -= 1
+      return false
+    }
+    return true
+  })
 }

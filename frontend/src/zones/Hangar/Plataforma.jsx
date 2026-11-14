@@ -12,7 +12,8 @@ export default function Plataforma({ analisis, mision, dinero, deuda, onLanzado 
   const [error, setError] = useState(null)
   const [prueba, setPrueba] = useState(null)
 
-  const prestamo = Math.max(0, analisis.coste - dinero)
+  const prestamo = Math.max(0, analisis.costeCompra - dinero)
+  const deAlmacen = analisis.piezas.length - analisis.aComprar.length
   const bloqueado = analisis.faltas.length > 0
   const hayRiesgos = [...objetivosMision(analisis, mision), ...analisis.recursos].some((fila) => fila.estado === 'error')
 
@@ -33,7 +34,7 @@ export default function Plataforma({ analisis, mision, dinero, deuda, onLanzado 
         puntuacion: simulacion.puntuacion,
         aceptaPrestamo: prestamo > 0,
         informe: {
-          orbitaId: analisis.resuelto.orbita.id,
+          orbitaId: analisis.resuelto.orbita?.id ?? null,
           eventos: simulacion.eventos,
           explicaciones: simulacion.explicaciones,
           valoracion,
@@ -62,14 +63,20 @@ export default function Plataforma({ analisis, mision, dinero, deuda, onLanzado 
       )}
 
       <div className="cristal p-4 text-sm">
-        <p>Parts cost: <strong>{formatoDinero(analisis.coste)}</strong> (you have {formatoDinero(dinero)})</p>
-        <p className="text-slate-400">Development: {analisis.meses} months · Deadline: {mision.requisitos.plazoMeses} months</p>
+        <p>
+          From your Warehouse: <strong>{deAlmacen} of {analisis.piezas.length} parts</strong> · To buy:{' '}
+          <strong>{formatoDinero(analisis.costeCompra)}</strong> (you have {formatoDinero(dinero)})
+        </p>
+        <p className="text-slate-400">
+          Development: {analisis.meses} months · Deadline: {mision.requisitos.plazoMeses} months · A real launch uses{' '}
+          {mision.mesesConsumidos} {mision.mesesConsumidos === 1 ? 'month' : 'months'} of your campaign
+        </p>
       </div>
 
       {hayRiesgos && !bloqueado && (
         <p className="text-sm text-amber-300">
           Some mission goals or resources are red (see the panel). Run a free test to see what would happen, or launch
-          anyway: if it fails you lose the money spent on parts, but the report will explain why.
+          anyway: if it fails you lose the parts and the time, but the report will explain why.
         </p>
       )}
       {prestamo > 0 && (
@@ -83,7 +90,7 @@ export default function Plataforma({ analisis, mision, dinero, deuda, onLanzado 
           <div>
             <h3 className="font-display font-semibold">Test run</h3>
             <p className="text-sm text-slate-400">
-              Simulate the whole mission for free, as many times as you like. Only a real launch pays for the parts.
+              Simulate the whole mission for free, as many times as you like. Only a real launch uses up parts and time.
             </p>
           </div>
           <button

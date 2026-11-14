@@ -27,7 +27,7 @@ export default function Navegacion({ jugador, zona, onIrA, onSalir }) {
           </button>
         ))}
         <span className="ml-auto text-sm text-slate-200">
-          {formatoDinero(jugador.dinero)} · Level {jugador.nivel}
+          {formatoDinero(jugador.dinero)} · Month {jugador.campana.mesActual} / {jugador.campana.mesLimite} · Level {jugador.nivel}
         </span>
         <button onClick={onSalir} className="rounded-lg border border-slate-400/30 px-3 py-1 text-sm hover:bg-slate-800/60">
           Log out

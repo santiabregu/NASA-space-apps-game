@@ -1,9 +1,15 @@
 package com.spaceapps.game.jugador;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.hibernate.annotations.ColumnDefault;
+
+import com.spaceapps.game.catalogo.KitInicial;
 import com.spaceapps.game.empresa.Empresa;
 
 import jakarta.persistence.CascadeType;
@@ -22,8 +28,6 @@ import jakarta.persistence.OneToOne;
 
 @Entity
 public class Jugador {
-
-    private static final long DINERO_INICIAL = 10_000_000;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -44,6 +48,17 @@ public class Jugador {
     @Column(nullable = false)
     private Instant creadoEn;
 
+    // Los valores por defecto permiten añadir estas columnas a una base que ya tiene jugadores.
+    @ColumnDefault("false")
+    private boolean introVista;
+
+    // Reloj de la campaña en meses de juego: cada lanzamiento real lo avanza.
+    @ColumnDefault("0")
+    private int mesActual;
+
+    @ColumnDefault("12")
+    private int mesLimite;
+
     @Embedded
     private Perfil perfil = new Perfil();
 
@@ -60,16 +75,31 @@ public class Jugador {
     @Column(name = "mejor_puntuacion", nullable = false)
     private Map<String, Integer> mejorPuntuacionPorMision = new HashMap<>();
 
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "inventario_pieza", joinColumns = @JoinColumn(name = "jugador_id"))
+    @MapKeyColumn(name = "pieza_id")
+    @Column(name = "cantidad", nullable = false)
+    private Map<String, Integer> inventario = new HashMap<>();
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "destino_alcanzado", joinColumns = @JoinColumn(name = "jugador_id"))
+    @MapKeyColumn(name = "destino_id")
+    @Column(name = "mes_juego", nullable = false)
+    private Map<String, Integer> mesPorDestinoAlcanzado = new HashMap<>();
+
     protected Jugador() {
     }
 
-    public Jugador(String email, String passwordHash, String nombreUsuario, Empresa empresa) {
+    public Jugador(String email, String passwordHash, String nombreUsuario, Empresa empresa, KitInicial kit, int mesLimite) {
         this.email = email;
         this.passwordHash = passwordHash;
         this.nombreUsuario = nombreUsuario;
         this.empresa = empresa;
-        this.dinero = DINERO_INICIAL;
-        this.creadoEn = Instant.now();
+        this.dinero = kit.dinero();
+        this.inventario.putAll(kit.piezas());
+        this.mesLimite = mesLimite;
+        // En milisegundos para que el valor que va en el token coincida exactamente con el guardado en la base.
+        this.creadoEn = Instant.now().truncatedTo(ChronoUnit.MILLIS);
     }
 
     public Long getId() {
@@ -84,12 +114,28 @@ public class Jugador {
         return passwordHash;
     }
 
+    public Instant getCreadoEn() {
+        return creadoEn;
+    }
+
     public String getNombreUsuario() {
         return nombreUsuario;
     }
 
     public long getDinero() {
         return dinero;
+    }
+
+    public boolean isIntroVista() {
+        return introVista;
+    }
+
+    public int getMesActual() {
+        return mesActual;
+    }
+
+    public int getMesLimite() {
+        return mesLimite;
     }
 
     public Perfil getPerfil() {
@@ -115,11 +161,63 @@ public class Jugador {
         dinero += cantidad;
     }
 
+    public void marcarIntroVista() {
+        introVista = true;
+    }
+
+    public void avanzarReloj(int meses) {
+        mesActual += meses;
+    }
+
     public Map<String, Integer> getMejorPuntuacionPorMision() {
         return Map.copyOf(mejorPuntuacionPorMision);
     }
 
     public void registrarMisionTerminada(String misionId, int puntuacion) {
         mejorPuntuacionPorMision.merge(misionId, puntuacion, Math::max);
+    }
+
+    public Map<String, Integer> getInventario() {
+        return Map.copyOf(inventario);
+    }
+
+    // Las piezas del diseño que el inventario no cubre, contando las repetidas.
+    public List<String> piezasQueFaltan(List<String> piezaIds) {
+        Map<String, Integer> disponibles = new HashMap<>(inventario);
+        List<String> faltan = new ArrayList<>();
+        for (String piezaId : piezaIds) {
+            if (disponibles.getOrDefault(piezaId, 0) > 0) {
+                disponibles.merge(piezaId, -1, Integer::sum);
+            } else {
+                faltan.add(piezaId);
+            }
+        }
+        return faltan;
+    }
+
+    public void anadirPiezas(List<String> piezaIds) {
+        piezaIds.forEach(piezaId -> inventario.merge(piezaId, 1, Integer::sum));
+    }
+
+    public void consumirPiezas(List<String> piezaIds) {
+        if (!piezasQueFaltan(piezaIds).isEmpty()) {
+            throw new IllegalStateException("El jugador " + id + " no tiene en el inventario todas las piezas de " + piezaIds);
+        }
+        // Las cantidades a cero se borran para que el inventario solo liste lo que hay.
+        piezaIds.forEach(piezaId -> inventario.computeIfPresent(piezaId, (clave, cantidad) -> cantidad > 1 ? cantidad - 1 : null));
+    }
+
+    public Map<String, Integer> getMesPorDestinoAlcanzado() {
+        return Map.copyOf(mesPorDestinoAlcanzado);
+    }
+
+    // Un destino null es el punto de partida, que todos tienen.
+    public boolean haAlcanzado(String destinoId) {
+        return destinoId == null || mesPorDestinoAlcanzado.containsKey(destinoId);
+    }
+
+    // Devuelve si es la primera vez: solo entonces hay ronda de financiación.
+    public boolean alcanzarDestino(String destinoId) {
+        return mesPorDestinoAlcanzado.putIfAbsent(destinoId, mesActual) == null;
     }
 }

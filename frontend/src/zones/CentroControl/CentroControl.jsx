@@ -1,8 +1,9 @@
-import { CircleCheck, CircleX, Earth, Flame, Layers, Radio, Rocket, Satellite } from 'lucide-react'
+import { ArrowUpToLine, CircleCheck, CircleX, Earth, Flame, Layers, Radio, Rocket, Satellite, Waves } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { esSuborbital } from '../../engine/analisis.js'
 import Informe from './Informe.jsx'
 
-const ICONO_EVENTO = { despegue: Rocket, separacion: Layers, orbita: Satellite, contacto: Radio, objetivo: CircleCheck }
+const ICONO_EVENTO = { despegue: Rocket, separacion: Layers, orbita: Satellite, contacto: Radio, objetivo: CircleCheck, apogeo: ArrowUpToLine, amerizaje: Waves }
 
 const MS_POR_FASE = 1100
 const ALTURA_VUELO_PX = 220
@@ -12,7 +13,10 @@ export default function CentroControl({ lanzamiento, onVolverSede, onRedisenar }
   const totalFases = simulacion.eventos.length
   const [fasesVistas, setFasesVistas] = useState(0)
   const terminado = fasesVistas >= totalFases
-  const enOrbita = terminado && simulacion.exito
+  const suborbital = esSuborbital(lanzamiento.mision)
+  const enOrbita = terminado && simulacion.exito && !suborbital
+  // Un vuelo suborbital que sale bien termina de vuelta abajo, en el mar.
+  const enElMar = terminado && simulacion.exito && suborbital
 
   useEffect(() => {
     const intervalo = setInterval(() => setFasesVistas((vistas) => Math.min(vistas + 1, totalFases)), MS_POR_FASE)
@@ -32,11 +36,11 @@ export default function CentroControl({ lanzamiento, onVolverSede, onRedisenar }
           ) : (
             <span
               className="mb-4 transition-transform duration-1000 ease-in"
-              style={{ transform: `translateY(-${altura}px)` }}
+              style={{ transform: `translateY(-${enElMar ? 0 : altura}px)` }}
             >
-              {terminado ? (
-                <Flame className="h-12 w-12 text-orange-400" strokeWidth={1.5} />
-              ) : (
+              {enElMar && <Waves className="h-12 w-12 text-sky-300" strokeWidth={1.5} />}
+              {terminado && !enElMar && <Flame className="h-12 w-12 text-orange-400" strokeWidth={1.5} />}
+              {!terminado && (
                 <Rocket className="h-12 w-12 -rotate-45 text-slate-100" strokeWidth={1.5} />
               )}
             </span>

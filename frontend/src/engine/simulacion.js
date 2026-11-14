@@ -1,41 +1,99 @@
 import { formatoNumero } from '../formato.js'
 import { EMPUJE_PESO_MINIMO } from './cohete.js'
+import { formatoAltitud } from './objetivos.js'
 
 const PERDIDA_DESPEGUE_LENTO = 500
 const PUNTOS_OBJETIVO = 50
 const PUNTOS_CIENCIA = 20
+const PUNTOS_ALTITUD = 20
 const PUNTOS_EFICIENCIA = 20
 const PUNTOS_EQUIPO = 10
 const PENALIZACION_POR_AVISO = 5
 const PENALIZACION_RETRASO = 10
-const MARGEN_CIENCIA_EXCELENTE = 1.5
+const MARGEN_EXCELENTE = 1.5
 
 // La explicación que cierra un fallo es la que lo provocó.
 export const causaDelFallo = ({ exito, explicaciones }) => (exito ? null : explicaciones.at(-1))
 
+// Lo que va pasando en el vuelo; fallo() cierra la bitácora con el problema que lo terminó.
+function nuevaBitacora() {
+  const eventos = []
+  const explicaciones = []
+  return {
+    eventos,
+    explicaciones,
+    ocurre: (texto, icono) => eventos.push({ texto, icono, ok: true }),
+    fallo: (texto, explicacion) => ({
+      exito: false,
+      puntuacion: 0,
+      desglose: null,
+      eventos: [...eventos, { texto, ok: false }],
+      explicaciones: [...explicaciones, explicacion],
+    }),
+  }
+}
+
+function falloEnPlataforma({ resuelto, empujePeso }, fallo) {
+  const empujeKN = resuelto.etapas[0].motor.empujeKN
+  const pesoKN = empujeKN / empujePeso
+  return fallo(
+    'The rocket does not leave the launch pad',
+    `The first-stage engine pushes ${formatoNumero(empujeKN)} kN, but the rocket weighs ${formatoNumero(pesoKN)} kN. You need a more powerful engine or less weight: thrust-to-weight must be above ${EMPUJE_PESO_MINIMO}.`,
+  )
+}
+
 export function simular(analisis, mision) {
+  return analisis.suborbital ? simularVueloSuborbital(analisis, mision) : simularPuestaEnOrbita(analisis, mision)
+}
+
+function simularVueloSuborbital(analisis, mision) {
+  const { resuelto, empujePeso, apogeoKm, meses } = analisis
+  const { requisitos } = mision
+  const { eventos, explicaciones, ocurre, fallo } = nuevaBitacora()
+
+  if (empujePeso < 1) return falloEnPlataforma(analisis, fallo)
+  ocurre('Liftoff', 'despegue')
+  resuelto.etapas.slice(0, -1).forEach((_, indice) => ocurre(`Stage ${indice + 1} separation`, 'separacion'))
+  ocurre(`Highest point: ${formatoAltitud(apogeoKm)} km`, 'apogeo')
+
+  if (apogeoKm < requisitos.altitudMinKm) {
+    return fallo(
+      'The rocket falls back too soon',
+      `It climbed ${formatoAltitud(apogeoKm)} km and the goal was ${formatoNumero(requisitos.altitudMinKm)} km. While the engine burns, gravity takes away 9.8 m/s every second: more propellant, a second stage or a lighter rocket would climb higher.`,
+    )
+  }
+  ocurre('Splashdown in the ocean', 'amerizaje')
+
+  const retraso = meses > requisitos.plazoMeses
+  if (retraso) {
+    explicaciones.push(`Delivered late: building took ${meses} months and the deadline was ${requisitos.plazoMeses}.`)
+  }
+  const despegueLento = empujePeso < EMPUJE_PESO_MINIMO
+  if (despegueLento) {
+    explicaciones.push(`Liftoff was slow (thrust-to-weight ${formatoNumero(empujePeso)}): the rocket wasted propellant fighting gravity.`)
+  }
+  if (!retraso && !despegueLento) {
+    explicaciones.push(`Clean flight: a quick liftoff and ${formatoAltitud(apogeoKm)} km of altitude.`)
+  }
+
+  const desglose = {
+    objetivo: PUNTOS_OBJETIVO,
+    altitud: Math.round(puntosPorMargen(apogeoKm, requisitos.altitudMinKm) * PUNTOS_ALTITUD),
+    eficiencia: despegueLento ? PUNTOS_EFICIENCIA - PENALIZACION_POR_AVISO : PUNTOS_EFICIENCIA,
+    equipo: PUNTOS_EQUIPO,
+    retraso: retraso ? -PENALIZACION_RETRASO : 0,
+  }
+  const puntuacion = Object.values(desglose).reduce((total, puntos) => total + puntos, 0)
+  return { exito: true, puntuacion, desglose, eventos, explicaciones }
+}
+
+function simularPuestaEnOrbita(analisis, mision) {
   const { resuelto, satelite, empujePeso, cargaUtilKg, meses } = analisis
   const { orbita, cofia } = resuelto
   const { requisitos } = mision
-  const eventos = []
-  const explicaciones = []
-  const ocurre = (texto, icono) => eventos.push({ texto, icono, ok: true })
-  const fallo = (texto, explicacion) => ({
-    exito: false,
-    puntuacion: 0,
-    desglose: null,
-    eventos: [...eventos, { texto, ok: false }],
-    explicaciones: [...explicaciones, explicacion],
-  })
+  const { eventos, explicaciones, ocurre, fallo } = nuevaBitacora()
 
-  if (empujePeso < 1) {
-    const empujeKN = resuelto.etapas[0].motor.empujeKN
-    const pesoKN = empujeKN / empujePeso
-    return fallo(
-      'The rocket does not leave the launch pad',
-      `The first-stage engine pushes ${formatoNumero(empujeKN)} kN, but the rocket weighs ${formatoNumero(pesoKN)} kN. You need a more powerful engine or less weight: thrust-to-weight must be above ${EMPUJE_PESO_MINIMO}.`,
-    )
-  }
+  if (empujePeso < 1) return falloEnPlataforma(analisis, fallo)
   ocurre('Liftoff', 'despegue')
 
   let deltaVConseguido = analisis.deltaV
@@ -107,9 +165,12 @@ export function simular(analisis, mision) {
   return { exito: true, puntuacion, desglose, eventos, explicaciones }
 }
 
+// De 0 a 1: el máximo se alcanza con un margen de MARGEN_EXCELENTE sobre el mínimo pedido.
+const puntosPorMargen = (valor, minimo) => Math.min(1, valor / (minimo * MARGEN_EXCELENTE))
+
 function puntosCiencia(valor, minimo) {
   if (minimo === 0) return PUNTOS_CIENCIA
-  return Math.min(1, valor / (minimo * MARGEN_CIENCIA_EXCELENTE)) * PUNTOS_CIENCIA
+  return puntosPorMargen(valor, minimo) * PUNTOS_CIENCIA
 }
 
 function avisosDeOperacion(satelite, orbita) {

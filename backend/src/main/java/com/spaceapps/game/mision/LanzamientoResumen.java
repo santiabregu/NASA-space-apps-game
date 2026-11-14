@@ -15,6 +15,9 @@ public record LanzamientoResumen(
         long deudaDevuelta,
         int xpGanada,
         int cambioReputacion,
+        String destinoAlcanzado,
+        long financiacion,
+        int mesJuego,
         List<String> piezas,
         InformeLanzamiento informe) {
 }

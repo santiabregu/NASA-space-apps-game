@@ -3,18 +3,18 @@ import { useState } from 'react'
 import FichaPieza from '../../components/FichaPieza.jsx'
 import TarjetaPieza from '../../components/TarjetaPieza.jsx'
 import { instalarEnCohete, MAX_ETAPAS, quitarDelCohete } from '../../engine/diseno.js'
-import { estaBloqueada } from '../../piezas.js'
+import { disponibilidad } from '../../piezas.js'
 import BahiaCohete from './BahiaCohete.jsx'
 
 const SECCIONES = [
   { tipo: 'motor', titulo: 'Engines', ayuda: 'An engine goes into the lowest stage that has none; if every stage has one, it starts a new stage on top.' },
   { tipo: 'tanque', titulo: 'Tanks', ayuda: 'A tank sits on top of the lowest stage that has none; if every stage has one, it starts a new stage on top.' },
-  { tipo: 'cofia', titulo: 'Fairing', ayuda: 'The nose that protects the satellite. It goes on top.' },
+  { tipo: 'cofia', titulo: 'Nose and fairing', ayuda: 'The nose cuts through the air and protects whatever you carry. It goes on top.' },
 ]
 
 const PIEZA_DE_CAMPO = { motorId: 'motor', tanqueId: 'tanque' }
 
-export default function Taller({ catalogo, analisis, diseno, onCambio, ficha, nivel, recomendadas, empresa, onPrevisualizar, onFinPrevisualizar }) {
+export default function Taller({ catalogo, analisis, diseno, onCambio, ficha, jugador, recomendadas, empresa, onPrevisualizar, onFinPrevisualizar }) {
   const [aviso, setAviso] = useState(null)
   const { cohete } = diseno
   const { resuelto } = analisis
@@ -55,7 +55,7 @@ export default function Taller({ catalogo, analisis, diseno, onCambio, ficha, ni
           onVaciar={() => onCambio(conCohete({ cofiaId: null, etapas: [] }))}
         />
         {ficha ? (
-          <FichaPieza key={`${ficha.pieza.id}-${ficha.accion}-${analisis.piezas.length}`} {...ficha} nivel={nivel} />
+          <FichaPieza key={`${ficha.pieza.id}-${ficha.accion}-${analisis.piezas.length}`} {...ficha} disponibilidad={disponibilidad(ficha.pieza, jugador, catalogo)} />
         ) : (
           <p className="cristal p-4 text-sm text-slate-400">Click a part to install it. Its details and its effect on your mission will appear here.</p>
         )}
@@ -83,19 +83,22 @@ export default function Taller({ catalogo, analisis, diseno, onCambio, ficha, ni
             <div className="grid gap-2 2xl:grid-cols-2">
               {catalogo.piezas
                 .filter((pieza) => pieza.tipo === seccion.tipo)
-                .map((pieza) => (
-                  <TarjetaPieza
-                    key={pieza.id}
-                    pieza={pieza}
-                    recomendada={recomendadas.includes(pieza.id)}
-                    nivel={nivel}
-                    instaladas={idsInstalados.filter((id) => id === pieza.id).length}
-                    onElegir={instalar}
-                    onPrevisualizar={previsualizar}
-                    onFinPrevisualizar={onFinPrevisualizar}
-                    deshabilitada={estaBloqueada(pieza, nivel)}
-                  />
-                ))}
+                .map((pieza) => {
+                  const disponible = disponibilidad(pieza, jugador, catalogo)
+                  return (
+                    <TarjetaPieza
+                      key={pieza.id}
+                      pieza={pieza}
+                      recomendada={recomendadas.includes(pieza.id)}
+                      disponibilidad={disponible}
+                      instaladas={idsInstalados.filter((id) => id === pieza.id).length}
+                      onElegir={instalar}
+                      onPrevisualizar={previsualizar}
+                      onFinPrevisualizar={onFinPrevisualizar}
+                      deshabilitada={Boolean(disponible.bloqueadaHasta)}
+                    />
+                  )
+                })}
             </div>
           </div>
         ))}

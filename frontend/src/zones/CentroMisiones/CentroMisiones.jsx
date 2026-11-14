@@ -1,4 +1,4 @@
-import { CircleCheck, Flag, Lock } from 'lucide-react'
+import { CircleCheck, Flag, Lock, Milestone } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { obtenerMisionesDisponibles } from '../../api/misiones.js'
 import { formatoDinero, formatoNumero } from '../../formato.js'
@@ -25,16 +25,16 @@ export default function CentroMisiones({ jugador, catalogo, misionActiva, onAcep
   if (!disponibles) return <p className="p-8 text-center text-slate-400">Contacting the Government…</p>
 
   const terminadas = jugador.misionesTerminadas
-  const bloqueadasPorNivel = catalogo.misiones.filter(
-    (mision) => mision.tipo === 'SOLO' && !disponibles.includes(mision.id) && mision.nivelMinimo > jugador.nivel,
-  )
+  const alcanzados = jugador.campana.destinosAlcanzados
+  const bloqueadasPorDestino = catalogo.misiones.filter((mision) => mision.destinoId && !(mision.destinoId in alcanzados))
 
   return (
     <main className="mx-auto max-w-4xl space-y-6 px-4 py-8">
       <header>
         <h1 className="font-display text-2xl font-bold">Mission Center</h1>
         <p className="text-slate-400">
-          The Government posts contracts. You pay for the parts; if the mission succeeds, the Government pays you based on your score.
+          Milestones take your company one destination further; Government contracts pay you based on your score. Parts
+          you are missing are bought at launch.
         </p>
       </header>
 
@@ -56,10 +56,10 @@ export default function CentroMisiones({ jugador, catalogo, misionActiva, onAcep
           </TarjetaMision>
         ))}
 
-      {bloqueadasPorNivel.map((mision) => (
+      {bloqueadasPorDestino.map((mision) => (
         <TarjetaMision key={mision.id} mision={mision} catalogo={catalogo} bloqueada>
           <p className="flex items-center gap-1.5 text-sm text-slate-400">
-            <Lock className="h-4 w-4" /> Requires level {mision.nivelMinimo}
+            <Lock className="h-4 w-4" /> Reach {catalogo.destinosPorId[mision.destinoId].nombre} first
           </p>
         </TarjetaMision>
       ))}
@@ -75,8 +75,10 @@ function textoBotonAceptar(enDiseno, terminada) {
 function TarjetaMision({ mision, catalogo, bloqueada = false, mejorPuntuacion, children }) {
   const terminada = mejorPuntuacion !== undefined
   const { requisitos, recompensa } = mision
-  const orbitas = mision.orbitasPermitidas.map((id) => catalogo.orbitasPorId[id].nombre).join(' or ')
+  const orbitas = mision.orbitasPermitidas.map((id) => catalogo.orbitasPorId[id].nombre).join(' or ') || 'Suborbital: up and back down'
+  const destinoDelHito = catalogo.destinos.find((destino) => destino.misionId === mision.id)
   const requisitosVisibles = [
+    requisitos.altitudMinKm > 0 && `Altitude ≥ ${formatoNumero(requisitos.altitudMinKm)} km`,
     requisitos.valorCientificoMin > 0 && `Science value ≥ ${requisitos.valorCientificoMin}`,
     requisitos.datosMinMB > 0 && `Data ≥ ${formatoNumero(requisitos.datosMinMB)} MB/day`,
     requisitos.vidaUtilMinDias > 0 && `Lifetime ≥ ${formatoNumero(requisitos.vidaUtilMinDias)} days`,
@@ -96,6 +98,12 @@ function TarjetaMision({ mision, catalogo, bloqueada = false, mejorPuntuacion, c
           </p>
         </div>
         <p className="text-slate-300">{mision.descripcion}</p>
+        {destinoDelHito && (
+          <p className="flex items-center gap-1.5 text-sm font-semibold text-amber-300">
+            <Milestone className="h-4 w-4" /> Milestone · destination {destinoDelHito.nombre}
+            {destinoDelHito.financiacion > 0 && ` · investors add ${formatoDinero(destinoDelHito.financiacion)} the first time`}
+          </p>
+        )}
         {terminada && (
           <p className="flex items-center gap-1.5 text-sm font-semibold text-emerald-300">
             <CircleCheck className="h-4 w-4" /> Completed · best score {mejorPuntuacion} / 100
@@ -104,6 +112,8 @@ function TarjetaMision({ mision, catalogo, bloqueada = false, mejorPuntuacion, c
         <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-sm">
           <dt className="text-slate-400">Orbit</dt>
           <dd>{orbitas}</dd>
+          <dt className="text-slate-400">Campaign time</dt>
+          <dd>{mision.mesesConsumidos} {mision.mesesConsumidos === 1 ? 'month' : 'months'}</dd>
           <dt className="text-slate-400">Requirements</dt>
           <dd>{requisitosVisibles.join(' · ')}</dd>
           <dt className="text-slate-400">Critical resources</dt>

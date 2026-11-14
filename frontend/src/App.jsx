@@ -13,6 +13,8 @@ import Hangar from './zones/Hangar/Hangar.jsx'
 import Login from './zones/Login/Login.jsx'
 import RegistroMisiones from './zones/RegistroMisiones/RegistroMisiones.jsx'
 import Sede from './zones/Sede/Sede.jsx'
+import Derrumbe from './zones/Transmision/Derrumbe.jsx'
+import Transmision from './zones/Transmision/Transmision.jsx'
 
 export default function App() {
   const [jugador, setJugador] = useState(null)
@@ -23,6 +25,8 @@ export default function App() {
   const [misionActiva, setMisionActiva] = useState(null)
   const [diseno, setDiseno] = useState(null)
   const [lanzamiento, setLanzamiento] = useState(null)
+  // Foto de la transmisión inicial que se rompe en ladrillos al aceptar la misión.
+  const [escenaRota, setEscenaRota] = useState(null)
 
   const cargarPartida = () =>
     Promise.all([obtenerJugador(), obtenerCatalogo()])
@@ -31,8 +35,12 @@ export default function App() {
         setCatalogo(datosCatalogo)
       })
       .catch((error) => {
-        if (error.estado === 401) borrarToken()
-        setAviso(error.message)
+        if (error.estado === 401) {
+          borrarToken()
+          setAviso('Your session has expired. Please log in again.')
+        } else {
+          setAviso(error.message)
+        }
       })
       .finally(() => setCargando(false))
 
@@ -65,7 +73,8 @@ export default function App() {
 
   function alLanzar(nuevoLanzamiento) {
     setJugador(nuevoLanzamiento.respuesta.jugador)
-    setLanzamiento(nuevoLanzamiento)
+    const destino = catalogo.destinosPorId[nuevoLanzamiento.respuesta.destinoAlcanzado] ?? null
+    setLanzamiento({ ...nuevoLanzamiento, destino })
     setZona('control')
   }
 
@@ -88,9 +97,31 @@ export default function App() {
     )
   }
 
+  if (!jugador.campana.introVista) {
+    return (
+      <Transmision
+        jugador={jugador}
+        onAceptada={(jugadorActualizado, escena) => {
+          setJugador(jugadorActualizado)
+          setZona('misiones')
+          setEscenaRota(escena)
+        }}
+      />
+    )
+  }
+
   return (
     <>
       <FondoZona {...FONDOS[zona]} />
+      {escenaRota && (
+        <Derrumbe
+          escena={escenaRota}
+          onTerminado={() => {
+            URL.revokeObjectURL(escenaRota)
+            setEscenaRota(null)
+          }}
+        />
+      )}
       {zona !== 'control' && <Navegacion jugador={jugador} zona={zona} onIrA={setZona} onSalir={salir} />}
       {zona === 'sede' && <Sede jugador={jugador} onIrA={setZona} />}
       {zona === 'misiones' && (

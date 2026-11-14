@@ -1,6 +1,5 @@
 import { CircleCheck, Lock, Satellite, Star } from 'lucide-react'
 import { IMAGEN_PIEZA } from '../imagenes.js'
-import { estaBloqueada } from '../piezas.js'
 
 function estiloBorde({ instaladas, seleccionada, recomendada }) {
   if (instaladas > 0) return 'border-emerald-400 bg-emerald-950/40 shadow-[0_0_14px_rgba(52,211,153,.25)]'
@@ -9,11 +8,11 @@ function estiloBorde({ instaladas, seleccionada, recomendada }) {
   return 'border-slate-400/20 bg-slate-900/60'
 }
 
-function Marca({ bloqueada, instaladas, recomendada, nivelRequerido }) {
-  if (bloqueada) {
+function Marca({ bloqueadaHasta, instaladas, recomendada }) {
+  if (bloqueadaHasta) {
     return (
       <span className="flex shrink-0 items-center gap-1 text-xs text-slate-400">
-        <Lock className="h-3.5 w-3.5" /> Level {nivelRequerido}
+        <Lock className="h-3.5 w-3.5" /> Reach {bloqueadaHasta}
       </span>
     )
   }
@@ -35,9 +34,10 @@ function Marca({ bloqueada, instaladas, recomendada, nivelRequerido }) {
 }
 
 // seleccionada = la pieza que se está viendo (Almacén); instaladas = cuántas lleva ya el diseño.
+// disponibilidad = { enAlmacen, bloqueadaHasta } de piezas.js.
 export default function TarjetaPieza({
   pieza,
-  nivel,
+  disponibilidad,
   seleccionada = false,
   instaladas = 0,
   recomendada = false,
@@ -47,9 +47,9 @@ export default function TarjetaPieza({
   deshabilitada = false,
   aviso,
 }) {
-  const bloqueada = estaBloqueada(pieza, nivel)
+  const { enAlmacen, bloqueadaHasta } = disponibilidad
   const imagen = IMAGEN_PIEZA[pieza.id]
-  const atenuada = bloqueada || (deshabilitada && instaladas === 0)
+  const atenuada = Boolean(bloqueadaHasta) || (deshabilitada && instaladas === 0)
 
   return (
     <button
@@ -74,9 +74,10 @@ export default function TarjetaPieza({
       <span className="flex min-w-0 flex-1 flex-col gap-1">
         <span className="flex w-full items-start justify-between gap-2">
           <span className="font-semibold">{pieza.nombre}</span>
-          <Marca bloqueada={bloqueada} instaladas={instaladas} recomendada={recomendada} nivelRequerido={pieza.nivelRequerido} />
+          <Marca bloqueadaHasta={bloqueadaHasta} instaladas={instaladas} recomendada={recomendada} />
         </span>
         <span className="text-xs text-slate-400">{pieza.explicacion}</span>
+        {enAlmacen > 0 && <span className="text-xs text-cyan-300">In your Warehouse: {enAlmacen}</span>}
         {aviso && <span className="text-xs text-amber-300">{aviso}</span>}
       </span>
     </button>

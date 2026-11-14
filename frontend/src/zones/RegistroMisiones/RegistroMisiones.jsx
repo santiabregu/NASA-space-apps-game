@@ -11,7 +11,7 @@ const NOMBRE_PUNTOS = { objetivo: 'Objective', ciencia: 'Science', eficiencia: '
 const formatoFecha = (fecha) =>
   new Date(fecha).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
 
-const neto = (lanzamiento) => lanzamiento.dineroGanado - lanzamiento.costePagado
+const neto = (lanzamiento) => lanzamiento.dineroGanado + lanzamiento.financiacion - lanzamiento.costePagado
 const conSigno = (dinero) => `${dinero >= 0 ? '+' : '−'}${formatoDinero(Math.abs(dinero))}`
 
 // El historial llega del más reciente al más antiguo; los grupos conservan ese orden.
@@ -170,7 +170,7 @@ function Detalle({ lanzamiento, mision, catalogo, disponible, onCargarDiseno }) 
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="text-sm text-slate-400">
-            {formatoFecha(lanzamiento.fecha)} · {orbita?.nombre ?? informe.orbitaId}
+            {formatoFecha(lanzamiento.fecha)} · {orbita?.nombre ?? 'Suborbital flight'} · month {lanzamiento.mesJuego}
           </p>
           <h2 className={`font-display text-xl font-bold ${lanzamiento.exito ? 'text-emerald-300' : 'text-red-300'}`}>
             {mision?.titulo ?? lanzamiento.misionId} · {lanzamiento.exito ? `${lanzamiento.puntuacion} / 100` : 'Mission failed'}
@@ -192,6 +192,12 @@ function Detalle({ lanzamiento, mision, catalogo, disponible, onCargarDiseno }) 
         <Dato etiqueta="Knowledge" valor={`+${lanzamiento.xpGanada} XP`} />
         <Dato etiqueta="Reputation" valor={lanzamiento.cambioReputacion > 0 ? `+${lanzamiento.cambioReputacion}` : lanzamiento.cambioReputacion} />
       </div>
+      {lanzamiento.destinoAlcanzado && (
+        <p className="text-sm text-amber-300">
+          Reached the destination {catalogo.destinosPorId[lanzamiento.destinoAlcanzado]?.nombre}: investors added{' '}
+          {formatoDinero(lanzamiento.financiacion)}.
+        </p>
+      )}
       {lanzamiento.prestamo > 0 && (
         <p className="text-sm text-amber-300">Needed a rescue loan of {formatoDinero(lanzamiento.prestamo)}.</p>
       )}

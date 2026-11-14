@@ -40,7 +40,9 @@ export default function Academia({ catalogo }) {
         {catalogo.orbitas.map((orbita) => (
           <article key={orbita.id} className="cristal grid overflow-hidden sm:grid-cols-[16rem_1fr]">
             <div className="relative aspect-video sm:aspect-auto">
-              <img src={IMAGEN_ORBITA[orbita.id]} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
+              {IMAGEN_ORBITA[orbita.id] && (
+                <img src={IMAGEN_ORBITA[orbita.id]} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
+              )}
             </div>
             <div className="p-4">
               <h3 className="font-display font-semibold">{orbita.nombre}</h3>
