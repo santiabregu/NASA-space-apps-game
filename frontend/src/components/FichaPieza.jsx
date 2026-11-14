@@ -1,5 +1,6 @@
 import { Fragment } from 'react'
 import { formatoDinero, formatoNumero } from '../formato.js'
+import { IMAGEN_PIEZA } from '../imagenes.js'
 
 const TITULO_ACCION = {
   instalada: { texto: 'Installed', color: 'text-emerald-300' },
@@ -28,9 +29,11 @@ function especificaciones(pieza, nivel) {
 
 export default function FichaPieza({ pieza, accion, efectos = [], nivel }) {
   const titulo = TITULO_ACCION[accion]
+  const imagen = IMAGEN_PIEZA[pieza.id]
 
   return (
     <section className="cristal animate-aparecer space-y-3 p-4" aria-live="polite">
+      {imagen && <img src={imagen} alt="" className="mx-auto h-28 object-contain drop-shadow-[0_6px_18px_rgba(34,211,238,.25)]" />}
       <div>
         {titulo && <p className={`text-xs font-semibold uppercase tracking-wide ${titulo.color}`}>{titulo.texto}</p>}
         <h3 className="font-display font-semibold">{pieza.nombre}</h3>

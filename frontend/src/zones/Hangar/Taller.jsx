@@ -87,7 +87,7 @@ export default function Taller({ catalogo, analisis, diseno, onCambio, ficha, ni
           <div key={seccion.tipo} className="space-y-2">
             <h2 className="font-display font-semibold">{seccion.titulo}</h2>
             <p className="text-sm text-slate-400">{seccion.ayuda}</p>
-            <div className="grid gap-2 xl:grid-cols-2">
+            <div className="grid gap-2 2xl:grid-cols-2">
               {catalogo.piezas
                 .filter((pieza) => pieza.tipo === seccion.tipo)
                 .map((pieza) => (

@@ -42,7 +42,7 @@ export default function Laboratorio({ catalogo, analisis, diseno, onCambio, fich
         <div className="space-y-2">
           <h2 className="font-display font-semibold">1 · Structure</h2>
           <p className="text-sm text-slate-400">The satellite’s skeleton: it sets how many components fit and how long it lasts.</p>
-          <div className="grid gap-2 xl:grid-cols-2">
+          <div className="grid gap-2 2xl:grid-cols-2">
             {catalogo.piezas
               .filter((pieza) => pieza.tipo === 'estructura')
               .map((estructura) => {
@@ -68,7 +68,7 @@ export default function Laboratorio({ catalogo, analisis, diseno, onCambio, fich
           {TIPOS_COMPONENTE.map((tipo) => (
             <div key={tipo} className="space-y-2">
               <h3 className="text-sm text-slate-300">{NOMBRE_TIPO[tipo]}</h3>
-              <div className="grid gap-2 xl:grid-cols-2">
+              <div className="grid gap-2 2xl:grid-cols-2">
                 {catalogo.piezas
                   .filter((pieza) => pieza.tipo === tipo)
                   .map((pieza) => (

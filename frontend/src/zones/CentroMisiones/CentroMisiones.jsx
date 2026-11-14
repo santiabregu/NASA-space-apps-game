@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { obtenerMisionesDisponibles } from '../../api/misiones.js'
 import { formatoDinero, formatoNumero } from '../../formato.js'
+import { BANNER_MISION } from '../../imagenes.js'
 
 const NOMBRE_RECURSO = {
   MASA: 'Mass',
@@ -72,24 +73,29 @@ function TarjetaMision({ mision, catalogo, bloqueada = false, children }) {
     `Deadline: ${requisitos.plazoMeses} months`,
   ].filter(Boolean)
 
+  const banner = BANNER_MISION[mision.id]
+
   return (
-    <article className={`cristal space-y-3 p-5 ${bloqueada ? 'opacity-50' : ''}`}>
-      <div className="flex flex-wrap items-start justify-between gap-2">
-        <h2 className="font-display text-lg font-semibold">{mision.titulo}</h2>
-        <p className="text-sm text-emerald-300">
-          {recompensa.dinero > 0 ? `up to ${formatoDinero(recompensa.dinero)}` : 'unpaid'} · {recompensa.xp} XP
-        </p>
+    <article className={`cristal overflow-hidden ${bloqueada ? 'opacity-50' : ''}`}>
+      {banner && <img src={banner} alt="" loading="lazy" className="h-40 w-full object-cover" />}
+      <div className="space-y-3 p-5">
+        <div className="flex flex-wrap items-start justify-between gap-2">
+          <h2 className="font-display text-lg font-semibold">{mision.titulo}</h2>
+          <p className="text-sm text-emerald-300">
+            {recompensa.dinero > 0 ? `up to ${formatoDinero(recompensa.dinero)}` : 'unpaid'} · {recompensa.xp} XP
+          </p>
+        </div>
+        <p className="text-slate-300">{mision.descripcion}</p>
+        <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-sm">
+          <dt className="text-slate-400">Orbit</dt>
+          <dd>{orbitas}</dd>
+          <dt className="text-slate-400">Requirements</dt>
+          <dd>{requisitosVisibles.join(' · ')}</dd>
+          <dt className="text-slate-400">Critical resources</dt>
+          <dd className="text-cyan-300">★ {mision.recursosCriticos.map((recurso) => NOMBRE_RECURSO[recurso]).join(', ')}</dd>
+        </dl>
+        {children}
       </div>
-      <p className="text-slate-300">{mision.descripcion}</p>
-      <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-sm">
-        <dt className="text-slate-400">Orbit</dt>
-        <dd>{orbitas}</dd>
-        <dt className="text-slate-400">Requirements</dt>
-        <dd>{requisitosVisibles.join(' · ')}</dd>
-        <dt className="text-slate-400">Critical resources</dt>
-        <dd className="text-cyan-300">★ {mision.recursosCriticos.map((recurso) => NOMBRE_RECURSO[recurso]).join(', ')}</dd>
-      </dl>
-      {children}
     </article>
   )
 }

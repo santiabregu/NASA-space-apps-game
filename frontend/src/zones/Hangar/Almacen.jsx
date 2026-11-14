@@ -23,7 +23,7 @@ export default function Almacen({ catalogo, nivel }) {
         {Object.entries(NOMBRE_TIPO).map(([tipo, nombre]) => (
           <div key={tipo} className="space-y-2">
             <h2 className="font-display font-semibold">{nombre}</h2>
-            <div className="grid gap-2 xl:grid-cols-2">
+            <div className="grid gap-2 2xl:grid-cols-2">
               {catalogo.piezas
                 .filter((pieza) => pieza.tipo === tipo)
                 .map((pieza) => (
