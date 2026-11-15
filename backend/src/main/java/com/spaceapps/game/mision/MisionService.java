@@ -83,6 +83,7 @@ class MisionService {
         } else {
             jugador.getPerfil().registrarFallo();
         }
+        jugador.comprobarFinal(catalogo.ultimoDestinoJugable().id(), catalogo.misionesConAmigos());
 
         LanzamientoResponse respuesta = new LanzamientoResponse(coste, prestamo, liquidacion.dinero(), deudaDevuelta,
                 liquidacion.xp(), liquidacion.cambioReputacion(), nivelesSubidos,

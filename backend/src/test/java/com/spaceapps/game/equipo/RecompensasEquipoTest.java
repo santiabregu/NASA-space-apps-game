@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.spaceapps.game.catalogo.Catalogo;
 import com.spaceapps.game.catalogo.Destino;
 import com.spaceapps.game.empresa.Empresa;
+import com.spaceapps.game.jugador.FinalCampana;
 import com.spaceapps.game.jugador.Jugador;
 import com.spaceapps.game.jugador.JugadorRepository;
 
@@ -42,8 +43,8 @@ class RecompensasEquipoTest {
         veterano.alcanzarDestino("espacio");
         int tanquesAntes = novato.getInventario().getOrDefault("tanque-sonda", 0);
 
-        RecompensasEquipo.Recompensa delNovato = recompensas.recompensar(novato.getId(), true);
-        RecompensasEquipo.Recompensa delVeterano = recompensas.recompensar(veterano.getId(), true);
+        RecompensasEquipo.Recompensa delNovato = recompensas.recompensar(novato.getId(), true, false);
+        RecompensasEquipo.Recompensa delVeterano = recompensas.recompensar(veterano.getId(), true, false);
 
         assertThat(delNovato.piezaId()).isEqualTo("tanque-sonda");
         assertThat(novato.getInventario().get("tanque-sonda")).isEqualTo(tanquesAntes + 1);
@@ -57,7 +58,7 @@ class RecompensasEquipoTest {
         catalogo.destinos().stream().filter(destino -> !destino.esProximamente()).map(Destino::id).forEach(lunar::alcanzarDestino);
         long dineroAntes = lunar.getDinero();
 
-        RecompensasEquipo.Recompensa recompensa = recompensas.recompensar(lunar.getId(), true);
+        RecompensasEquipo.Recompensa recompensa = recompensas.recompensar(lunar.getId(), true, false);
 
         assertThat(recompensa.piezaId()).isNull();
         assertThat(lunar.getDinero()).isEqualTo(dineroAntes + catalogo.reglasEquipo().dineroSinPieza());
@@ -67,11 +68,35 @@ class RecompensasEquipoTest {
     void alFallarNoHayPiezaYSePierdenDias() {
         Jugador jugador = nuevoJugador("kevin");
 
-        RecompensasEquipo.Recompensa recompensa = recompensas.recompensar(jugador.getId(), false);
+        RecompensasEquipo.Recompensa recompensa = recompensas.recompensar(jugador.getId(), false, true);
 
         assertThat(recompensa.piezaId()).isNull();
         assertThat(recompensa.diasPerdidos()).isEqualTo(catalogo.reglasEquipo().diasPorFallo());
         assertThat(jugador.getDiasPerdidos()).isEqualTo(catalogo.reglasEquipo().diasPorFallo());
         assertThat(jugador.getMesActual()).isZero();
+        assertThat(jugador.getMisionesConAmigos()).isZero();
+    }
+
+    @Test
+    void soloCuentanParaElFinalLasVictoriasConAmigos() {
+        Jugador jugador = nuevoJugador("lucia");
+
+        recompensas.recompensar(jugador.getId(), true, true);
+        recompensas.recompensar(jugador.getId(), true, false);
+
+        assertThat(jugador.getMisionesConAmigos()).isEqualTo(1);
+    }
+
+    @Test
+    void siUnFalloAgotaElRelojLlegaElFinal() {
+        Jugador jugador = nuevoJugador("mario");
+        jugador.avanzarReloj(catalogo.mesLimite() - 1);
+        jugador.perderDias(catalogo.reglasEquipo().diasPorMes() - catalogo.reglasEquipo().diasPorFallo(),
+                catalogo.reglasEquipo().diasPorMes());
+
+        recompensas.recompensar(jugador.getId(), false, true);
+
+        assertThat(jugador.getMesActual()).isEqualTo(catalogo.mesLimite());
+        assertThat(jugador.getFinalCampana()).isEqualTo(FinalCampana.LAST_SIGNAL);
     }
 }

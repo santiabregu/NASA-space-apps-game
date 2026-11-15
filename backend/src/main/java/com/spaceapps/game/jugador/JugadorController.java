@@ -34,6 +34,18 @@ class JugadorController {
         return JugadorResponse.de(jugador);
     }
 
+    // El jugador ha visto su final y sigue en modo libre: no se le vuelve a mostrar.
+    @PostMapping("/final")
+    @Transactional
+    JugadorResponse marcarFinalVisto(@AuthenticationPrincipal Jwt token) {
+        Jugador jugador = buscar(token);
+        if (jugador.getFinalCampana() == null) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Your campaign has not ended yet");
+        }
+        jugador.marcarFinalVisto();
+        return JugadorResponse.de(jugador);
+    }
+
     private Jugador buscar(Jwt token) {
         long jugadorId = Long.parseLong(token.getSubject());
         return jugadores.findById(jugadorId)

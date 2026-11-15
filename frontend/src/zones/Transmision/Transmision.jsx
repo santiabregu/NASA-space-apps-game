@@ -15,6 +15,7 @@ function paginasDelMensaje(jugador) {
     'So we need someone to find a new home for humanity. We asked everyone. They all said no. So... we picked YOU!',
     `Your budget: ${presupuesto}. But we found a tiny rocket kit in the garage. It can probably reach the sea. Probably.`,
     'Every time you get further, investors will throw money at you. The sea, space, orbit, the Moon... and beyond!',
+    "One more thing: space is lonely. Win team missions with your friends, and they'll be there for you at the end.",
     `You have ${jugador.campana.mesLimite} months. No pressure. (Lots of pressure.) So... are you in?`,
   ]
 }

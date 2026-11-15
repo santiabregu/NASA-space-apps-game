@@ -30,9 +30,20 @@ class RecompensasEquipo {
     }
 
     // Llamar dentro de una transacción: los cambios del jugador se guardan al confirmarla.
-    Recompensa recompensar(long jugadorId, boolean exito) {
+    // conAmigos: si en la sala había al menos un amigo suyo; las victorias así cuentan para el final.
+    Recompensa recompensar(long jugadorId, boolean exito, boolean conAmigos) {
         Jugador jugador = jugadores.findById(jugadorId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Account " + jugadorId + " no longer exists"));
+        Recompensa recompensa = repartir(jugador, exito);
+        if (exito && conAmigos) {
+            jugador.registrarMisionConAmigos();
+        }
+        jugador.comprobarFinal(catalogo.ultimoDestinoJugable().id(), catalogo.misionesConAmigos());
+        return recompensa;
+    }
+
+    private Recompensa repartir(Jugador jugador, boolean exito) {
+        long jugadorId = jugador.getId();
         ReglasEquipo reglas = catalogo.reglasEquipo();
         if (!exito) {
             jugador.perderDias(reglas.diasPorFallo(), reglas.diasPorMes());

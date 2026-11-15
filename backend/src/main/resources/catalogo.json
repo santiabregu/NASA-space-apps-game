@@ -90,6 +90,7 @@
   ],
 
   "mesLimite": 12,
+  "misionesConAmigos": 3,
 
   "kitInicial": { "dinero": 0, "piezas": { "motor-sonda": 1, "tanque-sonda": 1, "cofia-cono": 1 } },
 

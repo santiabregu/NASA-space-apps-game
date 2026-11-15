@@ -134,7 +134,7 @@ class SalasService {
             sala.comprobarLanzamiento(jugadorId, Instant.now());
             Teamwork teamwork = Teamwork.de(sala.resultados());
             List<RecompensasEquipo.Recompensa> repartidas = sala.miembros().stream()
-                    .map(miembro -> recompensas.recompensar(miembro.jugadorId(), exito))
+                    .map(miembro -> recompensas.recompensar(miembro.jugadorId(), exito, tieneAmigoEnLaSala(sala, miembro.jugadorId())))
                     .toList();
             sala.registrarLanzamiento(exito, informe, teamwork, repartidas);
         }
@@ -146,6 +146,11 @@ class SalasService {
         evaluador.comprobarVoto(departamento, piezaIds);
         sala.votar(jugadorId, departamento, piezaIds, catalogo.reglasEquipo().maximoVotos(), Instant.now());
         return foto(sala);
+    }
+
+    private boolean tieneAmigoEnLaSala(Sala sala, long jugadorId) {
+        return sala.miembros().stream()
+                .anyMatch(otro -> otro.jugadorId() != jugadorId && amigos.sonAmigos(jugadorId, otro.jugadorId()));
     }
 
     private Sala salaDe(long jugadorId, String codigo) {

@@ -15,6 +15,7 @@ import RegistroMisiones from './zones/RegistroMisiones/RegistroMisiones.jsx'
 import Sede from './zones/Sede/Sede.jsx'
 import SalaEquipo from './zones/Equipo/SalaEquipo.jsx'
 import Social from './zones/Social/Social.jsx'
+import Final from './zones/Final/Final.jsx'
 import Derrumbe from './zones/Transmision/Derrumbe.jsx'
 import Transmision from './zones/Transmision/Transmision.jsx'
 
@@ -113,6 +114,21 @@ export default function App() {
     )
   }
 
+  // El final espera a que el jugador salga del vuelo o de la sala de equipo, para no cortar el informe.
+  const finalPendiente = jugador.campana.finalCampana && !jugador.campana.finalVisto
+  if (finalPendiente && zona !== 'control' && zona !== 'sala') {
+    return (
+      <Final
+        jugador={jugador}
+        catalogo={catalogo}
+        onTerminado={(jugadorActualizado) => {
+          setJugador(jugadorActualizado)
+          setZona('sede')
+        }}
+      />
+    )
+  }
+
   return (
     <>
       {FONDOS[zona] && <FondoZona {...FONDOS[zona]} />}
@@ -125,7 +141,7 @@ export default function App() {
           }}
         />
       )}
-      {zona !== 'control' && <Navegacion jugador={jugador} zona={zona} onIrA={setZona} onSalir={salir} />}
+      {zona !== 'control' && <Navegacion jugador={jugador} misionesConAmigos={catalogo.misionesConAmigos} zona={zona} onIrA={setZona} onSalir={salir} />}
       {zona === 'sede' && <Sede jugador={jugador} onIrA={setZona} />}
       {zona === 'misiones' && (
         <CentroMisiones jugador={jugador} catalogo={catalogo} misionActiva={misionActiva} onAceptar={aceptarMision} />

@@ -18,6 +18,8 @@ import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -62,6 +64,17 @@ public class Jugador {
     // Los fallos en misiones de equipo cuestan días, no meses: aquí se acumulan hasta completar un mes.
     @ColumnDefault("0")
     private int diasPerdidos;
+
+    // Misiones de equipo ganadas con al menos un amigo en la sala: deciden el final junto con el reloj.
+    @ColumnDefault("0")
+    private int misionesConAmigos;
+
+    // Se fija una sola vez, al llegar al último destino o al agotarse el reloj; después se sigue en modo libre.
+    @Enumerated(EnumType.STRING)
+    private FinalCampana finalCampana;
+
+    @ColumnDefault("false")
+    private boolean finalVisto;
 
     @Embedded
     private Perfil perfil = new Perfil();
@@ -146,6 +159,18 @@ public class Jugador {
         return diasPerdidos;
     }
 
+    public int getMisionesConAmigos() {
+        return misionesConAmigos;
+    }
+
+    public FinalCampana getFinalCampana() {
+        return finalCampana;
+    }
+
+    public boolean isFinalVisto() {
+        return finalVisto;
+    }
+
     public Perfil getPerfil() {
         return perfil;
     }
@@ -181,6 +206,32 @@ public class Jugador {
         diasPerdidos += dias;
         avanzarReloj(diasPerdidos / diasPorMes);
         diasPerdidos %= diasPorMes;
+    }
+
+    public void registrarMisionConAmigos() {
+        misionesConAmigos++;
+    }
+
+    // Llamar tras cada cambio de reloj o de destinos. Llegar al último destino manda sobre el reloj:
+    // a tiempo si lo alcanzó en el mes límite o antes; si no llegó y el reloj está en el límite, ya no queda tiempo.
+    public void comprobarFinal(String ultimoDestinoId, int misionesConAmigosNecesarias) {
+        if (finalCampana != null) {
+            return;
+        }
+        boolean conAmigos = misionesConAmigos >= misionesConAmigosNecesarias;
+        Integer mesDeLlegada = mesPorDestinoAlcanzado.get(ultimoDestinoId);
+        if (mesDeLlegada != null) {
+            finalCampana = FinalCampana.de(mesDeLlegada <= mesLimite, conAmigos);
+        } else if (mesActual >= mesLimite) {
+            finalCampana = FinalCampana.de(false, conAmigos);
+        }
+    }
+
+    public void marcarFinalVisto() {
+        if (finalCampana == null) {
+            throw new IllegalStateException("El jugador " + id + " aún no ha llegado a ningún final");
+        }
+        finalVisto = true;
     }
 
     public Map<String, Integer> getMejorPuntuacionPorMision() {

@@ -1,0 +1,593 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Finales de Stellar Strategy</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600&family=Press+Start+2P&family=VT323&display=swap">
+<style>
+/* Layout: pantalla de consola de 8 bits; storyboard en tiras de 3 viñetas, una por final, tras una matriz 2×2 que explica la regla */
+:root {
+  --bg: #0a0e1c;
+  --panel: #11172d;
+  --ink: #fff1e8;
+  --muted: #a3a8c3;
+  --line: #2b3358;
+  --gold: #ffec27;
+  --ok: #00e436;
+  --sky: #29adff;
+  --pink: #ff77a8;
+  --red: #ff004d;
+  --font-pixel: "Press Start 2P", "Courier New", monospace;
+  --font-talk: "VT323", "Courier New", monospace;
+  --font-body: "IBM Plex Sans", system-ui, sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.55;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 40px 64px;
+}
+.wrap { max-width: 1080px; margin: 0 auto; display: flex; flex-direction: column; gap: 56px; }
+.eyebrow { font-family: var(--font-pixel); font-size: 10px; letter-spacing: .08em; color: var(--gold); text-transform: uppercase; }
+h1, h2 { font-family: var(--font-pixel); font-weight: 400; text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(22px, 4.4vw, 40px); line-height: 1.35; }
+h2 { font-size: clamp(14px, 2.2vw, 18px); line-height: 1.5; }
+p { margin: 0; max-width: 65ch; }
+.muted { color: var(--muted); }
+header { display: flex; flex-direction: column; gap: 18px; }
+header .lead { font-size: 18px; }
+
+/* Matriz */
+.matrix { display: grid; grid-template-columns: auto 1fr 1fr; gap: 12px; align-items: stretch; }
+.axis { font-family: var(--font-pixel); font-size: 9px; color: var(--muted); letter-spacing: .06em; text-transform: uppercase; display: flex; align-items: center; justify-content: center; text-align: center; line-height: 1.6; }
+.axis.row { writing-mode: vertical-rl; transform: rotate(180deg); padding: 0 4px; }
+.cell { display: flex; flex-direction: column; gap: 10px; background: var(--panel); border: 3px solid var(--line); padding: 12px; color: inherit; text-decoration: none; min-width: 0; }
+.cell:hover, .cell:focus-visible { border-color: var(--c); outline: none; }
+.cell .name { font-family: var(--font-pixel); font-size: 12px; color: var(--c); line-height: 1.5; }
+.cell .cond { font-size: 14px; color: var(--muted); }
+
+canvas { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; image-rendering: pixelated; image-rendering: crisp-edges; background: #020617; border: 3px solid var(--ink); }
+
+/* Tiras */
+.strip { display: flex; flex-direction: column; gap: 18px; }
+.strip-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px 16px; }
+.strip-head h2 { color: var(--c, var(--ink)); }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { font-family: var(--font-pixel); font-size: 9px; padding: 6px 8px; border: 2px solid var(--line); color: var(--ink); letter-spacing: .04em; }
+.chip.yes { border-color: var(--ok); color: var(--ok); }
+.chip.no { border-color: var(--red); color: var(--red); }
+.panels { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+figure { margin: 0; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+figcaption { font-size: 14px; color: var(--muted); }
+figcaption b { font-family: var(--font-pixel); font-size: 9px; font-weight: 400; color: var(--ink); margin-right: 6px; }
+.talk { background: #000; border: 3px solid var(--ink); box-shadow: 6px 6px 0 var(--line); padding: 12px 16px; font-family: var(--font-talk); font-size: 24px; line-height: 1.15; max-width: 760px; }
+.talk .who { display: block; font-family: var(--font-pixel); font-size: 9px; color: var(--gold); margin-bottom: 8px; letter-spacing: .06em; }
+
+/* Reglas */
+.rules { display: flex; flex-direction: column; gap: 16px; }
+.table-wrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; min-width: 560px; font-size: 15px; }
+th, td { text-align: left; padding: 10px 12px; border-bottom: 2px solid var(--line); vertical-align: top; }
+th { font-family: var(--font-pixel); font-size: 9px; font-weight: 400; color: var(--muted); letter-spacing: .06em; text-transform: uppercase; }
+.tag { font-family: var(--font-pixel); font-size: 8px; padding: 3px 6px; border: 2px solid currentColor; white-space: nowrap; }
+.tag.ya { color: var(--ok); }
+.tag.nuevo { color: var(--gold); }
+
+.pitch { border: 3px solid var(--gold); padding: 24px; display: flex; flex-direction: column; gap: 12px; }
+.pitch q { font-family: var(--font-talk); font-size: clamp(26px, 3.6vw, 34px); line-height: 1.15; quotes: "«" "»"; }
+
+@media (max-width: 760px) {
+  .panels { grid-template-columns: 1fr; }
+  .matrix { grid-template-columns: 1fr 1fr; }
+  .axis { display: none; }
+  .axis.col { display: flex; }
+  .matrix .corner { display: none; }
+}
+@media (max-width: 460px) {
+  .matrix { grid-template-columns: 1fr; }
+  .axis.col { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">Stellar Strategy · storyboard para la presentación</span>
+    <h1>Cuatro finales para New Home</h1>
+    <p class="lead">La campaña ya empieza con la llamada de la NASA. Esta propuesta le da un final que depende de dos cosas que controla el jugador: si llega a New Home antes de que acabe el reloj de 12 meses y si ha ganado misiones de equipo con sus amigos por el camino.</p>
+    <p class="muted">Ese es el gancho: llegar al final importa porque hay un final mejor que conseguir. Los textos en pantalla van en inglés, como en el juego.</p>
+  </header>
+
+  <section class="strip" aria-labelledby="t-regla">
+    <h2 id="t-regla">Cómo se decide el final</h2>
+    <div class="matrix">
+      <div class="corner"></div>
+      <div class="axis col">Llega a tiempo (12 meses)</div>
+      <div class="axis col">Se acaba el reloj</div>
+      <div class="axis row">Con amigos</div>
+      <a class="cell" href="#final-1" style="--c: var(--ok)"><canvas data-scene="e1p3" width="160" height="90"></canvas><span class="name">1 · New Home</span><span class="cond">A tiempo y con amigos. El final bueno.</span></a>
+      <a class="cell" href="#final-3" style="--c: var(--pink)"><canvas data-scene="e3p3" width="160" height="90"></canvas><span class="name">3 · The Relay</span><span class="cond">Tarde, pero tus amigos terminan la misión.</span></a>
+      <div class="axis row">Solo</div>
+      <a class="cell" href="#final-2" style="--c: var(--sky)"><canvas data-scene="e2p3" width="160" height="90"></canvas><span class="name">2 · Lone Pioneer</span><span class="cond">A tiempo, pero despegas solo.</span></a>
+      <a class="cell" href="#final-4" style="--c: var(--red)"><canvas data-scene="e4p3" width="160" height="90"></canvas><span class="name">4 · Last Signal</span><span class="cond">Tarde y solo. Se pierde la señal.</span></a>
+    </div>
+  </section>
+
+  <section class="strip" aria-labelledby="t-inicio">
+    <div class="strip-head">
+      <h2 id="t-inicio">El arranque (común a todos)</h2>
+    </div>
+    <div class="panels">
+      <figure><canvas data-scene="o1" width="160" height="90"></canvas><figcaption><b>1</b>La NASA llama: la Tierra arde y tu empresa es la elegida. Es la intro que ya tenemos.</figcaption></figure>
+      <figure><canvas data-scene="o2" width="160" height="90"></canvas><figcaption><b>2</b>Construyes, lanzas y aprendes de cada fallo.</figcaption></figure>
+      <figure><canvas data-scene="o3" width="160" height="90"></canvas><figcaption><b>3</b>Cada lanzamiento gasta tiempo del reloj de 12 meses. La meta es New Home.</figcaption></figure>
+    </div>
+  </section>
+
+  <section class="strip" id="final-1" style="--c: var(--ok)" aria-labelledby="t-f1">
+    <div class="strip-head">
+      <h2 id="t-f1">Final 1 · New Home</h2>
+      <div class="chips"><span class="chip yes">A TIEMPO</span><span class="chip yes">CON AMIGOS</span></div>
+    </div>
+    <div class="panels">
+      <figure><canvas data-scene="e1p1" width="160" height="90"></canvas><figcaption><b>1</b>El telescopio en L2 confirma el planeta en el mes 9.</figcaption></figure>
+      <figure><canvas data-scene="e1p2" width="160" height="90"></canvas><figcaption><b>2</b>Los amigos de tus misiones de equipo suben al arca contigo.</figcaption></figure>
+      <figure><canvas data-scene="e1p3" width="160" height="90"></canvas><figcaption><b>3</b>Aterrizáis juntos en el nuevo hogar.</figcaption></figure>
+    </div>
+    <p class="talk"><span class="who">NASA CONTROL</span>You found it with time to spare, and you didn't do it alone. Humanity has a new home, and a crew to build it.</p>
+  </section>
+
+  <section class="strip" id="final-2" style="--c: var(--sky)" aria-labelledby="t-f2">
+    <div class="strip-head">
+      <h2 id="t-f2">Final 2 · Lone Pioneer</h2>
+      <div class="chips"><span class="chip yes">A TIEMPO</span><span class="chip no">SOLO</span></div>
+    </div>
+    <div class="panels">
+      <figure><canvas data-scene="e2p1" width="160" height="90"></canvas><figcaption><b>1</b>Mismo hallazgo y a tiempo, en el mes 11.</figcaption></figure>
+      <figure><canvas data-scene="e2p2" width="160" height="90"></canvas><figcaption><b>2</b>Pero en el arca quedan tres asientos vacíos.</figcaption></figure>
+      <figure><canvas data-scene="e2p3" width="160" height="90"></canvas><figcaption><b>3</b>Despegas solo hacia el planeta nuevo.</figcaption></figure>
+    </div>
+    <p class="talk"><span class="who">NASA CONTROL</span>You found our new home in time. But a new world needs more than one pioneer. Who's flying with you?</p>
+  </section>
+
+  <section class="strip" id="final-3" style="--c: var(--pink)" aria-labelledby="t-f3">
+    <div class="strip-head">
+      <h2 id="t-f3">Final 3 · The Relay</h2>
+      <div class="chips"><span class="chip no">FUERA DE TIEMPO</span><span class="chip yes">CON AMIGOS</span></div>
+    </div>
+    <div class="panels">
+      <figure><canvas data-scene="e3p1" width="160" height="90"></canvas><figcaption><b>1</b>Se acaba el reloj antes de llegar a New Home, pero tus amigos están conectados.</figcaption></figure>
+      <figure><canvas data-scene="e3p2" width="160" height="90"></canvas><figcaption><b>2</b>Ellos lanzan sus cohetes y siguen la misión.</figcaption></figure>
+      <figure><canvas data-scene="e3p3" width="160" height="90"></canvas><figcaption><b>3</b>Encuentran el planeta y te mandan la señal.</figcaption></figure>
+    </div>
+    <p class="talk"><span class="who">NASA CONTROL</span>The clock ran out on you, but not on your crew. They finished what you started.</p>
+  </section>
+
+  <section class="strip" id="final-4" style="--c: var(--red)" aria-labelledby="t-f4">
+    <div class="strip-head">
+      <h2 id="t-f4">Final 4 · Last Signal</h2>
+      <div class="chips"><span class="chip no">FUERA DE TIEMPO</span><span class="chip no">SOLO</span></div>
+    </div>
+    <div class="panels">
+      <figure><canvas data-scene="e4p1" width="160" height="90"></canvas><figcaption><b>1</b>Se acaba el tiempo y nadie te acompaña.</figcaption></figure>
+      <figure><canvas data-scene="e4p2" width="160" height="90"></canvas><figcaption><b>2</b>El cohete se queda a medio montar en la plataforma.</figcaption></figure>
+      <figure><canvas data-scene="e4p3" width="160" height="90"></canvas><figcaption><b>3</b>Se pierde la señal. Queda la opción de seguir en modo libre.</figcaption></figure>
+    </div>
+    <p class="talk"><span class="who">NASA CONTROL</span>We're out of time. Your work still matters, though. The sky is open: keep exploring.</p>
+  </section>
+
+  <section class="rules" aria-labelledby="t-reglas">
+    <h2 id="t-reglas">Qué mide el juego</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Condición</th><th>Cómo se mide</th><th>Estado</th></tr></thead>
+        <tbody>
+          <tr><td>A tiempo</td><td>Llegar a New Home con el reloj de juego en 12 meses o menos. Cada lanzamiento gasta 1 mes (2 la Luna) y una misión de equipo fallida resta días.</td><td><span class="tag ya">YA EXISTE</span></td></tr>
+          <tr><td>Con amigos</td><td>Ganar al menos 3 misiones de equipo jugadas con gente de tu lista de amigos. El número 3 es una propuesta.</td><td><span class="tag nuevo">CONTADOR NUEVO</span></td></tr>
+          <tr><td>Después del final</td><td>Los cuatro finales ofrecen «Keep exploring» para seguir en modo libre.</td><td><span class="tag ya">YA DISEÑADO</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="muted">En la demo para el jurado la campaña llega hasta la Luna, así que los finales se enseñan como storyboard.</p>
+  </section>
+
+  <section class="pitch" aria-labelledby="t-frase">
+    <span class="eyebrow" id="t-frase">Frase para la presentación</span>
+    <q>Hay cuatro finales. El reloj decide si llegas a tiempo y tus amigos deciden si llegas acompañado.</q>
+  </section>
+</div>
+
+<script>
+(() => {
+  const W = 160, H = 90;
+  // Paleta de 8 bits del juego (components/pixel/pixel.jsx)
+  const P = {
+    k: '#000000', n: '#1d2b53', m: '#7e2553', v: '#008751', b: '#ab5236', G: '#5f574f',
+    g: '#c2c3c7', w: '#fff1e8', r: '#ff004d', o: '#ffa300', y: '#ffec27', l: '#00e436',
+    a: '#29adff', A: '#1d74c4', p: '#ff77a8', s: '#ffccaa', c: '#c2f0ff', x: '#020617',
+  };
+  const FONT = '8px "Press Start 2P", monospace';
+
+  function rng(seed) {
+    let e = seed;
+    return () => {
+      e = (e + 0x6d2b79f5) | 0;
+      let t = Math.imul(e ^ (e >>> 15), 1 | e);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  const mod = (a, n) => ((a % n) + n) % n;
+  const px = (ctx, x, y, w, h, col) => { ctx.fillStyle = col; ctx.fillRect(Math.round(x), Math.round(y), w, h); };
+
+  function spr(ctx, map, x, y, over = {}, sc = 1) {
+    map.forEach((row, j) => {
+      for (let i = 0; i < row.length; i++) {
+        const ch = row[i];
+        if (ch === '.') continue;
+        const col = over[ch] || P[ch];
+        if (col) px(ctx, x + i * sc, y + j * sc, sc, sc, col);
+      }
+    });
+  }
+
+  const ROCKET = [
+    '...w...',
+    '..wCw..',
+    '..www..',
+    '.wwwww.',
+    '.wwaww.',
+    '.wacaw.',
+    '.wwaww.',
+    '.wwwww.',
+    '.CCCCC.',
+    '.wwwww.',
+    '.wwwww.',
+    '.wwwww.',
+    'CwwwwwC',
+    'CCwgwCC',
+    'C.ggg.C',
+  ];
+  const ASTRO = [
+    '.www.',
+    'wccaw',
+    'wcaaw',
+    '.www.',
+    'CwwwC',
+    'CwwwC',
+    '.w.w.',
+    '.w.w.',
+  ];
+  const GHOST = { w: P.G, c: P.x, a: P.x, C: P.G };
+  const SCOPE = [
+    '....aaaaa....',
+    '...aAaAaAa...',
+    '..aAaAaAaAa..',
+    '...aAaAaAa...',
+    '....aaaaa....',
+    '......g......',
+    '......g......',
+    '..sssssssss..',
+    '.SSSSSSSSSSS.',
+    'sssssssssssss',
+    '.SSSSSSSSSSS.',
+  ];
+  const SCOPE_PAL = { a: P.y, A: P.o, s: P.p, S: P.m };
+
+  function stars(ctx, seed, t, n = 60) {
+    const r = rng(seed);
+    for (let i = 0; i < n; i++) {
+      const x = Math.floor(r() * W), y = Math.floor(r() * H);
+      const col = [P.w, P.g, P.y, P.a][Math.floor(r() * 4)];
+      const blink = r() < 0.3 && Math.sin(t * 3 + i * 1.7) > 0.5;
+      if (!blink) px(ctx, x, y, 1, 1, col);
+    }
+  }
+  function sky(ctx, seed, t, bg = P.x) {
+    px(ctx, 0, 0, W, H, bg);
+    stars(ctx, seed, t);
+  }
+
+  // Los discos grandes se pintan una vez por variante y se reutilizan.
+  const cache = new Map();
+  function disc(ctx, cx, cy, r, key, colorAt) {
+    let off = cache.get(key);
+    if (!off) {
+      off = document.createElement('canvas');
+      off.width = off.height = r * 2;
+      const o = off.getContext('2d');
+      for (let y = -r; y < r; y++) {
+        for (let x = -r; x < r; x++) {
+          const dx = x + 0.5, dy = y + 0.5, d = Math.hypot(dx, dy);
+          if (d > r) continue;
+          const col = d > r - 1.2 ? P.k : colorAt(x, y, (dx + dy) / r > 0.6);
+          o.fillStyle = col;
+          o.fillRect(x + r, y + r, 1, 1);
+        }
+      }
+      cache.set(key, off);
+    }
+    ctx.drawImage(off, Math.round(cx - r), Math.round(cy - r));
+  }
+  const isLand = (x, y) => Math.sin(x * 0.42 + 1) + Math.cos(y * 0.5 + x * 0.15) + Math.sin((x - y) * 0.23) > 0.7;
+
+  function earth(ctx, cx, cy, r, t, face = true) {
+    const phase = mod(Math.floor(t * 6), 3);
+    disc(ctx, cx, cy, r, `earth-${r}-${phase}`, (x, y, shade) => {
+      if (isLand(x, y)) return mod(x + y + phase, 3) === 0 ? P.y : (shade ? P.r : P.o);
+      return shade ? P.m : P.A;
+    });
+    // Llamas en la mitad de arriba
+    for (let a = -170; a <= -10; a += 12) {
+      const ang = a * Math.PI / 180, cos = Math.cos(ang), sin = Math.sin(ang);
+      const h = Math.max(2, Math.round(r / 7)) + mod(Math.floor(t * 10) + a / 12, 3);
+      for (let k = 0; k <= h; k++) {
+        const col = k < 1 ? P.r : (k < h - 1 ? P.o : P.y);
+        px(ctx, cx + cos * (r + k), cy + sin * (r + k), 1, 1, col);
+      }
+    }
+    if (!face) return;
+    const look = Math.sin(t * 2) > 0 ? 1 : 0;
+    [-8, 4].forEach((ex) => {
+      const x = cx + Math.round(ex * r / 24), y = cy - 5;
+      px(ctx, x, y, 4, 4, P.w);
+      px(ctx, x + 1 + look, y + 1, 2, 2, P.k);
+    });
+    for (let i = -5; i <= 5; i++) px(ctx, cx + i, cy + 6 + (mod(i, 2) ? 1 : 0), 1, 1, P.k);
+    const drop = mod(Math.floor(t * 4), 4);
+    px(ctx, cx + r - 6, cy - 3 + drop, 1, 2, P.a);
+  }
+
+  function newPlanet(ctx, cx, cy, r) {
+    disc(ctx, cx, cy, r, `home-${r}`, (x, y, shade) => {
+      if (Math.sin(x * 0.3 + y * 0.9) > 0.93) return P.w;
+      if (isLand(x, y)) return shade ? P.v : P.l;
+      return shade ? P.A : P.a;
+    });
+  }
+
+  function flame(ctx, cx, y, t, sc = 1, len = 6) {
+    const flick = Math.sin(t * 22 + cx) > 0 ? 1 : 0;
+    const L = len + flick;
+    for (let j = 0; j < L; j++) {
+      const w = Math.max(1, 3 - Math.floor(j / 2)) * sc;
+      const col = j < 2 ? P.y : (j < 4 ? P.o : P.r);
+      px(ctx, cx - Math.floor(w / 2), y + j * sc, w, sc, col);
+    }
+  }
+  function rocket(ctx, x, y, accent, t, { sc = 1, burn = true, rows = ROCKET } = {}) {
+    spr(ctx, rows, x, y, { C: accent }, sc);
+    if (burn) flame(ctx, x + 3 * sc + Math.floor(sc / 2), y + rows.length * sc, t, sc);
+  }
+  function ground(ctx, y = 76) {
+    px(ctx, 0, y, W, H - y, P.G);
+    px(ctx, 0, y, W, 1, P.g);
+    for (let x = 3; x < W; x += 9) px(ctx, x, y + 4, 3, 1, P.k);
+  }
+  function tower(ctx, x, top, bottom) {
+    for (let y = top; y < bottom; y++) {
+      px(ctx, x, y, 1, 1, P.g);
+      px(ctx, x + 4, y, 1, 1, P.g);
+      if (mod(y - top, 4) === 0) px(ctx, x, y, 5, 1, P.g);
+    }
+  }
+  function beam(ctx, x1, y1, x2, y2, t) {
+    const n = Math.max(Math.abs(x2 - x1), Math.abs(y2 - y1));
+    const off = Math.floor(t * 14);
+    for (let i = 0; i <= n; i++) {
+      if (mod(i - off, 5) < 2) continue;
+      px(ctx, x1 + (x2 - x1) * i / n, y1 + (y2 - y1) * i / n, 1, 1, P.c);
+    }
+  }
+  function text(ctx, str, x, y, col, align = 'left') {
+    ctx.font = FONT;
+    ctx.textBaseline = 'top';
+    ctx.textAlign = align;
+    ctx.fillStyle = col;
+    ctx.fillText(str, x, y);
+  }
+  function banner(ctx, str, y, col = P.w) {
+    const w = str.length * 8 + 8, x = Math.round((W - w) / 2);
+    px(ctx, x - 1, y - 1, w + 2, 14, col);
+    px(ctx, x, y, w, 12, P.k);
+    text(ctx, str, W / 2, y + 2, col, 'center');
+  }
+  function months(ctx, filled, col, y = 30) {
+    for (let i = 0; i < 12; i++) {
+      const x = 20 + i * 10;
+      px(ctx, x, y, 9, 8, P.G);
+      px(ctx, x + 1, y + 1, 7, 6, i < filled ? col : P.k);
+    }
+  }
+  const blinkOn = (t, hz = 2) => mod(Math.floor(t * hz), 2) === 0;
+
+  const CREW = [P.r, P.l, P.y, P.p];
+
+  function scopeShot(ctx, t, month) {
+    sky(ctx, 11, t);
+    newPlanet(ctx, 130, 24, 14);
+    spr(ctx, SCOPE, 10, 46, SCOPE_PAL);
+    beam(ctx, 17, 47, 118, 31, t);
+    text(ctx, month, 4, 4, P.y);
+    banner(ctx, 'SIGNAL FOUND', 72, P.l);
+  }
+  function arkShot(ctx, t, crewCount, label, labelCol) {
+    sky(ctx, 23, t);
+    ground(ctx, 76);
+    tower(ctx, 50, 24, 76);
+    rocket(ctx, 24, 31, P.r, t, { sc: 3, burn: false });
+    for (let i = 0; i < 4; i++) {
+      const x = 70 + i * 16;
+      if (i < crewCount) {
+        const hop = mod(Math.floor(t * 4) + i, 2);
+        spr(ctx, ASTRO, x, 68 - hop, { C: CREW[i] });
+      } else {
+        spr(ctx, ASTRO, x, 68, GHOST);
+      }
+    }
+    text(ctx, label, 100, 8, labelCol, 'center');
+  }
+
+  const SCENES = {
+    o1(ctx, t) {
+      sky(ctx, 3, t);
+      earth(ctx, 80, 46, 24, t);
+      if (blinkOn(t, 3)) {
+        text(ctx, 'RING', 6, 30, P.y);
+        text(ctx, 'RING', 122, 30, P.y);
+      }
+      banner(ctx, 'NASA IS CALLING', 74, P.y);
+    },
+    o2(ctx, t) {
+      sky(ctx, 5, t);
+      ground(ctx, 76);
+      tower(ctx, 58, 30, 76);
+      const rise = mod(t * 6, 8);
+      rocket(ctx, 73, 22 - rise, P.r, t, { sc: 2 });
+      const r = rng(9);
+      for (let i = 0; i < 14; i++) {
+        const sx = 60 + r() * 40, sy = 70 + r() * 6, s = 2 + Math.floor(r() * 3);
+        px(ctx, sx, sy, s, s, r() < 0.5 ? P.g : P.w);
+      }
+      banner(ctx, 'BUILD. LAUNCH.', 4, P.w);
+    },
+    o3(ctx, t) {
+      sky(ctx, 7, t, P.n);
+      text(ctx, '12 MONTHS', W / 2, 10, P.y, 'center');
+      months(ctx, 4, P.y, 26);
+      const xs = [16, 37, 59, 80, 101, 123, 144];
+      for (let i = 0; i < xs.length - 1; i++) {
+        for (let x = xs[i]; x < xs[i + 1]; x += 3) px(ctx, x, 60, 1, 1, i < 3 ? P.l : P.G);
+      }
+      xs.forEach((x, i) => {
+        if (i === 6) {
+          const col = blinkOn(t) ? P.y : P.w;
+          px(ctx, x - 1, 56, 3, 9, col);
+          px(ctx, x - 4, 59, 9, 3, col);
+        } else {
+          px(ctx, x - 2, 58, 5, 5, P.k);
+          px(ctx, x - 1, 59, 3, 3, i <= 3 ? P.l : P.G);
+        }
+      });
+      rocket(ctx, 77, 40, P.r, t, { burn: false });
+      text(ctx, 'NEW HOME?', W / 2, 74, P.w, 'center');
+    },
+
+    e1p1(ctx, t) { scopeShot(ctx, t, 'MONTH 9'); },
+    e1p2(ctx, t) { arkShot(ctx, t, 4, 'CREW 4/4', P.l); },
+    e1p3(ctx, t) {
+      sky(ctx, 31, t);
+      disc(ctx, 126, 62, 9, 'sun', () => P.y);
+      newPlanet(ctx, 80, 160, 88);
+      [36, 72, 108].forEach((x, i) => {
+        const bob = mod(Math.floor(t * 3) + i, 2);
+        rocket(ctx, x, 26 + i * 6 + bob, CREW[i + 1], t, { sc: 1 });
+      });
+      banner(ctx, 'WELCOME HOME', 4, P.l);
+    },
+
+    e2p1(ctx, t) { scopeShot(ctx, t, 'MONTH 11'); },
+    e2p2(ctx, t) { arkShot(ctx, t, 1, 'CREW 1/4', P.r); },
+    e2p3(ctx, t) {
+      sky(ctx, 41, t);
+      newPlanet(ctx, 134, 20, 6);
+      for (let x = 12; x < 44; x += 4) px(ctx, x, 70 - (x - 12) * 0.5, 1, 1, P.G);
+      rocket(ctx, 46, 38, P.r, t, { sc: 1 });
+      banner(ctx, 'SOLO FLIGHT', 74, P.a);
+    },
+
+    e3p1(ctx, t) {
+      sky(ctx, 51, t, P.n);
+      text(ctx, 'MONTH 12/12', W / 2, 10, blinkOn(t) ? P.r : P.w, 'center');
+      months(ctx, 12, P.r, 26);
+      [44, 70, 96].forEach((x, i) => spr(ctx, ASTRO, x + 6, 50, { C: CREW[i + 1] }));
+      text(ctx, '+3 ONLINE', W / 2, 66, P.l, 'center');
+    },
+    e3p2(ctx, t) {
+      sky(ctx, 53, t);
+      earth(ctx, 140, 14, 9, t, false);
+      ground(ctx, 78);
+      [[24, 0], [73, 6], [122, 12]].forEach(([x, lag], i) => {
+        const rise = mod(t * 6 + lag, 10);
+        rocket(ctx, x, 30 - rise, CREW[i + 1], t, { sc: 2 });
+      });
+      banner(ctx, 'CREW TAKES OVER', 4, P.p);
+    },
+    e3p3(ctx, t) {
+      sky(ctx, 57, t);
+      newPlanet(ctx, 130, 24, 14);
+      spr(ctx, SCOPE, 10, 40, SCOPE_PAL);
+      beam(ctx, 17, 41, 118, 31, t);
+      [CREW[1], CREW[2], CREW[3]].forEach((col, i) => spr(ctx, ASTRO, 40 + i * 9, 54, { C: col }));
+      banner(ctx, 'YOUR CREW FOUND IT', 72, P.p);
+    },
+
+    e4p1(ctx, t) {
+      sky(ctx, 61, t, P.k);
+      months(ctx, 12, P.r, 26);
+      if (blinkOn(t)) text(ctx, "TIME'S UP", W / 2, 50, P.r, 'center');
+    },
+    e4p2(ctx, t) {
+      sky(ctx, 63, t);
+      earth(ctx, 132, 22, 16, t);
+      ground(ctx, 76);
+      tower(ctx, 48, 30, 76);
+      rocket(ctx, 60, 76 - 7 * 3, P.G, t, { sc: 3, burn: false, rows: ROCKET.slice(8) });
+      spr(ctx, ASTRO, 100, 68, { C: P.r });
+      text(ctx, 'NO CREW', 6, 6, P.r);
+    },
+    e4p3(ctx, t) {
+      const r = rng(Math.floor(t * 10) + 1);
+      px(ctx, 0, 0, W, H, P.k);
+      for (let y = 0; y < H; y += 2) {
+        for (let x = 0; x < W; x += 2) {
+          const v = r();
+          if (v < 0.35) px(ctx, x, y, 2, 2, v < 0.1 ? P.g : P.G);
+        }
+      }
+      banner(ctx, 'SIGNAL LOST', 28, P.r);
+      if (blinkOn(t, 1.5)) banner(ctx, '> KEEP EXPLORING', 56, P.w);
+    },
+  };
+
+  const panels = [...document.querySelectorAll('canvas[data-scene]')].map((cv) => {
+    const ctx = cv.getContext('2d');
+    ctx.imageSmoothingEnabled = false;
+    return { ctx, draw: SCENES[cv.dataset.scene] };
+  }).filter((p) => p.draw);
+
+  const drawAll = (t) => panels.forEach((p) => p.draw(p.ctx, t));
+  const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function start() {
+    drawAll(0);
+    if (calm) return;
+    let last = 0;
+    const loop = (now) => {
+      if (now - last > 110) {
+        last = now;
+        drawAll(now / 1000);
+      }
+      requestAnimationFrame(loop);
+    };
+    requestAnimationFrame(loop);
+  }
+
+  drawAll(0);
+  const fontReady = document.fonts && document.fonts.load ? document.fonts.load(FONT) : Promise.resolve();
+  fontReady.then(start, start);
+})();
+</script>
+</body>
+</html>

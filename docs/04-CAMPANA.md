@@ -108,6 +108,23 @@ sonda nuevas en el catálogo.
 - Los hitos de la campaña solo se consiguen con el cohete propio.
 - Cualquier jugador puede unirse a cualquier misión de equipo, y por ahora la única recompensa es la pieza.
 
+### 3.5 Finales (implementado el 2026-11-15)
+
+La campaña termina al alcanzar el **último destino jugable** (la Luna en la demo; New Home cuando deje de ser
+«Coming soon») o cuando el reloj llega al mes límite sin haberlo alcanzado. El final depende de dos cosas:
+
+| | Con amigos (≥ `misionesConAmigos` victorias de equipo) | Solo |
+|---|---|---|
+| **A tiempo** (llega en el mes 12 o antes) | `NEW_HOME`: el arca despega con la tripulación completa | `LONE_PIONEER`: llega, pero con 3 asientos vacíos |
+| **Fuera de tiempo** | `RELAY`: los amigos terminan la misión | `LAST_SIGNAL`: se pierde la señal |
+
+- Una victoria de equipo cuenta si en la sala había **al menos un amigo** (amistad aceptada) del jugador.
+  El umbral está en `catalogo.json` (`misionesConAmigos`, 3 de momento).
+- El servidor fija el final una sola vez (`Jugador.finalCampana`), tras un lanzamiento en solitario o tras el
+  reparto de una misión de equipo (un fallo puede agotar el reloj). Después se sigue en modo libre.
+- El frontend lo enseña al volver del vuelo o de la sala (`zones/Final`), en pixel art como la intro, y
+  `POST /api/jugador/final` lo marca como visto. Storyboard: [presentacion/finales-storyboard.html](presentacion/finales-storyboard.html).
+
 ---
 
 ## 4. Casos de uso

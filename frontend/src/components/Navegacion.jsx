@@ -10,7 +10,7 @@ const ZONAS_NAVEGABLES = [
   { id: 'academia', nombre: 'Academy' },
 ]
 
-export default function Navegacion({ jugador, zona, onIrA, onSalir }) {
+export default function Navegacion({ jugador, misionesConAmigos, zona, onIrA, onSalir }) {
   return (
     <nav className="sticky top-0 z-10 border-b border-slate-400/20 bg-slate-950/55 backdrop-blur-md md:h-14">
       <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-2 px-4 py-2 md:h-full md:flex-nowrap md:py-0">
@@ -29,7 +29,11 @@ export default function Navegacion({ jugador, zona, onIrA, onSalir }) {
         ))}
         <span className="ml-auto text-sm text-slate-200">
           {formatoDinero(jugador.dinero)} · Month {jugador.campana.mesActual}
-          {jugador.campana.diasPerdidos > 0 && ` (+${jugador.campana.diasPerdidos}d)`} / {jugador.campana.mesLimite} · Level {jugador.nivel}
+          {jugador.campana.diasPerdidos > 0 && ` (+${jugador.campana.diasPerdidos}d)`} / {jugador.campana.mesLimite} ·{' '}
+          <span title="Team missions won with friends. They change your ending.">
+            Crew {Math.min(jugador.campana.misionesConAmigos, misionesConAmigos)}/{misionesConAmigos}
+          </span>{' '}
+          · Level {jugador.nivel}
         </span>
         <button onClick={onSalir} className="rounded-lg border border-slate-400/30 px-3 py-1 text-sm hover:bg-slate-800/60">
           Log out

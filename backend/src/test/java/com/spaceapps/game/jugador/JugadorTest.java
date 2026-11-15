@@ -75,4 +75,54 @@ class JugadorTest {
         assertThat(jugador.getMesPorDestinoAlcanzado()).isEqualTo(Map.of("mar", 3));
         assertThat(jugador.haAlcanzado(null)).isTrue();
     }
+
+    private static Jugador llegaALaLunaEnElMes(int mes, int misionesConAmigos) {
+        Jugador jugador = conKit(Map.of());
+        for (int i = 0; i < misionesConAmigos; i++) {
+            jugador.registrarMisionConAmigos();
+        }
+        jugador.avanzarReloj(mes);
+        jugador.alcanzarDestino("luna");
+        jugador.comprobarFinal("luna", 3);
+        return jugador;
+    }
+
+    @Test
+    void elFinalDependeDeLlegarATiempoYDeLasMisionesConAmigos() {
+        assertThat(llegaALaLunaEnElMes(12, 3).getFinalCampana()).isEqualTo(FinalCampana.NEW_HOME);
+        assertThat(llegaALaLunaEnElMes(9, 2).getFinalCampana()).isEqualTo(FinalCampana.LONE_PIONEER);
+        assertThat(llegaALaLunaEnElMes(13, 4).getFinalCampana()).isEqualTo(FinalCampana.RELAY);
+        assertThat(llegaALaLunaEnElMes(13, 0).getFinalCampana()).isEqualTo(FinalCampana.LAST_SIGNAL);
+    }
+
+    @Test
+    void sinLlegarAlUltimoDestinoElFinalLlegaAlAgotarseElReloj() {
+        Jugador jugador = conKit(Map.of());
+        jugador.avanzarReloj(11);
+        jugador.comprobarFinal("luna", 3);
+        assertThat(jugador.getFinalCampana()).isNull();
+
+        jugador.avanzarReloj(1);
+        jugador.comprobarFinal("luna", 3);
+        assertThat(jugador.getFinalCampana()).isEqualTo(FinalCampana.LAST_SIGNAL);
+    }
+
+    @Test
+    void elFinalNoCambiaUnaVezDecidido() {
+        Jugador jugador = llegaALaLunaEnElMes(13, 0);
+        for (int i = 0; i < 3; i++) {
+            jugador.registrarMisionConAmigos();
+        }
+
+        jugador.comprobarFinal("luna", 3);
+
+        assertThat(jugador.getFinalCampana()).isEqualTo(FinalCampana.LAST_SIGNAL);
+    }
+
+    @Test
+    void noSePuedeVerUnFinalQueNoExiste() {
+        Jugador jugador = conKit(Map.of());
+
+        assertThatThrownBy(jugador::marcarFinalVisto).isInstanceOf(IllegalStateException.class);
+    }
 }
