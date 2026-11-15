@@ -175,9 +175,13 @@ class SalasService {
         salas.values().removeIf(sala -> sala.vacia() || sala.inactivaDesde(limite));
     }
 
+    // Solo entra en una sala quien ya ha completado su primera misión en solitario.
     private Sala.Miembro miembro(long jugadorId) {
         Jugador jugador = jugadores.findById(jugadorId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Account " + jugadorId + " no longer exists"));
+        if (!jugador.haAlcanzado(catalogo.reglasEquipo().destinoRequerido())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Complete your first solo mission to unlock team missions");
+        }
         return new Sala.Miembro(jugadorId, jugador.getNombreUsuario(), jugador.getEmpresa().getNombre());
     }
 

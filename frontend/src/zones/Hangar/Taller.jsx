@@ -14,13 +14,15 @@ const SECCIONES = [
 
 const PIEZA_DE_CAMPO = { motorId: 'motor', tanqueId: 'tanque' }
 
-export default function Taller({ catalogo, analisis, diseno, onCambio, ficha, jugador, recomendadas, empresa, onPrevisualizar, onFinPrevisualizar, votos = {} }) {
+// voto y fijo: como en el Laboratorio (un compañero que vota en vez de instalar; panel de altura fija).
+export default function Taller({ catalogo, analisis, diseno, onCambio, ficha, jugador, recomendadas, empresa, onPrevisualizar, onFinPrevisualizar, votos = {}, voto = null, fijo = false }) {
   const [aviso, setAviso] = useState(null)
   const { cohete } = diseno
   const { resuelto } = analisis
   const idsInstalados = [cohete.cofiaId, ...cohete.etapas.flatMap((etapa) => [etapa.motorId, etapa.tanqueId])]
 
   const conCohete = (nuevoCohete) => ({ ...diseno, cohete: nuevoCohete })
+  const votoCerrado = (pieza) => !voto.misVotos.includes(pieza.id) && voto.misVotos.length >= voto.maximo
 
   function instalar(pieza) {
     const nuevoCohete = instalarEnCohete(cohete, pieza)
@@ -45,19 +47,23 @@ export default function Taller({ catalogo, analisis, diseno, onCambio, ficha, ju
 
   return (
     <section className="grid gap-6 md:grid-cols-[minmax(0,17rem)_1fr]">
-      <div className="space-y-3 md:sticky md:top-16 md:max-h-[calc(100vh-5rem)] md:self-start md:overflow-y-auto">
+      <div className={`space-y-3 md:sticky md:self-start md:overflow-y-auto ${fijo ? 'md:top-0 md:max-h-full' : 'md:top-16 md:max-h-[calc(100vh-5rem)]'}`}>
         <BahiaCohete
           etapas={resuelto.etapas}
           cofia={resuelto.cofia}
           conSatelite={Boolean(resuelto.estructura)}
           empresa={empresa}
-          onQuitar={quitar}
-          onVaciar={() => onCambio(conCohete({ cofiaId: null, etapas: [] }))}
+          onQuitar={voto ? undefined : quitar}
+          onVaciar={voto ? undefined : () => onCambio(conCohete({ cofiaId: null, etapas: [] }))}
         />
         {ficha ? (
           <FichaPieza key={`${ficha.pieza.id}-${ficha.accion}-${analisis.piezas.length}`} {...ficha} disponibilidad={disponibilidad(ficha.pieza, jugador, catalogo)} />
         ) : (
-          <p className="cristal p-4 text-sm text-slate-400">Click a part to install it. Its details and its effect on your mission will appear here.</p>
+          <p className="cristal p-4 text-sm text-slate-400">
+            {voto
+              ? 'Click a part to vote for it. Hover over it to see what it would change in the mission.'
+              : 'Click a part to install it. Its details and its effect on your mission will appear here.'}
+          </p>
         )}
       </div>
 
@@ -93,10 +99,11 @@ export default function Taller({ catalogo, analisis, diseno, onCambio, ficha, ju
                       votos={votos[pieza.id]}
                       disponibilidad={disponible}
                       instaladas={idsInstalados.filter((id) => id === pieza.id).length}
-                      onElegir={instalar}
+                      onElegir={voto ? voto.onVotar : instalar}
+                      votada={voto?.misVotos.includes(pieza.id)}
                       onPrevisualizar={previsualizar}
                       onFinPrevisualizar={onFinPrevisualizar}
-                      deshabilitada={Boolean(disponible.bloqueadaHasta)}
+                      deshabilitada={voto ? votoCerrado(pieza) : Boolean(disponible.bloqueadaHasta)}
                     />
                   )
                 })}

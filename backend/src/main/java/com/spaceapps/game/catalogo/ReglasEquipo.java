@@ -1,5 +1,6 @@
 package com.spaceapps.game.catalogo;
 
+// destinoRequerido: el que hay que haber alcanzado en solitario para poder jugar en equipo.
 // Puntuación de los minijuegos de equipo. Están en el catálogo porque el navegador calcula lo mismo para enseñarlo al momento.
 public record ReglasEquipo(
         long valorMoneda,
@@ -16,5 +17,6 @@ public record ReglasEquipo(
         int maximoVotos,
         int diasPorFallo,
         int diasPorMes,
-        long dineroSinPieza) {
+        long dineroSinPieza,
+        String destinoRequerido) {
 }

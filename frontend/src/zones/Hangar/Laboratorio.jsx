@@ -5,7 +5,9 @@ import BahiaSatelite from './BahiaSatelite.jsx'
 
 const TIPOS_COMPONENTE = ['panel', 'bateria', 'ordenador', 'antena', 'actitud', 'instrumento', 'escudo']
 
-export default function Laboratorio({ catalogo, analisis, diseno, onCambio, ficha, jugador, recomendadas, onPrevisualizar, onFinPrevisualizar, votos = {} }) {
+// voto = { misVotos, maximo, onVotar } convierte el banco en el de un compañero que vota: ve lo mismo, pero propone en vez de instalar.
+// fijo = el banco vive dentro de un panel de altura fija (misiones de equipo).
+export default function Laboratorio({ catalogo, analisis, diseno, onCambio, ficha, jugador, recomendadas, onPrevisualizar, onFinPrevisualizar, votos = {}, voto = null, fijo = false }) {
   const { satelite } = diseno
   const { huecos, huecosUsados } = analisis.satelite
   const lleno = huecosUsados >= huecos
@@ -18,6 +20,8 @@ export default function Laboratorio({ catalogo, analisis, diseno, onCambio, fich
     onCambio(conSatelite({ componentes: satelite.componentes.filter((_, i) => i !== indice) }), analisis.resuelto.componentes[indice], 'quitada')
   const elegirEstructura = (estructura) => onCambio(conEstructura(estructura), estructura, 'instalada')
 
+  const votoCerrado = (pieza) => !voto.misVotos.includes(pieza.id) && voto.misVotos.length >= voto.maximo
+
   function avisoComponente() {
     if (!satelite.estructuraId) return 'Choose a structure first'
     return lleno ? 'No free slots' : null
@@ -25,18 +29,22 @@ export default function Laboratorio({ catalogo, analisis, diseno, onCambio, fich
 
   return (
     <section className="grid gap-6 md:grid-cols-[minmax(0,20rem)_1fr]">
-      <div className="space-y-3 md:sticky md:top-16 md:max-h-[calc(100vh-5rem)] md:self-start md:overflow-y-auto">
+      <div className={`space-y-3 md:sticky md:self-start md:overflow-y-auto ${fijo ? 'md:top-0 md:max-h-full' : 'md:top-16 md:max-h-[calc(100vh-5rem)]'}`}>
         <BahiaSatelite
           estructura={analisis.resuelto.estructura}
           componentes={analisis.resuelto.componentes}
-          onQuitar={quitar}
-          onVaciar={() => onCambio(conSatelite({ componentes: [] }))}
+          onQuitar={voto ? undefined : quitar}
+          onVaciar={voto ? undefined : () => onCambio(conSatelite({ componentes: [] }))}
         />
         {satelite.estructuraId && <p className="text-center text-sm text-slate-400">{huecosUsados} / {huecos} slots used</p>}
         {ficha ? (
           <FichaPieza key={`${ficha.pieza.id}-${ficha.accion}-${huecosUsados}`} {...ficha} disponibilidad={disponibilidad(ficha.pieza, jugador, catalogo)} />
         ) : (
-          <p className="cristal p-4 text-sm text-slate-400">Click a part to install it. Its details and its effect on your mission will appear here.</p>
+          <p className="cristal p-4 text-sm text-slate-400">
+            {voto
+              ? 'Click a part to vote for it. Hover over it to see what it would change in the mission.'
+              : 'Click a part to install it. Its details and its effect on your mission will appear here.'}
+          </p>
         )}
       </div>
 
@@ -58,11 +66,12 @@ export default function Laboratorio({ catalogo, analisis, diseno, onCambio, fich
                     votos={votos[estructura.id]}
                     disponibilidad={disponible}
                     instaladas={estructura.id === satelite.estructuraId ? 1 : 0}
-                    onElegir={elegirEstructura}
+                    onElegir={voto ? voto.onVotar : elegirEstructura}
+                    votada={voto?.misVotos.includes(estructura.id)}
                     onPrevisualizar={(estructura) => onPrevisualizar(conEstructura(estructura), estructura)}
                     onFinPrevisualizar={onFinPrevisualizar}
-                    deshabilitada={Boolean(disponible.bloqueadaHasta) || noCaben}
-                    aviso={noCaben ? `Your ${satelite.componentes.length} components don’t fit` : null}
+                    deshabilitada={voto ? votoCerrado(estructura) : Boolean(disponible.bloqueadaHasta) || noCaben}
+                    aviso={!voto && noCaben ? `Your ${satelite.componentes.length} components don’t fit` : null}
                   />
                 )
               })}
@@ -88,11 +97,12 @@ export default function Laboratorio({ catalogo, analisis, diseno, onCambio, fich
                         votos={votos[pieza.id]}
                         disponibilidad={disponible}
                         instaladas={satelite.componentes.filter((id) => id === pieza.id).length}
-                        onElegir={anadir}
+                        onElegir={voto ? voto.onVotar : anadir}
+                        votada={voto?.misVotos.includes(pieza.id)}
                         onPrevisualizar={(pieza) => onPrevisualizar(conComponente(pieza), pieza)}
                         onFinPrevisualizar={onFinPrevisualizar}
-                        deshabilitada={Boolean(disponible.bloqueadaHasta) || !satelite.estructuraId || lleno}
-                        aviso={avisoComponente()}
+                        deshabilitada={voto ? votoCerrado(pieza) : Boolean(disponible.bloqueadaHasta) || !satelite.estructuraId || lleno}
+                        aviso={voto ? null : avisoComponente()}
                       />
                     )
                   })}

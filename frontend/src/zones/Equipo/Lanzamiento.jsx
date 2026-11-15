@@ -16,7 +16,7 @@ const COLOR_VEREDICTO = { OK: '#00e436', WARN: '#ffa300', FAILED: '#ff004d' }
 const lista = (valor) => (Array.isArray(valor) ? valor : [])
 
 // Con las cuatro fases resueltas, el anfitrión lanza. Su navegador simula el vuelo y el servidor reparte las recompensas.
-export function PlataformaEquipo({ sala, jugador, catalogo, onAccion, onSalir }) {
+export function PlataformaEquipo({ sala, jugador, catalogo, onAccion }) {
   const soyAnfitrion = sala.anfitrionId === jugador.id
   const anfitrion = sala.miembros.find((miembro) => miembro.jugadorId === sala.anfitrionId)
   const estrella = catalogo.estrellas.find((candidata) => candidata.id === sala.estrellaId)
@@ -36,9 +36,6 @@ export function PlataformaEquipo({ sala, jugador, catalogo, onAccion, onSalir })
         ) : (
           <p className="text-[8px] leading-5 text-[#ffec27]">Waiting for {anfitrion?.nombreUsuario} to launch...</p>
         )}
-        <button onClick={onSalir} className={`${BOTON_PIXEL} flex items-center gap-2 bg-[#c2c3c7]`}>
-          <LogOut className="h-4 w-4" /> Leave
-        </button>
       </div>
     </ResumenFases>
   )

@@ -1,8 +1,9 @@
 import { CircleCheck, Heart, Lock, Satellite, Star } from 'lucide-react'
 import { IMAGEN_PIEZA } from '../imagenes.js'
 
-function estiloBorde({ instaladas, seleccionada, recomendada }) {
+function estiloBorde({ instaladas, votada, seleccionada, recomendada }) {
   if (instaladas > 0) return 'border-emerald-400 bg-emerald-950/40 shadow-[0_0_14px_rgba(52,211,153,.25)]'
+  if (votada) return 'border-pink-400 bg-pink-950/40'
   if (seleccionada) return 'border-cyan-400 bg-cyan-950/50'
   if (recomendada) return 'border-amber-300/50 bg-slate-900/60 shadow-[0_0_14px_rgba(252,211,77,.15)]'
   return 'border-slate-400/20 bg-slate-900/60'
@@ -34,7 +35,8 @@ function Marca({ bloqueadaHasta, instaladas, recomendada }) {
 }
 
 // seleccionada = la pieza que se está viendo (Almacén); instaladas = cuántas lleva ya el diseño.
-// disponibilidad = { enAlmacen, bloqueadaHasta } de piezas.js. votos = compañeros que la proponen (misiones de equipo).
+// disponibilidad = { enAlmacen, bloqueadaHasta } de piezas.js. votos = compañeros que la proponen (misiones de equipo),
+// votada = la ha votado quien está mirando.
 export default function TarjetaPieza({
   pieza,
   disponibilidad,
@@ -47,6 +49,7 @@ export default function TarjetaPieza({
   deshabilitada = false,
   aviso,
   votos = 0,
+  votada = false,
 }) {
   const { enAlmacen, bloqueadaHasta } = disponibilidad
   const imagen = IMAGEN_PIEZA[pieza.id]
@@ -62,7 +65,7 @@ export default function TarjetaPieza({
       onFocus={() => !deshabilitada && onPrevisualizar?.(pieza)}
       onBlur={onFinPrevisualizar}
       className={`flex w-full items-center gap-3 rounded-xl border p-3 text-left backdrop-blur-md transition enabled:hover:-translate-y-0.5 enabled:hover:border-cyan-400/70 enabled:active:scale-[0.98] disabled:cursor-not-allowed ${estiloBorde(
-        { instaladas, seleccionada, recomendada },
+        { instaladas, votada, seleccionada, recomendada },
       )} ${atenuada ? 'opacity-55' : ''}`}
     >
       {imagen ? (
@@ -80,9 +83,10 @@ export default function TarjetaPieza({
         <span className="text-xs text-slate-400">{pieza.explicacion}</span>
         {enAlmacen > 0 && <span className="text-xs text-cyan-300">In your Warehouse: {enAlmacen}</span>}
         {aviso && <span className="text-xs text-amber-300">{aviso}</span>}
-        {votos > 0 && (
+        {(votos > 0 || votada) && (
           <span className="flex items-center gap-1 text-xs font-semibold text-pink-300">
-            <Heart className="h-3.5 w-3.5 fill-current" /> {votos} team {votos === 1 ? 'vote' : 'votes'}
+            <Heart className="h-3.5 w-3.5 fill-current" /> {votada && 'Your vote · '}
+            {votos} team {votos === 1 ? 'vote' : 'votes'}
           </span>
         )}
       </span>

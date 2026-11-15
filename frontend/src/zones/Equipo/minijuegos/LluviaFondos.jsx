@@ -187,8 +187,8 @@ export default function LluviaFondos({ catalogo, estrella, onProgreso, onTermina
   const presupuesto = presupuestoFinanzas({ ...marcador, aciertos }, estrella, reglas)
 
   return (
-    <div className="space-y-3">
-      <div className="flex flex-wrap justify-between gap-2 text-[8px] leading-4">
+    <div className="flex min-h-0 flex-1 flex-col gap-3">
+      <div className="flex shrink-0 flex-wrap justify-between gap-2 text-[8px] leading-4">
         <span>
           RAISED <span className="text-[#ffec27]">{formatoDinero(recaudado)}</span>
         </span>
@@ -197,10 +197,10 @@ export default function LluviaFondos({ catalogo, estrella, onProgreso, onTermina
         </span>
         <span>{Math.max(0, Math.ceil(SEGUNDOS_JUEGO - marcador.t))} s</span>
       </div>
-      <BarraBloques fraccion={1 - marcador.t / SEGUNDOS_JUEGO} color="#ffec27" className="h-4" />
+      <BarraBloques fraccion={1 - marcador.t / SEGUNDOS_JUEGO} color="#ffec27" className="h-4 shrink-0" />
 
       {etapa === 'pregunta' && (
-        <div className="flex justify-center">
+        <div className="flex min-h-0 flex-1 items-center justify-center overflow-y-auto">
           <PreguntaFlash
             key={marcador.respuestas.length}
             pregunta={preguntas[marcador.respuestas.length]}
@@ -210,14 +210,19 @@ export default function LluviaFondos({ catalogo, estrella, onProgreso, onTermina
           />
         </div>
       )}
-      <div className={`relative mx-auto max-w-[480px] ${etapa === 'pregunta' ? 'hidden' : ''}`}>
+      <div
+        className={`flex min-h-0 flex-1 items-center justify-center [container-type:size] max-md:aspect-[5/4] max-md:flex-none ${
+          etapa === 'pregunta' ? 'hidden' : ''
+        }`}
+      >
+      <div className="relative aspect-[5/4]" style={{ width: 'min(100cqw, 125cqh)' }}>
         <canvas
           ref={lienzo}
           width={ANCHO}
           height={ALTO}
           onPointerDown={apuntar}
           onPointerMove={apuntar}
-          className="block w-full touch-none border-4 border-black bg-[#0b1430] [image-rendering:pixelated]"
+          className="block h-full w-full touch-none border-4 border-black bg-[#0b1430] [image-rendering:pixelated]"
         />
         {etapa === 'intro' && (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-[#050816]/85 p-4 text-center">
@@ -239,7 +244,8 @@ export default function LluviaFondos({ catalogo, estrella, onProgreso, onTermina
           </div>
         )}
       </div>
-      <p className="text-center font-sans text-xs text-slate-400">Move with the arrow keys or A / D, or drag on the screen.</p>
+      </div>
+      <p className="shrink-0 text-center font-sans text-xs text-slate-400">Move with the arrow keys or A / D, or drag on the screen.</p>
     </div>
   )
 }

@@ -5,7 +5,7 @@ import MisionesEquipo from '../Equipo/MisionesEquipo.jsx'
 
 const MINIMO_BUSQUEDA = 2
 
-export default function Social({ catalogo, onAbrirSala }) {
+export default function Social({ jugador, catalogo, onIrA, onAbrirSala }) {
   const [amigos, setAmigos] = useState(null)
   const [texto, setTexto] = useState('')
   const [resultados, setResultados] = useState(null)
@@ -47,7 +47,7 @@ export default function Social({ catalogo, onAbrirSala }) {
         <p className="text-slate-400">Add other space companies as friends to fly team missions together.</p>
       </header>
 
-      <MisionesEquipo catalogo={catalogo} onAbrirSala={onAbrirSala} />
+      <MisionesEquipo jugador={jugador} catalogo={catalogo} onIrA={onIrA} onAbrirSala={onAbrirSala} />
 
       {error && <p className="rounded-lg bg-red-950/80 p-3 text-sm text-red-300">{error}</p>}
 

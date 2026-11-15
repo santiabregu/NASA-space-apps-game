@@ -144,7 +144,9 @@ export default function App() {
       {zona === 'academia' && <Academia catalogo={catalogo} />}
       {zona === 'social' && (
         <Social
+          jugador={jugador}
           catalogo={catalogo}
+          onIrA={setZona}
           onAbrirSala={(codigo) => {
             setSalaCodigo(codigo)
             setZona('sala')

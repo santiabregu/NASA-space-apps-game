@@ -17,7 +17,7 @@ function Dato({ etiqueta, valor }) {
 
 function Vivo({ nombre, grande, color, subtitulo, datos, aviso }) {
   return (
-    <div className="space-y-4 border-4 border-black bg-[#0b1430] p-5 text-center">
+    <div className="flex min-h-0 flex-1 flex-col justify-center gap-4 overflow-y-auto border-4 border-black bg-[#0b1430] p-5 text-center">
       <p className="text-[8px] leading-4 text-[#c2c3c7]">Watching {nombre}</p>
       <p className="text-base sm:text-2xl" style={{ color }}>
         {grande}

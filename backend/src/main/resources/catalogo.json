@@ -96,7 +96,7 @@
   "equipo": { "valorMoneda": 500000, "valorGrant": 2000000, "maximoMonedas": 100, "maximoGrants": 15, "bonusPorAcierto": 0.1,
     "preguntasPorFase": 3, "puntosCables": 70, "conexionesCables": 4, "penalizacionChispa": 5, "puntosPorAcierto": 10,
     "fiabilidadMinima": 10, "maximoVotos": 3,
-    "diasPorFallo": 1, "diasPorMes": 30, "dineroSinPieza": 5000000, "fiabilidadDespliegue": 50 },
+    "diasPorFallo": 1, "diasPorMes": 30, "dineroSinPieza": 5000000, "fiabilidadDespliegue": 50, "destinoRequerido": "mar" },
 
   "preguntas": [
     {"id": "fin-jwst-coste", "departamento": "FINANCIACION", "pregunta": "About how much did the James Webb Space Telescope cost NASA?", "opciones": ["About $10 million", "About $100 million", "About $10 billion", "About $1 trillion"], "correcta": 2,

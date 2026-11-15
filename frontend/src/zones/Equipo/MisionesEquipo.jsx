@@ -1,4 +1,4 @@
-import { DoorOpen, LogIn, Mail, Users } from 'lucide-react'
+import { DoorOpen, Lock, LogIn, Mail, Users } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { crearSala, obtenerInvitaciones, obtenerMiSala, unirseASala } from '../../api/salas.js'
 import { EstrellaPixel } from '../../components/pixel/pixel.jsx'
@@ -7,7 +7,33 @@ import { EstrellaPixel } from '../../components/pixel/pixel.jsx'
 const MS_ENTRE_CONSULTAS = 4000
 const LARGO_CODIGO = 6
 
-export default function MisionesEquipo({ catalogo, onAbrirSala }) {
+export default function MisionesEquipo({ jugador, catalogo, onIrA, onAbrirSala }) {
+  const requisito = catalogo.destinosPorId[catalogo.equipo.destinoRequerido]
+  if (!(requisito.id in jugador.campana.destinosAlcanzados)) {
+    return <EquipoBloqueado mision={catalogo.misiones.find((mision) => mision.id === requisito.misionId)} onIrA={onIrA} />
+  }
+  return <SalasDeEquipo catalogo={catalogo} onAbrirSala={onAbrirSala} />
+}
+
+// Primero se aprende en solitario: las misiones de equipo se abren al completar la primera misión.
+function EquipoBloqueado({ mision, onIrA }) {
+  return (
+    <section className="cristal flex flex-wrap items-center gap-4 p-4">
+      <Lock className="h-8 w-8 shrink-0 text-slate-400" />
+      <div className="min-w-0 flex-1">
+        <h2 className="font-display font-semibold">Team missions are locked</h2>
+        <p className="text-sm text-slate-400">
+          Complete your first solo mission, <strong className="text-slate-200">{mision?.titulo}</strong>, to fly with your friends.
+        </p>
+      </div>
+      <button onClick={() => onIrA('misiones')} className="rounded-lg bg-cyan-400 px-4 py-2 font-semibold text-slate-950">
+        Go to missions
+      </button>
+    </section>
+  )
+}
+
+function SalasDeEquipo({ catalogo, onAbrirSala }) {
   const [miSala, setMiSala] = useState(null)
   const [invitaciones, setInvitaciones] = useState([])
   const [codigo, setCodigo] = useState('')

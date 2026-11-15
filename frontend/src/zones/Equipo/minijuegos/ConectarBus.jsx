@@ -143,7 +143,7 @@ export default function ConectarBus({ catalogo, estrella, onProgreso, onTerminar
   }
 
   return (
-    <div className="space-y-3">
+    <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto">
       <div className="flex flex-wrap justify-between gap-2 text-[8px] leading-4">
         <span>
           RELIABILITY <span className="text-[#00e436]">{fiabilidad}%</span>

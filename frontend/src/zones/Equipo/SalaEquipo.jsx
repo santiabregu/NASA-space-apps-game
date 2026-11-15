@@ -84,12 +84,14 @@ export default function SalaEquipo({ codigo, jugador, catalogo, onSalir, onJugad
     onSalir()
   }
 
+  // En escritorio la sala ocupa justo lo que deja la barra de navegación (h-14) y la página no hace scroll:
+  // lo que no cabe se desplaza dentro de su propio panel.
   return (
-    <main className="relative min-h-[calc(100vh-3.5rem)] font-pixel text-[#fff1e8]">
+    <main className="relative flex flex-col font-pixel text-[#fff1e8] md:h-[calc(100dvh-3.5rem)] md:overflow-hidden">
       <div className="fixed inset-0 -z-10">
         <CieloPixel />
       </div>
-      <div className="mx-auto max-w-6xl space-y-6 px-4 py-8">
+      <div className="mx-auto flex min-h-0 w-full max-w-6xl flex-1 flex-col gap-4 px-4 py-4">
         {error && (
           <div className={`${CAJA_PIXEL} space-y-4 p-6 text-xs leading-6`}>
             <p>{error}</p>
@@ -101,16 +103,15 @@ export default function SalaEquipo({ codigo, jugador, catalogo, onSalir, onJugad
         {!error && !sala && <p className="text-center text-xs">Connecting to your team...</p>}
         {!error && sala && (
           <>
-            {sala.estado === 'ESPERA' ? <Cabecera sala={sala} catalogo={catalogo} /> : <CabeceraCompacta sala={sala} catalogo={catalogo} />}
-            {sala.estado === 'ESPERA' && <SalaDeEspera sala={sala} jugador={jugador} onAccion={ejecutar} onSalir={salir} />}
-            {sala.estado === 'EN_JUEGO' && (
-              <Partida sala={sala} jugador={jugador} catalogo={catalogo} onAccion={ejecutar} onSalir={salir} />
+            {sala.estado === 'ESPERA' ? (
+              <SalaDeEspera sala={sala} jugador={jugador} catalogo={catalogo} onAccion={ejecutar} onSalir={salir} />
+            ) : (
+              <CabeceraCompacta sala={sala} catalogo={catalogo} onSalir={salir} />
             )}
-            {sala.estado === 'TERMINADA' && (
-              <PlataformaEquipo sala={sala} jugador={jugador} catalogo={catalogo} onAccion={ejecutar} onSalir={salir} />
-            )}
+            {sala.estado === 'EN_JUEGO' && <Partida sala={sala} jugador={jugador} catalogo={catalogo} onAccion={ejecutar} />}
+            {sala.estado === 'TERMINADA' && <PlataformaEquipo sala={sala} jugador={jugador} catalogo={catalogo} onAccion={ejecutar} />}
             {lanzada && <LanzamientoEquipo sala={sala} jugador={jugador} catalogo={catalogo} onSalir={salir} />}
-            {errorAccion && <p className="text-xs leading-6 text-[#ff004d]">{errorAccion}</p>}
+            {errorAccion && <p className="shrink-0 text-[8px] leading-4 text-[#ff004d]">{errorAccion}</p>}
           </>
         )}
       </div>
@@ -118,16 +119,19 @@ export default function SalaEquipo({ codigo, jugador, catalogo, onSalir, onJugad
   )
 }
 
-// Durante la partida la ficha de la estrella se reduce a una línea: en el móvil ocupaba media pantalla.
-function CabeceraCompacta({ sala, catalogo }) {
+// Durante la partida la ficha de la estrella se reduce a una línea, con la salida siempre a mano.
+function CabeceraCompacta({ sala, catalogo, onSalir }) {
   const estrella = catalogo.estrellas.find((candidata) => candidata.id === sala.estrellaId)
   return (
-    <section className={`${CAJA_PIXEL} flex items-center gap-3 p-3`}>
-      <EstrellaPixel id={estrella.id} className="h-10 w-10 shrink-0" />
-      <div className="min-w-0 space-y-1">
+    <section className={`${CAJA_PIXEL} flex shrink-0 items-center gap-3 p-2`}>
+      <EstrellaPixel id={estrella.id} className="h-8 w-8 shrink-0" />
+      <div className="min-w-0 flex-1 space-y-1">
         <p className="text-[8px] sm:text-base">{estrella.nombre}</p>
         <p className="truncate font-sans text-xs text-[#ffec27]">{estrella.reto}</p>
       </div>
+      <button onClick={onSalir} className="flex shrink-0 items-center gap-2 border-4 border-black bg-[#c2c3c7] px-2 py-1 text-[8px] text-black">
+        <LogOut className="h-3 w-3" /> Leave
+      </button>
     </section>
   )
 }
@@ -135,12 +139,12 @@ function CabeceraCompacta({ sala, catalogo }) {
 function Cabecera({ sala, catalogo }) {
   const estrella = catalogo.estrellas.find((candidata) => candidata.id === sala.estrellaId)
   return (
-    <section className={`${CAJA_PIXEL} flex flex-col gap-5 p-5 sm:flex-row sm:items-center`}>
-      <EstrellaPixel id={estrella.id} className="h-28 w-28 shrink-0 self-center drop-shadow-[0_0_18px_rgba(255,163,0,.45)]" />
-      <div className="min-w-0 flex-1 space-y-3">
-        <p className="text-[8px] text-[#ffec27] sm:text-xs">Team mission · space telescope</p>
-        <h1 className="text-base sm:text-2xl">{estrella.nombre}</h1>
-        <p className="text-[8px] leading-5 text-[#c2c3c7] sm:text-xs sm:leading-6">
+    <section className={`${CAJA_PIXEL} flex shrink-0 gap-4 p-4`}>
+      <EstrellaPixel id={estrella.id} className="h-20 w-20 shrink-0 self-center drop-shadow-[0_0_18px_rgba(255,163,0,.45)]" />
+      <div className="min-w-0 flex-1 space-y-2">
+        <p className="text-[8px] text-[#ffec27]">Team mission · space telescope</p>
+        <h1 className="text-base">{estrella.nombre}</h1>
+        <p className="text-[8px] leading-4 text-[#c2c3c7]">
           {estrella.tipo} · {estrella.distancia}
         </p>
         <p className="font-sans text-sm text-slate-200">{estrella.descripcion}</p>
@@ -150,7 +154,7 @@ function Cabecera({ sala, catalogo }) {
   )
 }
 
-function SalaDeEspera({ sala, jugador, onAccion, onSalir }) {
+function SalaDeEspera({ sala, jugador, catalogo, onAccion, onSalir }) {
   const soyAnfitrion = sala.anfitrionId === jugador.id
   const anfitrion = sala.miembros.find((miembro) => miembro.jugadorId === sala.anfitrionId)
   const plazasLibres = Array.from({ length: PLAZAS - sala.miembros.length })
@@ -162,8 +166,10 @@ function SalaDeEspera({ sala, jugador, onAccion, onSalir }) {
   }
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[1fr_20rem]">
-      <section className={`${CAJA_PIXEL} space-y-4 p-5`}>
+    <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-[1fr_20rem]">
+      <div className="flex min-h-0 flex-col gap-4">
+        <Cabecera sala={sala} catalogo={catalogo} />
+        <section className={`${CAJA_PIXEL} space-y-4 p-4`}>
         <h2 className="text-xs sm:text-base">Crew · {sala.miembros.length} / {PLAZAS}</h2>
         <div className="grid gap-3 sm:grid-cols-2">
           {sala.miembros.map((miembro) => (
@@ -207,10 +213,11 @@ function SalaDeEspera({ sala, jugador, onAccion, onSalir }) {
         {soyAnfitrion && sala.miembros.length < MINIMO_PARA_EMPEZAR && (
           <p className="text-[8px] leading-5 text-[#c2c3c7]">You need at least {MINIMO_PARA_EMPEZAR} players.</p>
         )}
-      </section>
+        </section>
+      </div>
 
-      <aside className="space-y-6">
-        <section className={`${CAJA_PIXEL} space-y-3 p-5`}>
+      <aside className="flex min-h-0 flex-col gap-4">
+        <section className={`${CAJA_PIXEL} shrink-0 space-y-3 p-4`}>
           <h2 className="text-[8px] text-[#ffec27] sm:text-xs">Team code</h2>
           <p className="text-2xl tracking-[0.2em]">{sala.codigo}</p>
           <button onClick={copiarCodigo} className={`${BOTON_PIXEL} flex items-center gap-2 bg-[#ffec27]`}>
@@ -235,7 +242,7 @@ function InvitarAmigos({ sala, onAccion }) {
   const candidatos = amigos?.filter(({ jugador }) => !enLaSala.has(jugador.id)) ?? []
 
   return (
-    <section className={`${CAJA_PIXEL} space-y-3 p-5`}>
+    <section className={`${CAJA_PIXEL} min-h-0 flex-1 space-y-3 overflow-y-auto p-4`}>
       <h2 className="text-[8px] text-[#ffec27] sm:text-xs">Invite friends</h2>
       {amigos && candidatos.length === 0 && (
         <p className="font-sans text-xs text-slate-300">No friends to invite. Add some on the Friends page.</p>
@@ -260,63 +267,55 @@ function InvitarAmigos({ sala, onAccion }) {
 }
 
 // Antes de la primera fase se enseña el reparto; después, la fase que se esté jugando.
-function Partida({ sala, jugador, catalogo, onAccion, onSalir }) {
+function Partida({ sala, jugador, catalogo, onAccion }) {
   const ahora = useAhoraDelServidor(sala.desfase)
   const enReparto = Object.keys(sala.resultados).length === 0 && ahora < sala.fase.empiezaEn
 
   if (enReparto) {
     const segundos = Math.max(0, Math.ceil((sala.fase.empiezaEn - ahora) / 1000))
-    return <Reparto sala={sala} jugador={jugador} segundos={segundos} onSalir={onSalir} />
+    return <Reparto sala={sala} jugador={jugador} segundos={segundos} />
   }
-  return <FaseEnCurso sala={sala} jugador={jugador} catalogo={catalogo} ahora={ahora} onAccion={onAccion} onSalir={onSalir} />
+  return <FaseEnCurso sala={sala} jugador={jugador} catalogo={catalogo} ahora={ahora} onAccion={onAccion} />
 }
 
-// El reparto de departamentos: cada uno ve los suyos y el orden en que va a jugar todo el equipo.
-function Reparto({ sala, jugador, segundos, onSalir }) {
+// El reparto en un solo panel: mis departamentos con su explicación y el orden de todo el equipo.
+function Reparto({ sala, jugador, segundos }) {
   const responsable = (departamentoId) => responsableDe(sala, departamentoId)
   const mios = DEPARTAMENTOS.filter((departamento) => responsable(departamento.id)?.jugadorId === jugador.id)
 
   return (
-    <div className="space-y-6">
-      <section className={`${CAJA_PIXEL} space-y-4 p-5`}>
+    <section className={`${CAJA_PIXEL} flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-4`}>
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-xs sm:text-base">{mios.length > 1 ? 'Your departments' : 'Your department'}</h2>
-        <div className="grid gap-3 sm:grid-cols-2">
-          {mios.map((departamento) => (
-            <TarjetaDepartamento key={departamento.id} departamento={departamento} />
-          ))}
-        </div>
-      </section>
-
-      <section className={`${CAJA_PIXEL} space-y-4 p-5`}>
-        <h2 className="text-xs sm:text-base">Mission plan</h2>
-        <p className="font-sans text-sm text-slate-300">
-          The departments play in this order. Everybody watches the one at work, and every phase has a time limit: if
-          someone is slow, the whole project is late.
-        </p>
-        <ol className="grid gap-3 sm:grid-cols-2">
+        <p className="text-[8px] text-[#ffec27] sm:text-base">Finance starts in {segundos}</p>
+      </div>
+      <div className="grid gap-3 sm:grid-cols-2">
+        {mios.map((departamento) => (
+          <TarjetaDepartamento key={departamento.id} departamento={departamento} />
+        ))}
+      </div>
+      <div className="space-y-2">
+        <h2 className="text-[8px] leading-4 text-[#c2c3c7]">Mission plan · everybody watches the one at work</h2>
+        <ol className="grid grid-cols-2 gap-2 lg:grid-cols-4">
           {DEPARTAMENTOS.map((departamento, indice) => (
-            <li key={departamento.id} className="flex items-center gap-3 border-4 border-black bg-[#0b1430] p-3">
-              <span className="text-xs text-[#c2c3c7]">{indice + 1}</span>
+            <li key={departamento.id} className="flex items-center gap-2 border-4 border-black bg-[#0b1430] p-2">
+              <span className="text-[8px] text-[#c2c3c7]">{indice + 1}</span>
               <departamento.Icono className="h-5 w-5 shrink-0" style={{ color: departamento.color }} />
               <div className="min-w-0">
-                <p className="text-[8px] sm:text-xs">{departamento.nombre}</p>
+                <p className="truncate text-[8px]">{departamento.nombre}</p>
                 <p className="truncate font-sans text-xs text-slate-400">{responsable(departamento.id)?.nombreUsuario ?? 'Nobody'}</p>
               </div>
             </li>
           ))}
         </ol>
-        <p className="text-[8px] text-[#ffec27] sm:text-xs">Phase 1 · Finance starts in {segundos}...</p>
-        <button onClick={onSalir} className={`${BOTON_PIXEL} flex items-center gap-2 bg-[#c2c3c7]`}>
-          <LogOut className="h-4 w-4" /> Leave
-        </button>
-      </section>
-    </div>
+      </div>
+    </section>
   )
 }
 
 function TarjetaDepartamento({ departamento }) {
   return (
-    <div className="flex gap-3 border-4 border-black bg-[#0b1430] p-4">
+    <div className="flex gap-3 border-4 border-black bg-[#0b1430] p-3">
       <span className="flex h-12 w-12 shrink-0 items-center justify-center border-4 border-black" style={{ background: departamento.color }}>
         <departamento.Icono className="h-6 w-6 text-black" />
       </span>

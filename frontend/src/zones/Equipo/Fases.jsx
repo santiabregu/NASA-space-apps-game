@@ -1,8 +1,8 @@
-import { Check, Hourglass, LogOut } from 'lucide-react'
+import { Check, Hourglass } from 'lucide-react'
 import { useMemo } from 'react'
 import { enviarResultado, votarPiezas } from '../../api/salas.js'
 import BarraBloques from '../../components/pixel/BarraBloques.jsx'
-import { BOTON_PIXEL, CAJA_PIXEL } from '../../components/pixel/estilos.js'
+import { CAJA_PIXEL } from '../../components/pixel/estilos.js'
 import { misionDeEquipo } from '../../engine/equipo.js'
 import { formatoDinero } from '../../formato.js'
 import { DEPARTAMENTOS, responsableDe, resumenResultado } from './departamentos.js'
@@ -21,7 +21,7 @@ function reloj(segundos) {
   return `${minutos}:${String(segundos % 60).padStart(2, '0')}`
 }
 
-export function FaseEnCurso({ sala, jugador, catalogo, ahora, onAccion, onSalir }) {
+export function FaseEnCurso({ sala, jugador, catalogo, ahora, onAccion }) {
   const { fase } = sala
   const indice = DEPARTAMENTOS.findIndex((departamento) => departamento.id === fase.departamento)
   const departamento = DEPARTAMENTOS[indice]
@@ -31,42 +31,38 @@ export function FaseEnCurso({ sala, jugador, catalogo, ahora, onAccion, onSalir 
   const preparando = ahora < fase.empiezaEn
 
   return (
-    <div className="space-y-6">
+    <div className="flex min-h-0 flex-1 flex-col gap-3">
       <PlanDeFases sala={sala} />
-      <section className={`${CAJA_PIXEL} space-y-5 p-4 sm:p-5`}>
-        <div className="flex items-center gap-4">
+      <section className={`${CAJA_PIXEL} flex min-h-0 flex-1 flex-col gap-3 p-3 sm:p-4`}>
+        <div className="flex shrink-0 flex-wrap items-center gap-3">
           <span
-            className="flex h-12 w-12 shrink-0 items-center justify-center border-4 border-black"
+            className="flex h-10 w-10 shrink-0 items-center justify-center border-4 border-black"
             style={{ background: departamento.color }}
           >
-            <departamento.Icono className="h-6 w-6 text-black" />
+            <departamento.Icono className="h-5 w-5 text-black" />
           </span>
-          <div className="min-w-0 flex-1 space-y-2">
-            <p className="text-[8px] text-[#c2c3c7]">
-              Phase {indice + 1} / {DEPARTAMENTOS.length}
-            </p>
+          <div className="min-w-0 space-y-1">
             <h2 className="text-xs sm:text-base" style={{ color: departamento.color }}>
               {departamento.nombre}
+              <span className="ml-2 text-[8px] text-[#c2c3c7]">
+                Phase {indice + 1} / {DEPARTAMENTOS.length}
+              </span>
             </h2>
             <p className="truncate font-sans text-sm text-slate-300">{miTurno ? 'Your turn' : `${nombre} at work`}</p>
           </div>
-        </div>
-
-        {preparando ? (
-          <Preparacion
-            sala={sala}
-            indice={indice}
-            miTurno={miTurno}
-            nombre={nombre}
-            segundos={segundosHasta(fase.empiezaEn, ahora)}
-          />
-        ) : (
-          <>
+          {!preparando && (
             <BarraDeTiempo
               restante={segundosHasta(fase.terminaEn, ahora)}
               total={Math.round((fase.terminaEn - fase.empiezaEn) / 1000)}
               color={departamento.color}
             />
+          )}
+        </div>
+
+        {preparando ? (
+          <Preparacion sala={sala} indice={indice} miTurno={miTurno} nombre={nombre} segundos={segundosHasta(fase.empiezaEn, ahora)} />
+        ) : (
+          <div className="flex min-h-0 flex-1 flex-col">
             <Minijuego
               key={departamento.id}
               sala={sala}
@@ -77,12 +73,9 @@ export function FaseEnCurso({ sala, jugador, catalogo, ahora, onAccion, onSalir 
               nombre={nombre}
               onAccion={onAccion}
             />
-          </>
+          </div>
         )}
       </section>
-      <button onClick={onSalir} className={`${BOTON_PIXEL} flex items-center gap-2 bg-[#c2c3c7]`}>
-        <LogOut className="h-4 w-4" /> Leave
-      </button>
     </div>
   )
 }
@@ -93,7 +86,7 @@ function Preparacion({ sala, indice, miTurno, nombre, segundos }) {
   const resultado = anterior && sala.resultados[anterior.id]
 
   return (
-    <div className="space-y-3 border-4 border-black bg-[#0b1430] p-5 text-center">
+    <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 border-4 border-black bg-[#0b1430] p-5 text-center">
       {resultado && (
         <p className="font-sans text-sm text-slate-300">
           {anterior.nombre}: {resumenResultado(anterior.id, resultado)}
@@ -111,10 +104,10 @@ function BarraDeTiempo({ restante, total, color }) {
   const colorActual = prisa ? '#ff004d' : color
 
   return (
-    <div className="flex items-center gap-3">
-      <BarraBloques fraccion={restante / total} color={colorActual} className="h-6 flex-1" />
+    <div className="flex min-w-48 flex-1 items-center gap-3">
+      <BarraBloques fraccion={restante / total} color={colorActual} className="h-5 flex-1" />
       <span
-        className={`w-16 text-right text-xs sm:text-base ${prisa ? 'motion-safe:animate-parpadeo' : ''}`}
+        className={`w-14 text-right text-xs sm:text-base ${prisa ? 'motion-safe:animate-parpadeo' : ''}`}
         style={{ color: colorActual }}
       >
         {reloj(restante)}
@@ -173,7 +166,7 @@ function Minijuego({ sala, catalogo, jugador, departamento, miTurno, nombre, onA
 // Fila con las cuatro fases: hechas, la que se juega y las que faltan.
 function PlanDeFases({ sala }) {
   return (
-    <ol className="grid grid-cols-4 gap-2">
+    <ol className="grid shrink-0 grid-cols-4 gap-2">
       {DEPARTAMENTOS.map((departamento) => {
         const resultado = sala.resultados[departamento.id]
         const actual = sala.fase?.departamento === departamento.id
@@ -181,7 +174,7 @@ function PlanDeFases({ sala }) {
         return (
           <li
             key={departamento.id}
-            className={`flex flex-col items-center gap-2 border-4 p-2 ${actual ? 'bg-[#1d2b53]' : 'border-black bg-[#0b1430]'}`}
+            className={`flex items-center justify-center gap-2 border-4 p-1 sm:p-2 ${actual ? 'bg-[#1d2b53]' : 'border-black bg-[#0b1430]'}`}
             style={actual ? { borderColor: departamento.color } : undefined}
           >
             <departamento.Icono
@@ -203,7 +196,7 @@ export function ResumenFases({ sala, children }) {
   const gastado = ['SATELITE', 'COHETE'].reduce((total, id) => total + (sala.resultados[id]?.datos?.coste ?? 0), 0)
 
   return (
-    <section className={`${CAJA_PIXEL} space-y-4 p-5`}>
+    <section className={`${CAJA_PIXEL} min-h-0 space-y-4 overflow-y-auto p-5`}>
       <h2 className="text-xs sm:text-base">All departments are done</h2>
       <ul className="space-y-3">
         {DEPARTAMENTOS.map((departamento) => {
