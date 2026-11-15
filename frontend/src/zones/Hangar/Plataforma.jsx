@@ -41,7 +41,7 @@ export default function Plataforma({ analisis, mision, dinero, deuda, onLanzado 
           desglose: simulacion.desglose,
         },
       })
-      onLanzado({ mision, simulacion, valoracion, respuesta })
+      onLanzado({ mision, simulacion, valoracion, respuesta, resuelto: analisis.resuelto })
     } catch (excepcion) {
       setError(excepcion.message)
       setLanzando(false)

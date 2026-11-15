@@ -1,17 +1,22 @@
 import { ArrowUpToLine, CircleCheck, CircleX, Earth, Flame, Layers, Radio, Rocket, Satellite, Waves } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useState } from 'react'
 import { esSuborbital } from '../../engine/analisis.js'
 import Informe from './Informe.jsx'
 
 const ICONO_EVENTO = { despegue: Rocket, separacion: Layers, orbita: Satellite, contacto: Radio, objetivo: CircleCheck, apogeo: ArrowUpToLine, amerizaje: Waves }
 
 const MS_POR_FASE = 1100
+// El 3D va en un trozo aparte del paquete: Three.js solo se descarga al llegar aquí.
+const Vuelo3D = lazy(() => import('./Vuelo3D.jsx'))
 const ALTURA_VUELO_PX = 220
 
 export default function CentroControl({ lanzamiento, onVolverSede, onRedisenar }) {
   const { simulacion } = lanzamiento
   const totalFases = simulacion.eventos.length
   const [fasesVistas, setFasesVistas] = useState(0)
+  // Sin WebGL (o sin el diseño del cohete) se queda la animación 2D de siempre.
+  const [sin3D, setSin3D] = useState(!lanzamiento.resuelto)
+  const usar2D = useCallback(() => setSin3D(true), [])
   const terminado = fasesVistas >= totalFases
   const suborbital = esSuborbital(lanzamiento.mision)
   const enOrbita = terminado && simulacion.exito && !suborbital
@@ -30,6 +35,21 @@ export default function CentroControl({ lanzamiento, onVolverSede, onRedisenar }
       <h1 className="font-display text-2xl font-bold">Mission Control</h1>
 
       <div className="grid gap-6 md:grid-cols-2">
+        {!sin3D && (
+          <div className="relative h-80 overflow-hidden rounded-2xl border border-slate-400/20 bg-slate-950 md:h-96">
+            <Suspense fallback={<p className="p-4 text-sm text-slate-400">Preparing the launch pad…</p>}>
+              <Vuelo3D
+                resuelto={lanzamiento.resuelto}
+                empresa={lanzamiento.respuesta.jugador.empresa}
+                suborbital={suborbital}
+                eventos={simulacion.eventos}
+                vistos={fasesVistas}
+                onSinWebGL={usar2D}
+              />
+            </Suspense>
+          </div>
+        )}
+        {sin3D && (
         <div className="relative flex h-80 items-end justify-center overflow-hidden rounded-2xl border border-slate-400/20 bg-gradient-to-b from-slate-950 via-indigo-950 to-sky-900">
           {enOrbita ? (
             <Orbita />
@@ -46,6 +66,7 @@ export default function CentroControl({ lanzamiento, onVolverSede, onRedisenar }
             </span>
           )}
         </div>
+        )}
 
         <ol className="space-y-2">
           {simulacion.eventos.slice(0, fasesVistas).map((evento) => {
