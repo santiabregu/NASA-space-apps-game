@@ -155,6 +155,9 @@ export function crearVuelo(lienzo, { resuelto, empresa, suborbital, reducido }) 
     cayendo: false,
     amerizando: false,
     flotando: false,
+    desplegando: false,
+    // Solo en los fallos de caída el cohete vuelve al suelo y se estrella.
+    choque: false,
     destello: 0,
     deriva: null,
     // Lo que sigue la cámara: el cohete y, tras el despliegue, el satélite.
@@ -169,7 +172,8 @@ export function crearVuelo(lienzo, { resuelto, empresa, suborbital, reducido }) 
   function separarEtapa() {
     const etapa = modelo.etapas[vuelo.etapa]
     if (!etapa || vuelo.etapa >= modelo.etapas.length - 1) return
-    soltar(etapa.grupo, new THREE.Vector3(1.5, vuelo.velocidad * 0.6, 0), (Math.random() - 0.5) * 0.8)
+    // Gira despacio: un giro rápido barrería la tobera de la etapa de arriba, que aún está dentro de la interetapa.
+    soltar(etapa.grupo, new THREE.Vector3(1.5, vuelo.velocidad * 0.6, 0), (Math.random() - 0.5) * 0.3)
     // Lo que queda baja dentro del grupo para que su base siga en el origen: en el mundo no se mueve.
     modelo.cohete.children.forEach((hijo) => {
       hijo.position.y -= etapa.alto
@@ -211,6 +215,7 @@ export function crearVuelo(lienzo, { resuelto, empresa, suborbital, reducido }) 
       } else if (FALLOS_DE_CAIDA.includes(texto)) {
         vuelo.encendido = false
         vuelo.cayendo = true
+        vuelo.choque = true
       } else {
         // El satélite llegó pero falla: se queda girando a la deriva.
         vuelo.deriva = vuelo.deriva ?? 0.6
@@ -225,11 +230,12 @@ export function crearVuelo(lienzo, { resuelto, empresa, suborbital, reducido }) 
     } else if (icono === 'separacion' && texto.startsWith('Stage')) {
       separarEtapa()
     } else if (icono === 'separacion') {
-      modelo.mitades.forEach((mitad, indice) => soltar(mitad, new THREE.Vector3(indice ? -4 : 4, vuelo.velocidad * 0.8, 0), indice ? 0.9 : -0.9))
+      modelo.mitades.forEach((mitad, indice) => soltar(mitad, new THREE.Vector3(indice ? -8 : 8, vuelo.velocidad, 0), indice ? 0.9 : -0.9))
     } else if (icono === 'orbita') {
       vuelo.encendido = false
       soltar(modelo.carga, new THREE.Vector3(0, vuelo.velocidad * 1.02, 0), 0.15)
       vuelo.foco = modelo.carga
+      vuelo.desplegando = true
     } else if (icono === 'apogeo') {
       vuelo.encendido = false
       vuelo.cayendo = true
@@ -272,7 +278,10 @@ export function crearVuelo(lienzo, { resuelto, empresa, suborbital, reducido }) 
     } else {
       modelo.cohete.position.y = -modelo.altoTotal * 0.04 + Math.sin(vuelo.t * 1.5) * (reducido ? 0 : 0.15)
     }
+    if (vuelo.choque && vuelo.altura === 0 && modelo.cohete.visible) explotar()
     if (vuelo.deriva) modelo.carga.rotation.x += vuelo.deriva * dt
+    const panel = modelo.carga.userData.panel
+    if (vuelo.desplegando && panel && panel.scale.x < 1) panel.scale.x = reducido ? 1 : Math.min(1, panel.scale.x + dt * 0.8)
 
     for (const suelto of vuelo.sueltos) {
       suelto.velocidad.y -= GRAVEDAD_VISUAL * 0.3 * dt

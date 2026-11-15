@@ -121,12 +121,16 @@ function satelite(resuelto, radio) {
   cuerpo.position.y = lado
   grupo.add(cuerpo)
   if (resuelto.componentes.some((pieza) => pieza?.tipo === 'panel')) {
+    const ancho = lado * 3.2
     const panel = new THREE.Mesh(
-      new THREE.BoxGeometry(lado * 3.2, 0.04, lado * 0.8),
+      new THREE.BoxGeometry(ancho, 0.04, lado * 0.8),
       new THREE.MeshStandardMaterial({ color: 0x1e3a8a, metalness: 0.6, roughness: 0.25 }),
     )
     panel.position.y = lado
+    // Plegados, los paneles caben en la cofia con margen; al desplegarse vuelven a su ancho real.
+    panel.scale.x = Math.min(1, (radio * 1.4) / ancho)
     grupo.add(panel)
+    grupo.userData.panel = panel
   }
   return grupo
 }
@@ -167,7 +171,9 @@ export function construirCohete({ resuelto, empresa, texturas }) {
     let alto = motor.largo + LARGO_FALDON + tanque.alto
     // Interetapa: tapa la tobera de la etapa de arriba y cae con esta al separarse.
     const siguiente = completas[indice + 1]
-    const radioArriba = siguiente ? medidasTanque(siguiente.tanque).radio : datosCofia.radio
+    const radioArriba = siguiente
+      ? Math.max(medidasTanque(siguiente.tanque).radio, medidasMotor(siguiente.motor).salida * 1.08)
+      : datosCofia.radio
     const altoInteretapa = siguiente ? medidasMotor(siguiente.motor).largo + LARGO_FALDON : Math.max(0.3, datosCofia.radio * 0.6)
     const interetapa = new THREE.Mesh(
       new THREE.CylinderGeometry(Math.max(radioArriba, tanque.radio * 0.8), tanque.radio, altoInteretapa, 48, 1, true),
