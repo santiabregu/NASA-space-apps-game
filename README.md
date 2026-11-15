@@ -1,6 +1,7 @@
 # NASA-space-apps-game
 
 Juego de diseño de misiones espaciales para NASA Space Apps. Diseño y planificación en [docs/](docs/).
+Declaración de uso de IA (en inglés): [docs/05-AI-USE.md](docs/05-AI-USE.md).
 
 - `frontend/`: Vite + React + Tailwind
 - `backend/`: Spring Boot 4 (Java 21) + H2 + JWT

@@ -14,7 +14,7 @@ import com.spaceapps.game.empresa.Empresa;
 class JugadorTest {
 
     private static Jugador conKit(Map<String, Integer> piezas) {
-        return new Jugador("a@b.dev", "hash", "piloto", new Empresa("Orbital"), new KitInicial(0, piezas), 12);
+        return new Jugador("piloto", new Empresa("Orbital"), new KitInicial(0, piezas), 12);
     }
 
     @Test

@@ -7,13 +7,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface JugadorRepository extends JpaRepository<Jugador, Long> {
 
-    Optional<Jugador> findByEmail(String email);
+    // clave = Jugador.clave(nombre, empresa)
+    Optional<Jugador> findByClave(String clave);
 
-    boolean existsByEmail(String email);
-
-    boolean existsByNombreUsuario(String nombreUsuario);
-
-    Optional<Jugador> findByNombreUsuarioIgnoreCase(String nombreUsuario);
+    // Jugadores de antes de entrar con nombre + empresa (ver MigracionEntradaSinCuenta).
+    List<Jugador> findByClaveIsNull();
 
     List<Jugador> findTop10ByNombreUsuarioContainingIgnoreCaseAndIdNotOrderByNombreUsuario(String texto, Long excluido);
 }

@@ -31,7 +31,7 @@ class RecompensasEquipoTest {
     private Catalogo catalogo;
 
     private Jugador nuevoJugador(String nombre) {
-        return jugadores.save(new Jugador(nombre + "@test.dev", "hash", nombre, new Empresa(nombre + " Corp"),
+        return jugadores.save(new Jugador(nombre, new Empresa(nombre + " Corp"),
                 catalogo.kitInicial(), catalogo.mesLimite()));
     }
 

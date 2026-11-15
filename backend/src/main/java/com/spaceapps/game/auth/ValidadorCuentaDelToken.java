@@ -14,7 +14,7 @@ class ValidadorCuentaDelToken implements OAuth2TokenValidator<Jwt> {
     static final String CLAIM_ALTA = "alta";
 
     private static final OAuth2Error CUENTA_DISTINTA = new OAuth2Error("invalid_token",
-            "This session belongs to an account that no longer exists. Log in again.", null);
+            "This session belongs to a game that no longer exists. Enter your name and company again.", null);
 
     private final JugadorRepository jugadores;
 

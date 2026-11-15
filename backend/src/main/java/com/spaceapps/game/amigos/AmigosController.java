@@ -40,8 +40,8 @@ class AmigosController {
     }
 
     @PostMapping("/solicitudes")
-    AmigosResponse solicitar(@AuthenticationPrincipal Jwt token, @Valid @RequestBody SolicitudAmistadRequest solicitud) {
-        return amigos.solicitar(jugadorId(token), solicitud.nombreUsuario());
+    AmigosResponse solicitar(@AuthenticationPrincipal Jwt token, @RequestBody SolicitudAmistadRequest solicitud) {
+        return amigos.solicitar(jugadorId(token), solicitud.jugadorId());
     }
 
     @PostMapping("/{amistadId}/aceptar")

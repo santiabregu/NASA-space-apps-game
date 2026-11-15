@@ -6,7 +6,6 @@ import com.spaceapps.game.empresa.EmpresaResponse;
 
 public record JugadorResponse(
         Long id,
-        String email,
         String nombreUsuario,
         long dinero,
         int nivel,
@@ -30,7 +29,6 @@ public record JugadorResponse(
         Perfil perfil = jugador.getPerfil();
         return new JugadorResponse(
                 jugador.getId(),
-                jugador.getEmail(),
                 jugador.getNombreUsuario(),
                 jugador.getDinero(),
                 conocimiento.getNivel(),

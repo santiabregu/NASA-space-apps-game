@@ -41,7 +41,7 @@ export default function App() {
       .catch((error) => {
         if (error.estado === 401) {
           borrarToken()
-          setAviso('Your session has expired. Please log in again.')
+          setAviso('Your session has expired. Enter your name and company to continue.')
         } else {
           setAviso(error.message)
         }

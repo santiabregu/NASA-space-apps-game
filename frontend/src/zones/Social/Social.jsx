@@ -72,7 +72,7 @@ export default function Social({ jugador, catalogo, onIrA, onAbrirSala }) {
           <Fila key={jugador.id} jugador={jugador}>
             <AccionBusqueda
               relacion={relacion}
-              onPedir={() => ejecutar(() => pedirAmistad(jugador.nombreUsuario))}
+              onPedir={() => ejecutar(() => pedirAmistad(jugador.id))}
               onAceptar={() => {
                 const solicitud = amigos.recibidas.find((contacto) => contacto.jugador.id === jugador.id)
                 if (solicitud) ejecutar(() => aceptarAmistad(solicitud.amistadId))

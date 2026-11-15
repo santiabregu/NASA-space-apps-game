@@ -4,7 +4,8 @@ export const obtenerAmigos = () => pedir('/api/amigos')
 
 export const buscarJugadores = (texto) => pedir(`/api/amigos/buscar?texto=${encodeURIComponent(texto)}`)
 
-export const pedirAmistad = (nombreUsuario) => pedir('/api/amigos/solicitudes', { metodo: 'POST', cuerpo: { nombreUsuario } })
+// Por id: dos jugadores pueden llamarse igual si su empresa es distinta.
+export const pedirAmistad = (jugadorId) => pedir('/api/amigos/solicitudes', { metodo: 'POST', cuerpo: { jugadorId } })
 
 export const aceptarAmistad = (amistadId) => pedir(`/api/amigos/${amistadId}/aceptar`, { metodo: 'POST' })
 

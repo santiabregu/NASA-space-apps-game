@@ -41,7 +41,7 @@ class ValidadorCuentaDelTokenTest {
     private JugadorRepository jugadores;
 
     private Jugador nuevoJugador(String nombre) {
-        return jugadores.save(new Jugador(nombre + "@test.dev", "hash", nombre, new Empresa(nombre), new KitInicial(0, Map.of()), 12));
+        return jugadores.save(new Jugador(nombre, new Empresa(nombre), new KitInicial(0, Map.of()), 12));
     }
 
     private String token(Jugador jugador, Object alta) {

@@ -5,6 +5,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.hibernate.annotations.ColumnDefault;
@@ -35,14 +36,13 @@ public class Jugador {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
-    private String email;
-
     @Column(nullable = false)
-    private String passwordHash;
-
-    @Column(nullable = false, unique = true)
     private String nombreUsuario;
+
+    // Nombre y empresa normalizados: es lo que identifica la partida al volver a entrar, y no puede repetirse.
+    // Admite null solo para que la columna pueda añadirse a una base que ya tiene jugadores.
+    @Column(unique = true)
+    private String clave;
 
     @Column(nullable = false)
     private long dinero;
@@ -107,10 +107,9 @@ public class Jugador {
     protected Jugador() {
     }
 
-    public Jugador(String email, String passwordHash, String nombreUsuario, Empresa empresa, KitInicial kit, int mesLimite) {
-        this.email = email;
-        this.passwordHash = passwordHash;
+    public Jugador(String nombreUsuario, Empresa empresa, KitInicial kit, int mesLimite) {
         this.nombreUsuario = nombreUsuario;
+        this.clave = clave(nombreUsuario, empresa.getNombre());
         this.empresa = empresa;
         this.dinero = kit.dinero();
         this.inventario.putAll(kit.piezas());
@@ -123,12 +122,19 @@ public class Jugador {
         return id;
     }
 
-    public String getEmail() {
-        return email;
+    // Sin distinguir mayúsculas ni espacios de más: "Ana  " de "orbital corp" es la misma partida que "ana" de "Orbital Corp".
+    // El salto de línea no puede quedar dentro de ninguna de las dos partes, así que separa sin ambigüedad.
+    public static String clave(String nombreUsuario, String nombreEmpresa) {
+        return normalizar(nombreUsuario) + "\n" + normalizar(nombreEmpresa);
     }
 
-    public String getPasswordHash() {
-        return passwordHash;
+    // Para los jugadores creados antes de que existiera la clave.
+    void completarClave() {
+        clave = clave(nombreUsuario, empresa.getNombre());
+    }
+
+    private static String normalizar(String texto) {
+        return texto.strip().replaceAll("\\s+", " ").toLowerCase(Locale.ROOT);
     }
 
     public Instant getCreadoEn() {

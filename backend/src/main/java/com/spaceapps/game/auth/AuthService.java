@@ -1,57 +1,39 @@
 package com.spaceapps.game.auth;
 
-import java.util.Locale;
-
-import org.springframework.http.HttpStatus;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import com.spaceapps.game.catalogo.Catalogo;
 import com.spaceapps.game.empresa.Empresa;
 import com.spaceapps.game.jugador.Jugador;
 import com.spaceapps.game.jugador.JugadorRepository;
 
+// Sin contraseñas: el nombre y la empresa identifican la partida. Si la pareja ya existe se continúa; si no, empieza una nueva.
+// Cualquiera que conozca la pareja entra en esa partida: es lo que se pidió para que jugar sea inmediato.
 @Service
 public class AuthService {
 
     private final JugadorRepository jugadores;
-    private final PasswordEncoder passwordEncoder;
     private final TokenService tokenService;
     private final Catalogo catalogo;
 
-    AuthService(JugadorRepository jugadores, PasswordEncoder passwordEncoder, TokenService tokenService, Catalogo catalogo) {
+    AuthService(JugadorRepository jugadores, TokenService tokenService, Catalogo catalogo) {
         this.jugadores = jugadores;
-        this.passwordEncoder = passwordEncoder;
         this.tokenService = tokenService;
         this.catalogo = catalogo;
     }
 
     @Transactional
-    public String registrar(RegistroRequest datos) {
-        String email = normalizarEmail(datos.email());
-        String nombreUsuario = datos.nombreUsuario().trim();
-        if (jugadores.existsByEmail(email)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "An account with the email " + email + " already exists");
-        }
-        if (jugadores.existsByNombreUsuario(nombreUsuario)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "The username " + nombreUsuario + " is already taken");
-        }
-        Empresa empresa = new Empresa(datos.nombreEmpresa().trim());
-        Jugador jugador = jugadores.save(new Jugador(email, passwordEncoder.encode(datos.password()), nombreUsuario, empresa,
-                catalogo.kitInicial(), catalogo.mesLimite()));
+    public String entrar(EntradaRequest datos) {
+        String nombreUsuario = limpiar(datos.nombreUsuario());
+        String nombreEmpresa = limpiar(datos.nombreEmpresa());
+        Jugador jugador = jugadores.findByClave(Jugador.clave(nombreUsuario, nombreEmpresa))
+                .orElseGet(() -> jugadores.save(new Jugador(nombreUsuario, new Empresa(nombreEmpresa), catalogo.kitInicial(),
+                        catalogo.mesLimite())));
         return tokenService.emitir(jugador);
     }
 
-    public String iniciarSesion(LoginRequest credenciales) {
-        return jugadores.findByEmail(normalizarEmail(credenciales.email()))
-                .filter(jugador -> passwordEncoder.matches(credenciales.password(), jugador.getPasswordHash()))
-                .map(tokenService::emitir)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Incorrect email or password"));
-    }
-
-    private static String normalizarEmail(String email) {
-        return email.trim().toLowerCase(Locale.ROOT);
+    private static String limpiar(String texto) {
+        return texto.strip().replaceAll("\\s+", " ");
     }
 }

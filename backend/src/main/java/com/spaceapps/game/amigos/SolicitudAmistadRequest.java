@@ -1,7 +1,5 @@
 package com.spaceapps.game.amigos;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
-
-record SolicitudAmistadRequest(@NotBlank @Size(max = 30) String nombreUsuario) {
+// Por id y no por nombre: dos jugadores pueden llamarse igual si su empresa es distinta.
+record SolicitudAmistadRequest(long jugadorId) {
 }

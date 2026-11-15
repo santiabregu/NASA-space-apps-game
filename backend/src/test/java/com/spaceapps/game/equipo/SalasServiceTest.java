@@ -37,7 +37,7 @@ class SalasServiceTest {
     private Catalogo catalogo;
 
     private long nuevoJugador(String nombre) {
-        Jugador jugador = new Jugador(nombre + "@test.dev", "hash", nombre, new Empresa(nombre + " Corp"),
+        Jugador jugador = new Jugador(nombre, new Empresa(nombre + " Corp"),
                 catalogo.kitInicial(), catalogo.mesLimite());
         jugador.alcanzarDestino(catalogo.reglasEquipo().destinoRequerido());
         return jugadores.save(jugador).getId();
@@ -46,7 +46,7 @@ class SalasServiceTest {
     @Test
     void sinLaPrimeraMisionEnSolitarioNoSeJuegaEnEquipo() {
         long veterano = nuevoJugador("lola");
-        long novato = jugadores.save(new Jugador("mario@test.dev", "hash", "mario", new Empresa("mario Corp"),
+        long novato = jugadores.save(new Jugador("mario", new Empresa("mario Corp"),
                 catalogo.kitInicial(), catalogo.mesLimite())).getId();
         String codigo = salas.crear(veterano, "sol").codigo();
 
@@ -71,7 +71,7 @@ class SalasServiceTest {
         long anfitrion = nuevoJugador("tomas");
         long amigo = nuevoJugador("ursula");
         long desconocido = nuevoJugador("victor");
-        long amistadId = amigos.solicitar(anfitrion, "ursula").enviadas().getFirst().amistadId();
+        long amistadId = amigos.solicitar(anfitrion, amigo).enviadas().getFirst().amistadId();
         amigos.aceptar(amigo, amistadId);
         String codigo = salas.crear(anfitrion, "sol").codigo();
 

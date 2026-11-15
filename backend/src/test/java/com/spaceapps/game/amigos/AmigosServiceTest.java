@@ -31,7 +31,7 @@ class AmigosServiceTest {
     private Catalogo catalogo;
 
     private Jugador nuevoJugador(String nombre) {
-        return jugadores.save(new Jugador(nombre + "@test.dev", "hash", nombre, new Empresa(nombre + " Corp"),
+        return jugadores.save(new Jugador(nombre, new Empresa(nombre + " Corp"),
                 catalogo.kitInicial(), catalogo.mesLimite()));
     }
 
@@ -40,7 +40,7 @@ class AmigosServiceTest {
         Jugador ana = nuevoJugador("ana");
         Jugador bruno = nuevoJugador("bruno");
 
-        AmigosResponse deAna = amigos.solicitar(ana.getId(), "BRUNO");
+        AmigosResponse deAna = amigos.solicitar(ana.getId(), bruno.getId());
         assertThat(deAna.enviadas()).singleElement().satisfies(c -> assertThat(c.jugador().nombreUsuario()).isEqualTo("bruno"));
 
         long amistadId = amigos.resumen(bruno.getId()).recibidas().getFirst().amistadId();
@@ -54,9 +54,9 @@ class AmigosServiceTest {
     void siLosDosSePidenAmistadSeAceptaSola() {
         Jugador carla = nuevoJugador("carla");
         Jugador dani = nuevoJugador("dani");
-        amigos.solicitar(carla.getId(), "dani");
+        amigos.solicitar(carla.getId(), dani.getId());
 
-        AmigosResponse deDani = amigos.solicitar(dani.getId(), "carla");
+        AmigosResponse deDani = amigos.solicitar(dani.getId(), carla.getId());
 
         assertThat(deDani.amigos()).hasSize(1);
         assertThat(deDani.recibidas()).isEmpty();
@@ -65,8 +65,8 @@ class AmigosServiceTest {
     @Test
     void nadiePuedeAceptarSuPropiaSolicitud() {
         Jugador eva = nuevoJugador("eva");
-        nuevoJugador("fran");
-        long amistadId = amigos.solicitar(eva.getId(), "fran").enviadas().getFirst().amistadId();
+        Jugador fran = nuevoJugador("fran");
+        long amistadId = amigos.solicitar(eva.getId(), fran.getId()).enviadas().getFirst().amistadId();
 
         assertThatThrownBy(() -> amigos.aceptar(eva.getId(), amistadId)).isInstanceOf(ResponseStatusException.class);
     }
@@ -74,9 +74,9 @@ class AmigosServiceTest {
     @Test
     void laBusquedaExcluyeAUnoMismoYDiceLaRelacion() {
         Jugador gael = nuevoJugador("gael");
-        nuevoJugador("gaela");
+        Jugador gaela = nuevoJugador("gaela");
         nuevoJugador("gaelo");
-        amigos.solicitar(gael.getId(), "gaela");
+        amigos.solicitar(gael.getId(), gaela.getId());
 
         assertThat(amigos.buscar(gael.getId(), "gae"))
                 .extracting(r -> r.jugador().nombreUsuario(), ResultadoBusqueda::relacion)
@@ -89,7 +89,7 @@ class AmigosServiceTest {
     void borrarUnaAmistadLaQuitaParaLosDos() {
         Jugador hugo = nuevoJugador("hugo");
         Jugador ines = nuevoJugador("ines");
-        long amistadId = amigos.solicitar(hugo.getId(), "ines").enviadas().getFirst().amistadId();
+        long amistadId = amigos.solicitar(hugo.getId(), ines.getId()).enviadas().getFirst().amistadId();
         amigos.aceptar(ines.getId(), amistadId);
 
         amigos.eliminar(ines.getId(), amistadId);

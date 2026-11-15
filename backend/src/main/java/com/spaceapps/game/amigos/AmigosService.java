@@ -51,10 +51,10 @@ public class AmigosService {
 
     // Si el otro ya nos había pedido amistad, pedírsela a él equivale a aceptarla.
     @Transactional
-    public AmigosResponse solicitar(long jugadorId, String nombreUsuario) {
+    public AmigosResponse solicitar(long jugadorId, long otroId) {
         Jugador yo = buscarJugador(jugadorId);
-        Jugador otro = jugadores.findByNombreUsuarioIgnoreCase(nombreUsuario.trim())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no player called " + nombreUsuario));
+        Jugador otro = jugadores.findById(otroId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "That player no longer exists"));
         if (otro.getId() == jugadorId) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You cannot add yourself as a friend");
         }
